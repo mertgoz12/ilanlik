@@ -2,15 +2,17 @@ import "dotenv/config";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
 import { hashPassword } from "../src/lib/password";
 import { ALL_DAMAGE_PART_KEYS, type DamagePartStatus } from "../src/lib/car-data";
 import { CATEGORY_TREE, type CategoryNode } from "../src/lib/categories";
 import { generateListingNo } from "../src/lib/listing-no";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./dev.db",
-});
+neonConfig.webSocketConstructor = ws;
+
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
 
 const prisma = new PrismaClient({ adapter });
 

@@ -1,4 +1,11 @@
 import { prisma } from "@/lib/prisma";
+
+// Katalog autoevolution sonrası ~29.000 satıra ulaştı; bu sayfa filtre
+// olmadan TÜM marka/model/jenerasyon/donanımı çekip dev bir JSX ağacı
+// render ediyor (bkz. altta açıklama). Build sırasında statik üretim
+// denemesi 60 saniyeyi aşıp hataya düşüyordu - sayfa her zaman istek
+// anında (dynamic) render edilsin, hiç prerender denenmesin.
+export const dynamic = "force-dynamic";
 import { ConfirmActionButton, ToastForm } from "@/components/admin/action-button";
 import { PageHeader } from "@/components/admin/page-header";
 import { SummaryActions } from "@/components/admin/summary-actions";

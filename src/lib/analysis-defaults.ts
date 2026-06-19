@@ -4,7 +4,8 @@ import type { DamagePartStatus } from "./car-data";
 // KATMAN 1 — KURAL TABANLI ANALİZ AYARLARI (varsayılan değerler)
 // Bu dosya prisma'ya bağımlı DEĞİLDİR, böylece src/lib/rule-analysis.ts
 // (ve onu kullanan istemci bileşenleri, örn. ilan-ver sihirbazı önizlemesi)
-// better-sqlite3'ü tarayıcı paketine dahil etmeden bu sabitleri kullanabilir.
+// veritabanı sürücüsünü (Neon/pg) tarayıcı paketine dahil etmeden bu
+// sabitleri kullanabilir.
 // Admin tarafından geçersiz kılınabilen "etkin" değerler için
 // src/lib/analysis-config.ts → getEffectiveSettings() kullanılır.
 // =====================================================================
