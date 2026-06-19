@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files - ASLA commit edilmez (API anahtarları, sırlar burada)
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +41,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# sqlite veritabanı - hangi konumda olursa olsun (root, prisma/, vb.)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+
+# Claude Code - sadece makineye özel ayarlar/kilit dosyaları
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# Bir kerelik veri içe aktarımı için kullanılan büyük referans veri seti
+# (prisma/seed-autoevolution.ts) - veritabanına aktarıldı, runtime'da
+# gerekmiyor. Tekrar import gerekirse ayrıca indirilmeli.
+/automobile-models-and-specs-master/
+
+# Kullanıcı tarafından yüklenen / test sırasında oluşan içerik (statik demo
+# varlıkları hariç, bkz. public/uploads/seed/)
+/public/uploads/listings/
+/public/uploads/avatars/

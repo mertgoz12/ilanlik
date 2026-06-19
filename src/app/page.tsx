@@ -1,65 +1,322 @@
-import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
+import { FeaturedCategories } from "@/components/featured-categories";
+import { TrustStrip } from "@/components/trust-strip";
+import { BrandGrid } from "@/components/brand-grid";
+import { ListingCard } from "@/components/listing-card";
+import { ListingFilters } from "@/components/listing-filters";
+import { Pagination } from "@/components/pagination";
+import { CategorySidebar } from "@/components/category-sidebar";
+import { SidebarShell } from "@/components/sidebar-shell";
+import { ComingSoonBadge } from "@/components/coming-soon";
+import { CarIcon, ClockIcon } from "@/components/icons";
+import { getSession } from "@/lib/session";
+import {
+  collectSlugs,
+  findCategory,
+  isComingSoonSlug,
+  isVasitaEmlakActive,
+  COMING_SOON_SLUGS,
+} from "@/lib/categories";
+import { buildListingWhere } from "@/lib/listing-query";
+import { getEffectiveSettings } from "@/lib/analysis-config";
+import { expireStaleOptions } from "@/lib/listing-options";
+import {
+  computeGenericRuleAnalysis,
+  computeRuleAnalysis,
+  toComparable,
+  toGenericComparable,
+  type ComparableListing,
+  type RuleAnalysisResult,
+} from "@/lib/rule-analysis";
 
-export default function Home() {
+const PAGE_SIZE = 12;
+const FEATURED_COUNT = 8;
+const RECENT_COUNT = 8;
+
+type SearchParams = Record<string, string | undefined>;
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const page = Math.max(1, Number(sp.page) || 1);
+
+  // Cron/arka plan görevi olmadığı için süresi dolan opsiyonlar okuma
+  // anında tembel olarak süpürülür (bkz. src/lib/listing-options.ts).
+  await expireStaleOptions();
+
+  const where = await buildListingWhere(sp);
+
+  let categoryName: string | null = null;
+  if (sp.kategori) {
+    const node = findCategory(sp.kategori);
+    if (node) categoryName = node.name;
+  }
+
+  let orderBy: Prisma.ListingOrderByWithRelationInput = { createdAt: "desc" };
+  switch (sp.sort) {
+    case "price-asc":
+      orderBy = { price: "asc" };
+      break;
+    case "price-desc":
+      orderBy = { price: "desc" };
+      break;
+    case "km-asc":
+      orderBy = { km: "asc" };
+      break;
+    case "year-desc":
+      orderBy = { year: "desc" };
+      break;
+  }
+
+  const showVitrin =
+    page === 1 &&
+    !sp.kategori &&
+    !sp.q &&
+    !sp.brand &&
+    !sp.model &&
+    !sp.il &&
+    !sp.ilce &&
+    !sp.fuelType &&
+    !sp.minYear &&
+    !sp.maxYear &&
+    !sp.minPrice &&
+    !sp.maxPrice;
+
+  const vasitaEmlakActive = isVasitaEmlakActive();
+  const categoryComingSoon = !!sp.kategori && isComingSoonSlug(sp.kategori);
+
+  // Vasıta ve Emlak "çok yakında" kapalıyken vitrin/son eklenenler bölümleri
+  // bu kategorilerdeki (varsa eski demo) ilanları göstermez.
+  let excludedCategoryIds: string[] = [];
+  if (!vasitaEmlakActive) {
+    const comingSoonSlugs = COMING_SOON_SLUGS.flatMap((slug) => {
+      const node = findCategory(slug);
+      return node ? collectSlugs(node) : [slug];
+    });
+    const excludedCats = await prisma.category.findMany({
+      where: { slug: { in: comingSoonSlugs } },
+      select: { id: true },
+    });
+    excludedCategoryIds = excludedCats.map((c) => c.id);
+  }
+  const excludeComingSoon = excludedCategoryIds.length > 0 ? { categoryId: { notIn: excludedCategoryIds } } : {};
+
+  const [
+    listings,
+    total,
+    featuredListings,
+    recentListings,
+    vehicleComparablePool,
+    genericComparablePool,
+  ] = await Promise.all([
+    categoryComingSoon
+      ? Promise.resolve([])
+      : prisma.listing.findMany({
+          where,
+          orderBy,
+          include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
+          skip: (page - 1) * PAGE_SIZE,
+          take: PAGE_SIZE,
+        }),
+    categoryComingSoon ? 0 : prisma.listing.count({ where }),
+    showVitrin
+      ? prisma.listing.findMany({
+          where: { isFeatured: true, status: "active", optionStatus: { not: "opsiyonlandi" }, ...excludeComingSoon },
+          orderBy: { createdAt: "desc" },
+          take: FEATURED_COUNT,
+          include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
+        })
+      : Promise.resolve([]),
+    showVitrin
+      ? prisma.listing.findMany({
+          where: { isFeatured: false, status: "active", optionStatus: { not: "opsiyonlandi" }, ...excludeComingSoon },
+          orderBy: { createdAt: "desc" },
+          take: RECENT_COUNT,
+          include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
+        })
+      : Promise.resolve([]),
+    // KATMAN 1 (kural tabanlı fiyat aralığı) için emsal ilan havuzları - sadece aktif ilanlar.
+    prisma.listing.findMany({
+      where: { brand: { not: null }, model: { not: null }, year: { not: null }, km: { not: null }, status: "active" },
+      select: { id: true, brand: true, model: true, year: true, km: true, price: true },
+    }),
+    prisma.listing.findMany({
+      where: { brand: null, status: "active" },
+      select: { id: true, categoryId: true, title: true, price: true },
+    }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const session = await getSession();
+  const allListingIds = [...listings, ...featuredListings, ...recentListings].map((l) => l.id);
+  const favoritedIds = session
+    ? new Set(
+        (
+          await prisma.favorite.findMany({
+            where: { userId: session.id, listingId: { in: allListingIds } },
+            select: { listingId: true },
+          })
+        ).map((f) => f.listingId),
+      )
+    : new Set<string>();
+
+  const vehicleComparables = vehicleComparablePool.map(toComparable).filter((c): c is ComparableListing => c !== null);
+  const genericComparables = genericComparablePool.map(toGenericComparable);
+  const settings = await getEffectiveSettings();
+
+  function ruleAnalysisFor(listing: {
+    id: string;
+    categoryId: string;
+    title: string;
+    brand: string | null;
+    model: string | null;
+    year: number | null;
+    km: number | null;
+    price: number;
+    description: string | null;
+    damageInfo: string | null;
+    tramerAmount: number | null;
+  }): RuleAnalysisResult {
+    if (listing.brand !== null) {
+      const result = computeRuleAnalysis(listing, vehicleComparables, settings.deprecation);
+      if (result) return result;
+    }
+    return computeGenericRuleAnalysis(listing, genericComparables);
+  }
+
+  const listingsHeading = categoryName ?? "Son Eklenen İlanlar";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <FeaturedCategories />
+
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <SidebarShell>
+            <CategorySidebar activeSlug={sp.kategori} />
+          </SidebarShell>
+
+          <div className="min-w-0 flex-1">
+            {showVitrin ? (
+              <>
+                {featuredListings.length > 0 && (
+                  <section>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                      Vitrin İlanları
+                    </h2>
+                    <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                      {featuredListings.map((listing) => (
+                        <ListingCard
+                          key={listing.id}
+                          listing={listing}
+                          ruleAnalysis={ruleAnalysisFor(listing)}
+                          currentUserId={session?.id ?? null}
+                          isFavorited={favoritedIds.has(listing.id)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {vasitaEmlakActive && <BrandGrid />}
+
+                {recentListings.length > 0 && (
+                  <section className="mt-12">
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                      Son Eklenen İlanlar
+                    </h2>
+                    <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                      {recentListings.map((listing) => (
+                        <ListingCard
+                          key={listing.id}
+                          listing={listing}
+                          ruleAnalysis={ruleAnalysisFor(listing)}
+                          currentUserId={session?.id ?? null}
+                          isFavorited={favoritedIds.has(listing.id)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </>
+            ) : categoryComingSoon ? (
+              <div className="mt-6 flex flex-col items-center justify-center rounded-lg bg-white py-20 text-center shadow-soft">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-light text-brand">
+                  <ClockIcon className="h-7 w-7" />
+                </span>
+                <h2 className="mt-4 text-xl font-bold text-foreground">{categoryName}</h2>
+                <div className="mt-2">
+                  <ComingSoonBadge />
+                </div>
+                <p className="mt-3 max-w-sm text-sm text-slate-500">
+                  Bu kategori çok yakında açılacak. Şimdilik ikinci el / sıfır ürün
+                  kategorilerimize göz atabilirsiniz.
+                </p>
+                <Link
+                  href="/"
+                  className="mt-5 text-sm font-semibold text-brand hover:text-accent-dark"
+                >
+                  Ana sayfaya dön
+                </Link>
+              </div>
+            ) : (
+              <>
+                <ListingFilters searchParams={sp} isLoggedIn={!!session} />
+
+                <div className="mt-12 flex items-end justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                      {listingsHeading}
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                      <span className="font-semibold text-foreground">{total}</span> ilan bulundu
+                    </p>
+                  </div>
+                </div>
+
+                {listings.length === 0 ? (
+                  <div className="mt-6 flex flex-col items-center justify-center rounded-lg bg-white py-16 text-center shadow-soft">
+                    <CarIcon className="h-10 w-10 text-slate-300" />
+                    <p className="mt-4 text-sm font-medium text-slate-600">
+                      Aramanıza uygun ilan bulunamadı.
+                    </p>
+                    <Link
+                      href="/"
+                      className="mt-2 text-sm font-semibold text-brand hover:text-accent-dark"
+                    >
+                      Filtreleri temizle
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {listings.map((listing) => (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        ruleAnalysis={ruleAnalysisFor(listing)}
+                        currentUserId={session?.id ?? null}
+                        isFavorited={favoritedIds.has(listing.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {totalPages > 1 && (
+                  <Pagination page={page} totalPages={totalPages} searchParams={sp} />
+                )}
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+
+      <TrustStrip />
     </div>
   );
 }

@@ -1,0 +1,395 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String  @id @default(cuid())
+  name      String
+  email     String  @unique
+  password  String
+  phone     String?
+  il        String?
+  ilce      String?
+  avatarUrl String?
+
+  // Yönetim paneli alanları
+  role         String  @default("user") // "user" | "admin"
+  isBanned     Boolean @default(false)
+  isVerified   Boolean @default(false)
+  badge        String? // "galeri" | "kurumsal" | null
+  warningCount Int     @default(0)
+
+  // true ise bu hesap seed/demo verisidir (bkz. prisma/seed.ts) - canlıya
+  // geçmeden önce admin panelinden ("Demo Veri Yönetimi") tek tıkla
+  // silinebilir. Gerçek kullanıcılarda her zaman false.
+  isDemo Boolean @default(false)
+
+  // Hesabım > Ayarlar > Bildirim tercihleri
+  notifyNewMessage     Boolean @default(true)
+  notifySavedSearch    Boolean @default(true)
+  notifyListingUpdates Boolean @default(true)
+
+  createdAt      DateTime        @default(now())
+  listings       Listing[]
+  listingReports ListingReport[]
+
+  favorites           Favorite[]
+  savedSearches       SavedSearch[]
+  following           SellerFollow[] @relation("FollowerUser")
+  followers           SellerFollow[] @relation("FollowedUser")
+  buyerConversations  Conversation[] @relation("BuyerConversations")
+  sellerConversations Conversation[] @relation("SellerConversations")
+  messages            Message[]
+
+  // Opsiyonlama (rezervasyon) sistemi
+  heldOptions      ListingOption[] @relation("ListingOptionBuyer")
+  optionedListings Listing[]       @relation("ListingOptionHolder")
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  name     String
+  slug     String     @unique
+  order    Int        @default(0)
+  parentId String?
+  parent   Category?  @relation("CategoryChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryChildren")
+  listings Listing[]
+
+  @@index([parentId])
+}
+
+model Listing {
+  id          String  @id @default(cuid())
+  listingNo   String  @unique // 10 haneli ilan numarası (örn: 1313717965)
+  title       String
+  description String?
+  price       Float
+
+  // Vasıta'ya özel alanlar - diğer kategorilerde null
+  brand        String?
+  model        String?
+  series       String?
+  year         Int?
+  km           Int?
+  fuelType     String?
+  transmission String?
+  bodyType     String?
+  color        String?
+  enginePower  String?
+  engineVolume String?
+  drivetrain   String?
+
+  // Sahibinden tarzı ek teknik/satış alanları (sadece Vasıta)
+  vehicleCondition String? // "İkinci El" | "Sıfır" | "Klasik"
+  doorCount        String? // "2" | "3" | "4" | "5"
+  plateOrigin      String? // "Türkiye (TR) Plakalı" | "Yabancı Plakalı" | "Mavi Plakalı"
+  fromWho          String? // "Sahibinden" | "Galeriden" | "Yetkili Bayiden"
+  exchange         String? // "Evet" | "Hayır" | "Düşünürüm" (Takas)
+  warranty         String? // "Evet" | "Hayır" | "Belirtilmemiş" (Garanti)
+
+  // İlan verilirken seçilen VehicleTrim'in autoevolution ham teknik verisi
+  // (tork, yakıt tüketimi, boyutlar vb.) - varsa ilan detayında "Detaylı
+  // Teknik Özellikler" panelinde gösterilir. bkz. src/lib/rule-analysis.ts
+  // gibi diğer JSON alanları - aynı şekilde JSON.stringify edilmiş saklanır.
+  vehicleTrimRawSpecs String?
+
+  // Hasar / boya / değişen parça bilgileri (sadece Vasıta)
+  damageStatus String? // "hasarsiz" | "hasar-kayitli" | "agir-hasarli"
+  damageInfo   String? // JSON: { partKey: "orijinal" | "boyali" | "lokal-boyali" | "degisen" }
+  tramerAmount Float? // TRAMER hasar kaydı tutarı (TL); null = "Hasar kaydı yok"
+  equipment    String? // JSON: string[] - donanım anahtarları
+
+  il   String
+  ilce String
+
+  isFeatured Boolean @default(false)
+  views      Int     @default(0)
+
+  // true ise bu ilan seed/demo verisidir (bkz. prisma/seed.ts). Demo ilanlar
+  // status="pasif" ile yayından gizli tutulur (sadece admin panelinden
+  // görülebilir); canlıya geçmeden önce admin "Demo Veri Yönetimi"nden tek
+  // tıkla kalıcı olarak silebilir. Gerçek ilanlarda her zaman false.
+  isDemo Boolean @default(false)
+
+  // Yapay zeka ekspertiz analizi
+  status         String    @default("active") // "active" | "pending_review" | "pasif"
+  aiAnalysis     String? // JSON: AI analiz sonucu (fiyat_analizi, ekspertiz_raporu, tutarlilik_analizi)
+  aiReportStatus String? // null | "tamamlandi" | "odeme_bekliyor" | "odendi" - "ucretli" fiyatlandırma modunda kullanılır
+  flagResolvedAt DateTime? // admin moderasyon kuyruğundaki yapay zeka bayrağını incelediğinde set edilir
+
+  // Opsiyonlama (rezervasyon) sistemi - status alanından BAĞIMSIZ bir eksen:
+  // ilan "active" kalır, sadece geçici olarak opsiyonlandığında genel
+  // listeleme/aramadan gizlenir (bkz. buildListingWhere). Güncel/aktif
+  // opsiyonun anlık durumu burada, geçmişi ListingOption tablosunda tutulur.
+  optionStatus   String          @default("bosta") // "bosta" | "opsiyonlandi"
+  optionHolderId String?
+  optionHolder   User?           @relation("ListingOptionHolder", fields: [optionHolderId], references: [id], onDelete: SetNull)
+  optionStartAt  DateTime?
+  optionEndAt    DateTime?
+  listingOptions ListingOption[]
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  images         ListingImage[]
+  aiReportLogs   AiReportLog[]
+  listingReports ListingReport[]
+  favoritedBy    Favorite[]
+  conversations  Conversation[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([brand, model])
+  @@index([createdAt])
+  @@index([categoryId])
+  @@index([il, ilce])
+  @@index([optionStatus])
+  @@index([isDemo])
+}
+
+// Bir ilana yapılan her opsiyon (rezervasyon) denemesinin geçmiş kaydı.
+// Listing üzerindeki optionStatus/optionHolderId/optionEndAt alanları SADECE
+// güncel/aktif opsiyonu yansıtır; bu tablo ise admin görünürlüğü ve kötüye
+// kullanım tespiti (sürekli opsiyonla/vazgeç) için TÜM geçmişi tutar.
+model ListingOption {
+  id            String    @id @default(cuid())
+  listingId     String
+  listing       Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId       String
+  buyer         User      @relation("ListingOptionBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  durationHours Int
+  startedAt     DateTime  @default(now())
+  endsAt        DateTime
+  status        String    @default("aktif") // "aktif" | "bitti"
+  endReason     String? // "alici_vazgecti" | "satici_sonlandirdi" | "suresi_doldu"
+  endedAt       DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([listingId])
+  @@index([buyerId, createdAt])
+  @@index([status])
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  url       String
+  order     Int     @default(0)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+// "Ücretsiz" fiyatlandırma modunda maliyet kontrolü için her başarılı yapay
+// zeka raporu üretimini kaydeder (kullanıcı/IP başına ve sistem genelinde
+// günlük limit kontrolü bu tabloya göre yapılır, bkz. ai-report-limits.ts).
+model AiReportLog {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([ip, createdAt])
+  @@index([createdAt])
+}
+
+// Kullanıcıların ilanları bildirmesi: moderasyon kuyruğunun (admin/moderasyon)
+// "kullanıcı şikayeti" kaynağı.
+model ListingReport {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  reason    String
+  status    String   @default("pending") // "pending" | "resolved" | "dismissed"
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@index([status])
+}
+
+// İletişim sayfasındaki formdan gelen mesajlar (bkz. src/app/iletisim).
+// Şimdilik sadece veritabanına kaydedilir; e-posta bildirimi yok.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("yeni") // "yeni" | "okundu" | "yanitlandi"
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Admin panelinin "Yapay Zeka Kontrol Paneli" bölümünden düzenlenen tekil
+// ("singleton", id="singleton") ayar satırı. Alanlar null ise
+// analysis-config.ts içindeki env/varsayılan değerler kullanılır
+// (bkz. getEffectiveSettings()).
+model AppSettings {
+  id                        String  @id @default("singleton")
+  aiReportPricingMode       String? // "ucretsiz" | "ucretli"
+  aiReportPrice             Float? // "ucretli" modda gösterilecek rapor fiyatı (TL)
+  aiReportDailyLimitPerUser Int?
+  aiReportDailyGlobalCap    Int?
+  partDeprecationRates      String? // JSON: Record<DamagePartStatus, number>
+  tramerDeprecationTiers    String? // JSON: { maxRatio: number; rate: number }[]
+  maxDeprecationRatio       Float?
+
+  // Opsiyonlama (rezervasyon) sistemi ayarları
+  optionDurationsHours         String? // JSON: number[] (saat) - örn "[24,48,72]"
+  optionMaxActivePerUser       Int? // kullanıcı başına eşzamanlı azami aktif opsiyon
+  optionMaxWeeklyCancellations Int? // kullanıcının son 7 günde yapabileceği azami "vazgeç" sayısı
+
+  updatedAt DateTime @updatedAt
+}
+
+// Hesabım > Favorilerim > Favori İlanlarım (kalp/yıldız işaretli ilanlar)
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([listingId])
+}
+
+// Hesabım > Favorilerim > Favori Aramalarım (kaydedilen arama filtreleri).
+// lastSeenCount, kullanıcının son görüntülemesindeki eşleşen ilan sayısını
+// tutar; güncel eşleşme sayısı bundan büyükse "yeni ilan var" rozeti gösterilir.
+model SavedSearch {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label         String
+  query         String // querystring (örn: "kategori=otomobil&brand=BMW&maxPrice=500000")
+  lastSeenCount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Hesabım > Favorilerim > Favori Satıcılarım (takip edilen satıcılar)
+model SellerFollow {
+  id         String   @id @default(cuid())
+  followerId String
+  follower   User     @relation("FollowerUser", fields: [followerId], references: [id], onDelete: Cascade)
+  sellerId   String
+  seller     User     @relation("FollowedUser", fields: [sellerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([followerId, sellerId])
+  @@index([sellerId])
+}
+
+// Hesabım > Mesajlar: bir ilan üzerinden alıcı-satıcı arasındaki konuşma
+// (thread). Aynı ilan + alıcı + satıcı üçlüsü için tek konuşma bulunur.
+model Conversation {
+  id        String    @id @default(cuid())
+  listingId String
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId   String
+  buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerId  String
+  seller    User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([listingId, buyerId, sellerId])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+// İlan Verme Sihirbazı > Araç Bilgileri adımı için kademeli (cascading) araç
+// kataloğu: Marka -> Model -> Jenerasyon (yıl aralığı) -> Motor/Donanım (trim).
+// Admin panelinden (/admin/arac-veritabani) düzenlenebilir; prisma/seed-vehicle-catalog.ts
+// ile idempotent şekilde doldurulur.
+model VehicleBrand {
+  id     String         @id @default(cuid())
+  name   String         @unique
+  order  Int            @default(0)
+  models VehicleModel[]
+}
+
+model VehicleModel {
+  id          String              @id @default(cuid())
+  name        String
+  order       Int                 @default(0)
+  brandId     String
+  brand       VehicleBrand        @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  generations VehicleGeneration[]
+
+  @@unique([brandId, name])
+  @@index([brandId])
+}
+
+model VehicleGeneration {
+  id        String        @id @default(cuid())
+  name      String // örn: "Clio 5", "Golf 7"
+  yearStart Int
+  yearEnd   Int? // null = halen üretimde / güncel
+  order     Int           @default(0)
+  modelId   String
+  model     VehicleModel  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  trims     VehicleTrim[]
+
+  @@unique([modelId, name])
+  @@index([modelId])
+}
+
+model VehicleTrim {
+  id               String            @id @default(cuid())
+  name             String // örn: "1.0 TCe 100 Icon" - "Seri / Paket" alanına yazılan tam ad
+  equipmentPackage String? // örn: "Icon"
+  fuelType         String
+  transmission     String
+  engineVolume     String?
+  enginePower      String?
+  drivetrain       String?
+  order            Int               @default(0)
+  generationId     String
+  generation       VehicleGeneration @relation(fields: [generationId], references: [id], onDelete: Cascade)
+
+  // Otomatik veri içe aktarımı (autoevolution) kaynaklı alanlar. Elle (admin
+  // panelinden) eklenen donanımlarda null kalır; prisma/seed-autoevolution.ts
+  // bu alana göre idempotent upsert yapar ve revert-autoevolution.ts geri
+  // almak için sourceUrl IS NOT NULL olan kayıtları siler.
+  sourceUrl String? // autoevolution model sayfası URL'si
+  rawSpecs  String? // JSON.stringify edilmiş tam specs objesi (boyut, ağırlık, fren, lastik, yakıt tüketimi vb.)
+
+  @@unique([generationId, name])
+  @@index([generationId])
+}
