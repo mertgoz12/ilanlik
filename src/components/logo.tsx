@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type LogoSize = "sm" | "md" | "lg";
@@ -11,28 +12,33 @@ type LogoProps = {
   className?: string;
 };
 
-// Eskiden statik bir görsel (public/logo.png) kullanılıyordu; marka adı
-// değiştiğinde (İlanlık -> İlanlio) görseldeki pikselleri güncellemek mümkün
-// olmadığından metin tabanlı bir logoya geçildi - bundan sonra marka adı
-// kodda tek satırda güncellenebilir. Sora fontu (--font-sora, extrabold)
-// zaten projeye dahildi, görsel stile en yakın hazır font olarak kullanıldı.
-const TEXT_SIZE: Record<LogoSize, string> = {
-  sm: "text-xl",
-  md: "text-2xl",
-  lg: "text-3xl",
+// public/logo.png opak (alfa kanalsız) beyaz zeminli bir görsel - navy footer
+// üzerinde direkt kullanılırsa beyaz bir kutu gibi görünür, bu yüzden dark
+// varyantta küçük bir beyaz "kart" içine alınıyor.
+const DIMENSIONS: Record<LogoSize, { width: number; height: number }> = {
+  sm: { width: 108, height: 27 },
+  md: { width: 138, height: 34 },
+  lg: { width: 168, height: 42 },
 };
 
 export function Logo({ size = "md", variant = "light", className = "" }: LogoProps) {
-  const brandClass = variant === "dark" ? "text-white" : "text-brand";
+  const { width, height } = DIMENSIONS[size];
+
+  const image = (
+    <Image src="/logo.png" alt="İlanlio" width={width} height={height} priority />
+  );
 
   return (
     <Link
       href="/"
       aria-label="İlanlio - Ana sayfa"
-      className={`inline-flex shrink-0 items-baseline font-display font-extrabold tracking-tight ${TEXT_SIZE[size]} ${className}`}
+      className={`inline-flex shrink-0 items-center ${className}`}
     >
-      <span className={brandClass}>ilanlio</span>
-      <span className="text-accent">.com</span>
+      {variant === "dark" ? (
+        <span className="inline-flex rounded-md bg-white px-2 py-1.5">{image}</span>
+      ) : (
+        image
+      )}
     </Link>
   );
 }

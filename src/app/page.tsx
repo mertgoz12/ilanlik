@@ -10,7 +10,7 @@ import { Pagination } from "@/components/pagination";
 import { CategorySidebar } from "@/components/category-sidebar";
 import { SidebarShell } from "@/components/sidebar-shell";
 import { ComingSoonBadge } from "@/components/coming-soon";
-import { CarIcon, ClockIcon } from "@/components/icons";
+import { SearchIcon, ClockIcon } from "@/components/icons";
 import { getSession } from "@/lib/session";
 import {
   collectSlugs,
@@ -282,7 +282,7 @@ export default async function HomePage({
 
                 {listings.length === 0 ? (
                   <div className="mt-6 flex flex-col items-center justify-center rounded-lg bg-white py-16 text-center shadow-soft">
-                    <CarIcon className="h-10 w-10 text-slate-300" />
+                    <SearchIcon className="h-10 w-10 text-slate-300" />
                     <p className="mt-4 text-sm font-medium text-slate-600">
                       Aramanıza uygun ilan bulunamadı.
                     </p>

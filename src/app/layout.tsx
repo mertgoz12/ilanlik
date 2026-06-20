@@ -20,11 +20,27 @@ const sora = Sora({
   weight: ["800"],
 });
 
+const SITE_TITLE = "İlanlio | Yapay Zeka Destekli Güvenli İlan Platformu";
+const SITE_DESCRIPTION =
+  "İlanlio'da her ilan yapay zeka ile denetlenir. İkinci el elektronik, ev eşyası, hobi ve daha fazlası - güvenilir alışverişin yeni adresi.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://ilanlio.com"),
-  title: "İlanlio | Yapay Zeka Destekli Araç İlanları",
-  description:
-    "İlanlio - araç al, sat, ilan ver. Hasar, boya ve değişen bilgileriyle şeffaf araç ilanları.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "https://ilanlio.com",
+    siteName: "İlanlio",
+    locale: "tr_TR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default async function RootLayout({
