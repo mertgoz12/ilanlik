@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Plus, Search, ShieldCheck } from "lucide-react";
+import { Plus, ShieldCheck } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { logoutAction } from "@/lib/actions/logout";
 import { isVasitaEmlakActive } from "@/lib/categories";
 import { Logo } from "./logo";
 import { NavbarMobileMenu } from "./navbar-mobile-menu";
+import { SearchBar } from "./search-bar";
 import { UserMenu } from "./user-menu";
 
 // Vasıta aktif olduğunda kullanılacak eski hızlı filtreler - kod silinmedi,
@@ -31,30 +32,6 @@ const IKINCI_EL_QUICK_LINKS = [
   { label: "0 - 1.000 ₺", href: "/?maxPrice=1000" },
 ];
 
-function SearchForm({ className = "" }: { className?: string }) {
-  return (
-    <form method="get" action="/" className={className}>
-      <div className="flex w-full items-center">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            name="q"
-            placeholder="Ürün veya ilan başlığı ara..."
-            className="w-full rounded-l-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-slate-400 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/10"
-          />
-        </div>
-        <button
-          type="submit"
-          className="shrink-0 rounded-r-lg border border-l-0 border-brand bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-900"
-        >
-          Ara
-        </button>
-      </div>
-    </form>
-  );
-}
-
 export async function Navbar() {
   const session = await getSession();
   const quickLinks = isVasitaEmlakActive() ? VASITA_QUICK_LINKS : IKINCI_EL_QUICK_LINKS;
@@ -64,7 +41,7 @@ export async function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
         <Logo size="md" />
 
-        <SearchForm className="hidden flex-1 md:block" />
+        <SearchBar className="hidden flex-1 md:block" />
 
         <div className="ml-auto hidden items-center gap-2 md:flex">
           {session ? (
@@ -113,7 +90,7 @@ export async function Navbar() {
       </div>
 
       <div className="border-t border-slate-100 px-4 py-2.5 md:hidden">
-        <SearchForm />
+        <SearchBar />
       </div>
 
       <div className="border-t border-slate-100 bg-slate-50/60">

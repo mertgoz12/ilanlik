@@ -180,3 +180,26 @@ export function selectableCategories(): SelectableCategory[] {
   }
   return result;
 }
+
+// "İ"/"ı" gibi Türkçe harflerin İngilizce/ASCII küçültme kurallarıyla yanlış
+// eşleşmesini önlemek için locale'e duyarlı küçültme kullanılır (bkz. arama
+// kutusu otomatik tamamlama - searchSelectableCategories).
+function turkishLower(value: string): string {
+  return value.toLocaleLowerCase("tr-TR");
+}
+
+/** Arama kutusu otomatik tamamlama için: yazılan kelimeyle adı eşleşen
+ * (Vasıta/Emlak "çok yakında" kapalıyken hariç tutulan) seçilebilir
+ * kategoriler. */
+export function searchSelectableCategories(query: string, limit = 5): SelectableCategory[] {
+  const normalizedQuery = turkishLower(query.trim());
+  if (!normalizedQuery) return [];
+  const matches: SelectableCategory[] = [];
+  for (const category of selectableCategories()) {
+    if (turkishLower(category.name).includes(normalizedQuery)) {
+      matches.push(category);
+      if (matches.length >= limit) break;
+    }
+  }
+  return matches;
+}
