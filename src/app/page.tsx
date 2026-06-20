@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { FeaturedCategories } from "@/components/featured-categories";
+import { Hero } from "@/components/hero";
 import { TrustStrip } from "@/components/trust-strip";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
@@ -194,6 +195,7 @@ export default async function HomePage({
 
   return (
     <div>
+      {showVitrin && <Hero />}
       <FeaturedCategories />
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
