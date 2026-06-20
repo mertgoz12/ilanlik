@@ -719,16 +719,16 @@ const IKINCI_EL_LISTINGS: SimpleSeed[] = [
 ];
 
 // Gerçekçi satıcı isimleri - "Demo Kullanıcı" gibi sahte/jenerik isimler
-// kullanılmaz. demo@ilanlik.com / satici@ilanlik.com giriş bilgileri test
+// kullanılmaz. demo@ilanlio.com / satici@ilanlio.com giriş bilgileri test
 // amaçlı korunur, ancak görünen ad gerçekçi bir kişi adıdır.
 const SEED_USERS = [
-  { name: "Mehmet Demir", email: "demo@ilanlik.com", phone: "0532 412 67 18" },
-  { name: "Ayşe Yılmaz", email: "satici@ilanlik.com", phone: "0533 778 24 05" },
-  { name: "Can Öztürk", email: "can.ozturk@ilanlik.com", phone: "0534 221 90 36" },
-  { name: "Zeynep Kaya", email: "zeynep.kaya@ilanlik.com", phone: "0535 660 13 82" },
-  { name: "Emre Şahin", email: "emre.sahin@ilanlik.com", phone: "0536 304 57 91" },
-  { name: "Elif Çelik", email: "elif.celik@ilanlik.com", phone: "0537 845 32 19" },
-  { name: "Burak Aydın", email: "burak.aydin@ilanlik.com", phone: "0538 192 76 40" },
+  { name: "Mehmet Demir", email: "demo@ilanlio.com", phone: "0532 412 67 18" },
+  { name: "Ayşe Yılmaz", email: "satici@ilanlio.com", phone: "0533 778 24 05" },
+  { name: "Can Öztürk", email: "can.ozturk@ilanlio.com", phone: "0534 221 90 36" },
+  { name: "Zeynep Kaya", email: "zeynep.kaya@ilanlio.com", phone: "0535 660 13 82" },
+  { name: "Emre Şahin", email: "emre.sahin@ilanlio.com", phone: "0536 304 57 91" },
+  { name: "Elif Çelik", email: "elif.celik@ilanlio.com", phone: "0537 845 32 19" },
+  { name: "Burak Aydın", email: "burak.aydin@ilanlio.com", phone: "0538 192 76 40" },
 ];
 
 // SADECE önceki demo verisi (isDemo=true) temizlenir - gerçek kullanıcı/ilan

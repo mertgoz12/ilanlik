@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PlaceholderPage } from "@/components/placeholder-page";
 
-export const metadata: Metadata = { title: "Galeri / Kurumsal Üyelik - İlanlık" };
+export const metadata: Metadata = { title: "Galeri / Kurumsal Üyelik - İlanlio" };
 
 export default function KurumsalUyelikPage() {
   return (

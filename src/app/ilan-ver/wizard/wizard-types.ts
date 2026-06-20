@@ -73,7 +73,7 @@ export const DEFAULT_WIZARD_STATE: WizardState = {
   ilce: "",
 };
 
-export const DRAFT_KEY = "ilanlik:ilan-ver:vasita-wizard:v1";
+export const DRAFT_KEY = "ilanlio:ilan-ver:vasita-wizard:v1";
 
 export type WizardDraft = {
   step: number;

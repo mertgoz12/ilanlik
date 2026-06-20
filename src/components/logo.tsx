@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 type LogoSize = "sm" | "md" | "lg";
@@ -12,37 +11,28 @@ type LogoProps = {
   className?: string;
 };
 
-// public/logo.png intrinsic boyutu (en/boy oranı) - genişlik bu orana göre otomatik hesaplanır.
-const LOGO_ASPECT_RATIO = 2508 / 627;
-
-// "light": açık zeminler için orijinal lacivert+sarı görsel (public/logo.png).
-// "dark": koyu zeminler (örn. lacivert footer) için "ilanlık" beyaza çevrilmiş
-// görsel (public/logo-white.png) - aksi halde lacivert yazı lacivert zeminde kaybolur.
-const LOGO_SRC: Record<LogoVariant, string> = {
-  light: "/logo.png",
-  dark: "/logo-white.png",
-};
-
-const IMAGE_HEIGHT: Record<LogoSize, number> = {
-  sm: 28,
-  md: 36,
-  lg: 44,
+// Eskiden statik bir görsel (public/logo.png) kullanılıyordu; marka adı
+// değiştiğinde (İlanlık -> İlanlio) görseldeki pikselleri güncellemek mümkün
+// olmadığından metin tabanlı bir logoya geçildi - bundan sonra marka adı
+// kodda tek satırda güncellenebilir. Sora fontu (--font-sora, extrabold)
+// zaten projeye dahildi, görsel stile en yakın hazır font olarak kullanıldı.
+const TEXT_SIZE: Record<LogoSize, string> = {
+  sm: "text-xl",
+  md: "text-2xl",
+  lg: "text-3xl",
 };
 
 export function Logo({ size = "md", variant = "light", className = "" }: LogoProps) {
-  const height = IMAGE_HEIGHT[size];
-  const width = Math.round(height * LOGO_ASPECT_RATIO);
+  const brandClass = variant === "dark" ? "text-white" : "text-brand";
 
   return (
-    <Link href="/" aria-label="İlanlık - Ana sayfa" className={`inline-block shrink-0 ${className}`}>
-      <Image
-        src={LOGO_SRC[variant]}
-        alt="İlanlık"
-        width={width}
-        height={height}
-        preload
-        style={{ height, width: "auto" }}
-      />
+    <Link
+      href="/"
+      aria-label="İlanlio - Ana sayfa"
+      className={`inline-flex shrink-0 items-baseline font-display font-extrabold tracking-tight ${TEXT_SIZE[size]} ${className}`}
+    >
+      <span className={brandClass}>ilanlio</span>
+      <span className="text-accent">.com</span>
     </Link>
   );
 }

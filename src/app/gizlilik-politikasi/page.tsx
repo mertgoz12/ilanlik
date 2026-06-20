@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Gizlilik Politikası - İlanlık" };
+export const metadata: Metadata = { title: "Gizlilik Politikası - İlanlio" };
 
 const SECTIONS = [
   { id: "giris", title: "Giriş" },
@@ -21,7 +21,7 @@ export default function GizlilikPolitikasiPage() {
     <LegalPage title="Gizlilik Politikası" updatedAt="17 Haziran 2026" sections={SECTIONS}>
       <h2 id="giris">1. Giriş</h2>
       <p>
-        Bu Gizlilik Politikası, İlanlık (&quot;İlanlık&quot;, &quot;biz&quot;) tarafından işletilen ilanlik.com
+        Bu Gizlilik Politikası, İlanlio (&quot;İlanlio&quot;, &quot;biz&quot;) tarafından işletilen ilanlio.com
         platformunu (&quot;Platform&quot;) kullanırken hangi kişisel verilerinizin toplandığını, bu verilerin nasıl
         kullanıldığını, kimlerle paylaşılabileceğini ve verileriniz üzerindeki haklarınızı açıklar. Platform&apos;u
         kullanarak bu politikada açıklanan veri işleme faaliyetlerini kabul etmiş olursunuz. Kişisel verilerinizin
@@ -59,7 +59,7 @@ export default function GizlilikPolitikasiPage() {
 
       <h2 id="saklama-ve-guvenlik">4. Verilerin Saklanması ve Güvenliği</h2>
       <p>
-        Kişisel verileriniz, İlanlık&apos;ın veya hizmet aldığı altyapı/hosting sağlayıcılarının sunucularında, yetkisiz
+        Kişisel verileriniz, İlanlio&apos;nun veya hizmet aldığı altyapı/hosting sağlayıcılarının sunucularında, yetkisiz
         erişime, kayba, kötüye kullanıma veya ifşaya karşı makul teknik ve idari güvenlik tedbirleriyle (erişim
         kısıtlama, şifreleme, düzenli yedekleme vb.) korunarak saklanır. Şifreniz veritabanında okunabilir biçimde
         tutulmaz; tek yönlü şifreleme (hash) yöntemiyle saklanır. Hiçbir iletim veya depolama yönteminin %100
@@ -91,7 +91,7 @@ export default function GizlilikPolitikasiPage() {
         </li>
       </ul>
       <p>
-        İlanlık, kişisel verilerinizi yukarıda belirtilenler dışında, açık rızanız olmadan üçüncü kişilere pazarlama
+        İlanlio, kişisel verilerinizi yukarıda belirtilenler dışında, açık rızanız olmadan üçüncü kişilere pazarlama
         amacıyla satmaz veya kiralamaz.
       </p>
 
@@ -137,7 +137,7 @@ export default function GizlilikPolitikasiPage() {
 
       <h2 id="politika-degisiklikleri">9. Politika Değişiklikleri</h2>
       <p>
-        İlanlık, bu Gizlilik Politikası&apos;nı mevzuat değişiklikleri veya Platform&apos;daki yenilikler doğrultusunda
+        İlanlio, bu Gizlilik Politikası&apos;nı mevzuat değişiklikleri veya Platform&apos;daki yenilikler doğrultusunda
         güncelleme hakkını saklı tutar. Güncellemeler bu sayfada yayınlandığı anda yürürlüğe girer. Politikayı
         düzenli olarak gözden geçirmenizi öneririz.
       </p>
@@ -145,12 +145,12 @@ export default function GizlilikPolitikasiPage() {
       <h2 id="iletisim">10. İletişim</h2>
       <p>
         Gizlilik uygulamalarımızla ilgili sorularınız için{" "}
-        <a href="mailto:destek@ilanlik.com" className="font-medium text-brand underline hover:text-accent-dark">
-          destek@ilanlik.com
+        <a href="mailto:destek@ilanlio.com" className="font-medium text-brand underline hover:text-accent-dark">
+          destek@ilanlio.com
         </a>{" "}
         veya kişisel veri başvurularınız için{" "}
-        <a href="mailto:kvkk@ilanlik.com" className="font-medium text-brand underline hover:text-accent-dark">
-          kvkk@ilanlik.com
+        <a href="mailto:kvkk@ilanlio.com" className="font-medium text-brand underline hover:text-accent-dark">
+          kvkk@ilanlio.com
         </a>{" "}
         adresine yazabilirsiniz.
       </p>

@@ -4,7 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Cookie, Settings } from "lucide-react";
 
-const STORAGE_KEY = "ilanlik_cookie_consent";
+const STORAGE_KEY = "ilanlio_cookie_consent";
 
 type ConsentCategories = {
   necessary: true;
@@ -94,7 +94,7 @@ export function CookieConsent() {
                 <Cookie className="h-5 w-5" />
               </span>
               <p className="text-sm leading-relaxed text-slate-600">
-                İlanlık, deneyiminizi iyileştirmek için çerezler kullanır. Detaylar için{" "}
+                İlanlio, deneyiminizi iyileştirmek için çerezler kullanır. Detaylar için{" "}
                 <Link href="/cerez-politikasi" className="font-medium text-brand underline hover:text-accent-dark">
                   Çerez Politikası
                 </Link>

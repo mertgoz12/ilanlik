@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Çerez Politikası - İlanlık" };
+export const metadata: Metadata = { title: "Çerez Politikası - İlanlio" };
 
 const SECTIONS = [
   { id: "cerez-nedir", title: "Çerez Nedir?" },
@@ -19,7 +19,7 @@ export default function CerezPolitikasiPage() {
       <p>
         Çerezler (cookies), bir web sitesini ziyaret ettiğinizde tarayıcınız aracılığıyla cihazınıza kaydedilen
         küçük metin dosyalarıdır. Çerezler; sitenin düzgün çalışmasını sağlamak, tercihlerinizi hatırlamak ve
-        Platform&apos;u nasıl kullandığınızı anlayarak deneyiminizi iyileştirmek amacıyla kullanılır. İlanlık,
+        Platform&apos;u nasıl kullandığınızı anlayarak deneyiminizi iyileştirmek amacıyla kullanılır. İlanlio,
         Platform&apos;u ziyaret ettiğinizde ilk girişte gösterilen çerez bildirimi üzerinden tercihlerinizi
         belirlemenize imkân tanır.
       </p>
@@ -78,7 +78,7 @@ export default function CerezPolitikasiPage() {
 
       <h2 id="degisiklikler">6. Politika Değişiklikleri</h2>
       <p>
-        İlanlık, bu Çerez Politikası&apos;nı mevzuat değişiklikleri veya kullanılan çerez türlerindeki güncellemeler
+        İlanlio, bu Çerez Politikası&apos;nı mevzuat değişiklikleri veya kullanılan çerez türlerindeki güncellemeler
         doğrultusunda değiştirme hakkını saklı tutar. Güncel politika her zaman bu sayfada yayınlanır.
       </p>
     </LegalPage>

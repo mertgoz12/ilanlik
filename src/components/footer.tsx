@@ -5,7 +5,7 @@ import { SOCIAL_LINKS } from "@/lib/social-links";
 import { isVasitaEmlakActive } from "@/lib/categories";
 import { ComingSoonBadge, ComingSoonTrigger } from "./coming-soon";
 
-const SUPPORT_EMAIL = "destek@ilanlik.com";
+const SUPPORT_EMAIL = "destek@ilanlio.com";
 
 type FooterLink = { label: string; href: string; comingSoon?: boolean };
 
@@ -113,12 +113,12 @@ export function Footer() {
         <div className="mt-8 border-t border-white/10 pt-6">
           <Logo size="sm" variant="dark" />
           <p className="mt-4 max-w-3xl text-xs leading-relaxed text-brand-100">
-            İlanlık.com&apos;da yer alan kullanıcıların oluşturduğu tüm içerik, görüş ve bilgilerin
-            doğruluğu ve sorumluluğu içeriği oluşturan kullanıcıya aittir. İlanlık, kullanıcılar
+            İlanlio.com&apos;da yer alan kullanıcıların oluşturduğu tüm içerik, görüş ve bilgilerin
+            doğruluğu ve sorumluluğu içeriği oluşturan kullanıcıya aittir. İlanlio, kullanıcılar
             tarafından oluşturulan içeriklerden sorumlu değildir.
           </p>
           <p className="mt-4 text-xs text-brand-100/70">
-            Copyright &copy; {new Date().getFullYear()} İlanlık.com - Tüm hakları saklıdır.
+            Copyright &copy; {new Date().getFullYear()} İlanlio.com - Tüm hakları saklıdır.
           </p>
         </div>
       </div>

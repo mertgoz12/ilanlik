@@ -21,10 +21,10 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ilanlik.com"),
-  title: "İlanlık | Yapay Zeka Destekli Araç İlanları",
+  metadataBase: new URL("https://ilanlio.com"),
+  title: "İlanlio | Yapay Zeka Destekli Araç İlanları",
   description:
-    "İlanlık - araç al, sat, ilan ver. Hasar, boya ve değişen bilgileriyle şeffaf araç ilanları.",
+    "İlanlio - araç al, sat, ilan ver. Hasar, boya ve değişen bilgileriyle şeffaf araç ilanları.",
 };
 
 export default async function RootLayout({

@@ -1,4 +1,4 @@
-# İlanlık Araç İlan Analiz Motoru — Sistem Prompt'u
+# İlanlio Araç İlan Analiz Motoru — Sistem Prompt'u
 
 Bu dosya, ilan sitesinin yapay zeka analiz motorunun sistem prompt'unu, girdi formatını ve beklenen çıktı şemasını içerir. API çağrısında `system` alanına aşağıdaki sistem prompt'u, `user` mesajına ise JSON girdi konur.
 
@@ -7,7 +7,7 @@ Bu dosya, ilan sitesinin yapay zeka analiz motorunun sistem prompt'unu, girdi fo
 ## SİSTEM PROMPT'U
 
 \`\`\`
-Sen, Türkiye ikinci el araç piyasasında uzmanlaşmış profesyonel bir araç değerleme ve ekspertiz analiz motorusun. İlanlık adlı bir araç ilan platformunun arka planında çalışıyorsun. Görevin, sana JSON formatında iletilen araç ilanı verilerini analiz ederek üç çıktı üretmek: (1) fiyat analizi, (2) alıcıya yönelik ekspertiz raporu, (3) ilan tutarlılık ve güven puanı.
+Sen, Türkiye ikinci el araç piyasasında uzmanlaşmış profesyonel bir araç değerleme ve ekspertiz analiz motorusun. İlanlio adlı bir araç ilan platformunun arka planında çalışıyorsun. Görevin, sana JSON formatında iletilen araç ilanı verilerini analiz ederek üç çıktı üretmek: (1) fiyat analizi, (2) alıcıya yönelik ekspertiz raporu, (3) ilan tutarlılık ve güven puanı.
 
 ## GENEL KURALLAR
 
@@ -175,7 +175,7 @@ const analiz = JSON.parse(data.content[0].text);
 
 ## VASITA DIŞI (İKİNCİ EL / SIFIR ÜRÜN) İLANLAR İÇİN AYRI PROMPT
 
-İlanlık, ilk yayın sürümünde Vasıta ve Emlak'ı "çok yakında" olarak kapattığı
+İlanlio, ilk yayın sürümünde Vasıta ve Emlak'ı "çok yakında" olarak kapattığı
 için vitrin ikinci el/sıfır ürünlere (telefon, bilgisayar, elektronik, giyim
 vb.) odaklanır. Bu ilanlar yukarıdaki araç odaklı sistem prompt'unu kullanamaz
 (parça durumu, TRAMER, motor gibi alanlar yok); bunun için

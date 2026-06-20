@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PlaceholderPage } from "@/components/placeholder-page";
 
-export const metadata: Metadata = { title: "Yapay Zeka Ekspertiz - İlanlık" };
+export const metadata: Metadata = { title: "Yapay Zeka Ekspertiz - İlanlio" };
 
 export default function YapayZekaEkspertizPage() {
   return (

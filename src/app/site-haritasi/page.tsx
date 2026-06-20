@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CATEGORY_TREE, COMING_SOON_SLUGS, isVasitaEmlakActive } from "@/lib/categories";
 import { ComingSoonBadge, ComingSoonTrigger } from "@/components/coming-soon";
 
-export const metadata: Metadata = { title: "Site Haritası - İlanlık" };
+export const metadata: Metadata = { title: "Site Haritası - İlanlio" };
 
 const OTHER_LINKS = [
   { label: "Hakkımızda", href: "/hakkimizda" },

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
 
-export const metadata: Metadata = { title: "Kariyer - İlanlık" };
+export const metadata: Metadata = { title: "Kariyer - İlanlio" };
 
-const CAREER_EMAIL = "kariyer@ilanlik.com";
+const CAREER_EMAIL = "kariyer@ilanlio.com";
 
 export default function KariyerPage() {
   return (

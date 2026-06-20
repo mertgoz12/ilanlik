@@ -11,7 +11,7 @@ import {
   MessageIcon,
 } from "@/components/icons";
 
-export const metadata: Metadata = { title: "Nasıl Çalışır - İlanlık" };
+export const metadata: Metadata = { title: "Nasıl Çalışır - İlanlio" };
 
 const SELLER_STEPS = [
   { icon: UserIcon, title: "Üye Ol", description: "Saniyeler içinde ücretsiz bir hesap oluşturun." },
@@ -75,7 +75,7 @@ export default function NasilCalisirPage() {
 
       <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Nasıl Çalışır?</h1>
       <p className="mt-2 max-w-2xl text-sm text-slate-500">
-        İlanlık&apos;ta hem ilan vermek hem de güvenle alışveriş yapmak çok basit. Adımlar şöyle:
+        İlanlio&apos;da hem ilan vermek hem de güvenle alışveriş yapmak çok basit. Adımlar şöyle:
       </p>
 
       <section className="mt-10">

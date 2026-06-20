@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-// İlanlık amblemi: "i" harfi, noktası sarı.
+// İlanlio amblemi: "i" harfi, noktası sarı.
 export default function AppleIcon() {
   return new ImageResponse(
     (

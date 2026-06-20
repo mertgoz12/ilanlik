@@ -51,7 +51,7 @@ export function CarDiagram({ values, onChange, className }: CarDiagramProps) {
       <svg
         viewBox="0 0 520 520"
         role="img"
-        aria-label="İlanlık araç ekspertiz şeması"
+        aria-label="İlanlio araç ekspertiz şeması"
         className="mx-auto block h-auto w-full max-w-md"
       >
         <defs>

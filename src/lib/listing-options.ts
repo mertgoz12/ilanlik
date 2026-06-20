@@ -68,7 +68,7 @@ export async function getOptionSettings(): Promise<OptionSettings> {
 
 // --- Sistem mesajları için kullanılan otomatik hesap ---
 
-const SYSTEM_USER_EMAIL = "sistem@ilanlik.com";
+const SYSTEM_USER_EMAIL = "sistem@ilanlio.com";
 let cachedSystemUserId: string | null = null;
 
 // Sadece opsiyon süresi otomatik dolduğunda (hiçbir tarafın aksiyonu olmadığı
@@ -85,7 +85,7 @@ async function getSystemUserId(): Promise<string> {
 
   const password = await hashPassword(randomUUID());
   const created = await prisma.user.create({
-    data: { name: "İlanlık Sistem", email: SYSTEM_USER_EMAIL, password, isVerified: true },
+    data: { name: "İlanlio Sistem", email: SYSTEM_USER_EMAIL, password, isVerified: true },
   });
   cachedSystemUserId = created.id;
   return created.id;

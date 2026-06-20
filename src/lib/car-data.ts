@@ -106,7 +106,7 @@ export function damageStatusLabel(value: string) {
 }
 
 // Part keys match the `data-part`/`id` attributes on the paths in
-// /ilanlik-arac-sema.svg (inlined by CarDiagram).
+// /ilanlio-arac-sema.svg (inlined by CarDiagram).
 export const DAMAGE_PART_LABELS: Record<string, string> = {
   "on-tampon": "Ön Tampon",
   kaput: "Kaput",
@@ -157,7 +157,7 @@ export function damagePartStatusLabel(value: DamagePartStatus): string {
   return DAMAGE_PART_STATUSES.find((s) => s.value === value)?.label ?? value;
 }
 
-// Fill colors for the inline /ilanlik-arac-sema.svg car diagram. Each part's
+// Fill colors for the inline /ilanlio-arac-sema.svg car diagram. Each part's
 // <path> fill is set directly to the color matching its current status.
 export const DAMAGE_PART_FILL_COLORS: Record<DamagePartStatus, string> = {
   orijinal: "#d7d7d7",

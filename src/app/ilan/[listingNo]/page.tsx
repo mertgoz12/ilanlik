@@ -51,7 +51,7 @@ export async function generateMetadata({
   });
 
   if (!listing || listing.status !== "active") {
-    return { title: "İlan Bulunamadı - İlanlık" };
+    return { title: "İlan Bulunamadı - İlanlio" };
   }
 
   const description = listing.description?.trim()
@@ -59,7 +59,7 @@ export async function generateMetadata({
     : `${listing.title} - ${formatPrice(listing.price)} - ${listing.il}, ${listing.ilce}`;
 
   return {
-    title: `${listing.title} - İlanlık`,
+    title: `${listing.title} - İlanlio`,
     description,
   };
 }

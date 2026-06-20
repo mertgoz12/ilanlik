@@ -5,9 +5,9 @@ import { FormSection } from "@/components/form-ui";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 import { ContactForm } from "./contact-form";
 
-export const metadata: Metadata = { title: "İletişim - İlanlık" };
+export const metadata: Metadata = { title: "İletişim - İlanlio" };
 
-const SUPPORT_EMAIL = "destek@ilanlik.com";
+const SUPPORT_EMAIL = "destek@ilanlio.com";
 
 export default function IletisimPage() {
   return (

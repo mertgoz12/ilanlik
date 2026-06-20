@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# İlanlio
 
-## Getting Started
+İlanlio (ilanlio.com), her ilanın yapay zeka destekli bir denetimden geçtiği,
+ikinci el ve sıfır ürün/araç ilan platformu. [Next.js](https://nextjs.org)
+App Router üzerinde, Prisma + PostgreSQL (Neon) ile yazıldı.
 
-First, run the development server:
+## Geliştirme
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) adresini açarak sonucu görebilirsiniz.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`.env` dosyasına en azından şu değişkenler gerekir: `DATABASE_URL`,
+`AUTH_SECRET`, `ANTHROPIC_API_KEY`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Veritabanı
 
-## Learn More
+```bash
+npx prisma generate       # Prisma client'ı üret
+npx prisma db push        # şemayı veritabanına uygula
+npm run db:seed-categories # kategori taksonomisi
+npm run db:seed-vehicles   # el ile düzenlenmiş araç kataloğu
+npm run db:create-admin    # admin hesabı oluştur
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Dağıtım (Deploy)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proje [Vercel](https://vercel.com) üzerinde, [Neon](https://neon.tech)
+PostgreSQL veritabanına bağlı olarak çalışır. `npm run build` komutu
+`prisma generate`'i otomatik çalıştırır.

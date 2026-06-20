@@ -52,7 +52,7 @@ export function AiReportCard({ rule, ai, price, listingNo, pricingMode }: AiRepo
     <section className="rounded-lg border border-emerald-100 bg-white p-6 shadow-soft">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
         <SparkleIcon className="h-5 w-5 text-emerald-500" />
-        {isVehicleListing ? "İlanlık Yapay Zeka Ekspertiz Raporu" : "İlanlık Yapay Zeka Analizi"}
+        {isVehicleListing ? "İlanlio Yapay Zeka Ekspertiz Raporu" : "İlanlio Yapay Zeka Analizi"}
       </h2>
 
       <div className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr] sm:items-center">

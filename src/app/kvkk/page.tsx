@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "KVKK Aydınlatma Metni - İlanlık" };
+export const metadata: Metadata = { title: "KVKK Aydınlatma Metni - İlanlio" };
 
 const SECTIONS = [
   { id: "veri-sorumlusu", title: "Veri Sorumlusu" },
@@ -21,10 +21,10 @@ export default function KvkkPage() {
       <h2 id="veri-sorumlusu">1. Veri Sorumlusu</h2>
       <p>
         6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) uyarınca kişisel verileriniz; veri
-        sorumlusu sıfatıyla <strong>İlanlık (ilanlik.com)</strong> (&quot;İlanlık&quot;, &quot;veri sorumlusu&quot;)
-        tarafından, aşağıda açıklanan kapsam ve şartlarla işlenebilecektir. İlanlık&apos;a KVKK kapsamındaki
-        taleplerinizi <strong>kvkk@ilanlik.com</strong> adresine, genel destek taleplerinizi ise{" "}
-        <strong>destek@ilanlik.com</strong> adresine iletebilirsiniz.
+        sorumlusu sıfatıyla <strong>İlanlio (ilanlio.com)</strong> (&quot;İlanlio&quot;, &quot;veri sorumlusu&quot;)
+        tarafından, aşağıda açıklanan kapsam ve şartlarla işlenebilecektir. İlanlio&apos;ya KVKK kapsamındaki
+        taleplerinizi <strong>kvkk@ilanlio.com</strong> adresine, genel destek taleplerinizi ise{" "}
+        <strong>destek@ilanlio.com</strong> adresine iletebilirsiniz.
       </p>
 
       <h2 id="islenen-veriler">2. İşlenen Kişisel Veriler</h2>
@@ -39,7 +39,7 @@ export default function KvkkPage() {
         <li><strong>Talep/Şikâyet Verisi:</strong> İletişim formu, destek talebi veya şikâyet bildirimi kapsamında paylaştığınız bilgiler.</li>
       </ul>
       <p>
-        İlanlık, ırk, etnik köken, sağlık, biyometrik veri gibi KVKK madde 6 kapsamındaki <strong>özel nitelikli
+        İlanlio, ırk, etnik köken, sağlık, biyometrik veri gibi KVKK madde 6 kapsamındaki <strong>özel nitelikli
         kişisel verileri</strong> Platform hizmetleri kapsamında toplamamaktadır.
       </p>
 
@@ -63,13 +63,13 @@ export default function KvkkPage() {
       </p>
       <ul>
         <li><strong>Sözleşmenin kurulması/ifası (m. 5/2-c):</strong> Üyelik ve ilan yayınlama ilişkisinin kurulması ve yürütülmesi için verilerinizin işlenmesi gereklidir.</li>
-        <li><strong>Hukuki yükümlülük (m. 5/2-ç):</strong> İlanlık&apos;ın tabi olduğu mevzuattan kaynaklanan saklama ve bilgilendirme yükümlülükleri.</li>
+        <li><strong>Hukuki yükümlülük (m. 5/2-ç):</strong> İlanlio&apos;nun tabi olduğu mevzuattan kaynaklanan saklama ve bilgilendirme yükümlülükleri.</li>
         <li><strong>Bir hakkın tesisi/korunması (m. 5/2-e):</strong> Uyuşmazlık, dolandırıcılık veya hukuki talep hâllerinde delil olarak kullanılması.</li>
         <li><strong>Veri sorumlusunun meşru menfaati (m. 5/2-f):</strong> Platform güvenliğinin sağlanması, yapay zeka destekli analizle hizmet kalitesinin artırılması, temel hak ve özgürlüklerinize zarar vermemek kaydıyla.</li>
         <li><strong>Açık rıza (m. 5/1):</strong> Yukarıdaki sebeplerle açıklanamayan işlemler için (örn. pazarlama amaçlı çerezler) açık rızanız alınır.</li>
       </ul>
       <p>
-        Yukarıda belirtildiği üzere İlanlık, KVKK madde 6 kapsamındaki özel nitelikli kişisel veri işlememektedir.
+        Yukarıda belirtildiği üzere İlanlio, KVKK madde 6 kapsamındaki özel nitelikli kişisel veri işlememektedir.
       </p>
 
       <h2 id="aktarim">5. Kişisel Verilerin Aktarıldığı Taraflar</h2>
@@ -105,7 +105,7 @@ export default function KvkkPage() {
       </p>
 
       <h2 id="haklar">7. Veri Sahibinin Hakları (Madde 11)</h2>
-      <p>KVKK&apos;nın 11. maddesi uyarınca İlanlık&apos;a başvurarak şu haklarınızı kullanabilirsiniz:</p>
+      <p>KVKK&apos;nın 11. maddesi uyarınca İlanlio&apos;ya başvurarak şu haklarınızı kullanabilirsiniz:</p>
       <ul>
         <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme,</li>
         <li>İşlenmişse buna ilişkin bilgi talep etme,</li>
@@ -121,10 +121,10 @@ export default function KvkkPage() {
       <h2 id="basvuru-yontemi">8. Başvuru Yöntemi</h2>
       <p>
         Yukarıdaki haklarınızı kullanmak için talebinizi yazılı olarak veya kayıtlı elektronik posta (KEP) adresi,
-        mobil imza, güvenli elektronik imza ya da İlanlık&apos;a önceden bildirdiğiniz ve sistemimizde kayıtlı
+        mobil imza, güvenli elektronik imza ya da İlanlio&apos;ya önceden bildirdiğiniz ve sistemimizde kayıtlı
         bulunan elektronik posta adresinizi kullanmak suretiyle{" "}
-        <a href="mailto:kvkk@ilanlik.com" className="font-medium text-brand underline hover:text-accent-dark">
-          kvkk@ilanlik.com
+        <a href="mailto:kvkk@ilanlio.com" className="font-medium text-brand underline hover:text-accent-dark">
+          kvkk@ilanlio.com
         </a>{" "}
         adresine iletebilirsiniz. Başvurunuzda; ad-soyad, T.C. kimlik numarası (yabancılar için pasaport numarası
         veya kimlik bilgisi), tebligata esas yerleşim yeri/iş yeri adresi, varsa bildirime esas e-posta adresi/telefon
@@ -134,7 +134,7 @@ export default function KvkkPage() {
 
       <h2 id="basvuru-sureci">9. Başvurulara Cevap Verme Süreci</h2>
       <p>
-        İlanlık, başvurunuzu KVKK madde 13 uyarınca talebin niteliğine göre en kısa sürede ve en geç{" "}
+        İlanlio, başvurunuzu KVKK madde 13 uyarınca talebin niteliğine göre en kısa sürede ve en geç{" "}
         <strong>30 (otuz) gün</strong> içinde, ücretsiz olarak sonuçlandırır. Ancak işlemin ayrıca bir maliyet
         gerektirmesi hâlinde, Kişisel Verileri Koruma Kurulu tarafından belirlenen tarifedeki ücret talep
         edilebilir. Başvurunuz kabul edilir veya gerekçesi açıklanarak reddedilir; cevabımız başvurunuzda

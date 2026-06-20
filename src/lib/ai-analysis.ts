@@ -5,7 +5,7 @@ import { equipmentLabel, type DamagePartStatus } from "./car-data";
 // API çağrısı sadece sunucu tarafında (server action) yapılmalı; ANTHROPIC_API_KEY
 // asla client koduna sızdırılmamalı.
 
-const SISTEM_PROMPTU = `Sen, Türkiye ikinci el araç piyasasında uzmanlaşmış profesyonel bir araç değerleme ve ekspertiz analiz motorusun. İlanlık adlı bir araç ilan platformunun arka planında çalışıyorsun. Görevin, sana JSON formatında iletilen araç ilanı verilerini analiz ederek üç çıktı üretmek: (1) fiyat analizi, (2) alıcıya yönelik ekspertiz raporu, (3) ilan tutarlılık ve güven puanı.
+const SISTEM_PROMPTU = `Sen, Türkiye ikinci el araç piyasasında uzmanlaşmış profesyonel bir araç değerleme ve ekspertiz analiz motorusun. İlanlio adlı bir araç ilan platformunun arka planında çalışıyorsun. Görevin, sana JSON formatında iletilen araç ilanı verilerini analiz ederek üç çıktı üretmek: (1) fiyat analizi, (2) alıcıya yönelik ekspertiz raporu, (3) ilan tutarlılık ve güven puanı.
 
 ## GENEL KURALLAR
 
@@ -87,7 +87,7 @@ ETKİLEMEMELİDİR.
 
 // --- Girdi formatı ---
 
-// İlanlık'ın iç parça durumu sözlüğü ("lokal-boyali", "ezik-gocuk" gibi tirelidir);
+// İlanlio'nun iç parça durumu sözlüğü ("lokal-boyali", "ezik-gocuk" gibi tirelidir);
 // AI girdi formatı alt çizgili anahtarlar bekler.
 export type AiPartStatus =
   | "orijinal"
@@ -367,7 +367,7 @@ export async function runAiAnalysis(input: AiAnalysisInput): Promise<AiAnalysisO
 // ve "arac" girdisi yerine "urun" girdisi kullanılır.
 // =====================================================================
 
-const GENEL_URUN_SISTEM_PROMPTU = `Sen, ikinci el ve sıfır ürün alışverişinde uzmanlaşmış profesyonel bir ilan analiz motorusun. İlanlık adlı bir ilan platformunun arka planında çalışıyorsun. Görevin, sana JSON formatında iletilen ürün ilanı verilerini analiz ederek üç çıktı üretmek: (1) fiyat analizi, (2) alıcıya yönelik değerlendirme, (3) ilan tutarlılık ve güven puanı.
+const GENEL_URUN_SISTEM_PROMPTU = `Sen, ikinci el ve sıfır ürün alışverişinde uzmanlaşmış profesyonel bir ilan analiz motorusun. İlanlio adlı bir ilan platformunun arka planında çalışıyorsun. Görevin, sana JSON formatında iletilen ürün ilanı verilerini analiz ederek üç çıktı üretmek: (1) fiyat analizi, (2) alıcıya yönelik değerlendirme, (3) ilan tutarlılık ve güven puanı.
 
 ## GENEL KURALLAR
 

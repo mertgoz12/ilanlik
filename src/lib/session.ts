@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { signSessionToken, verifySessionToken } from "./jwt";
 
-export const SESSION_COOKIE = "ilanlik_session";
+export const SESSION_COOKIE = "ilanlio_session";
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 

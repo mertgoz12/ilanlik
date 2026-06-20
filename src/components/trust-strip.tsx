@@ -29,7 +29,7 @@ export function TrustStrip() {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <div className="text-center">
           <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            Neden İlanlık?
+            Neden İlanlio?
           </h2>
           <p className="mt-1 text-sm text-slate-500">
             Yapay zeka destekli denetim ile güvenle alın, şeffafça satın.

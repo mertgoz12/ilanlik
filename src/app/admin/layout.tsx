@@ -5,7 +5,7 @@ import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { ToastProvider } from "@/components/admin/toast";
 
 export const metadata: Metadata = {
-  title: "Yönetim Paneli | İlanlık",
+  title: "Yönetim Paneli | İlanlio",
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SparkleIcon, ShieldCheckIcon, ScaleIcon } from "@/components/icons";
 
-export const metadata: Metadata = { title: "Hakkımızda - İlanlık" };
+export const metadata: Metadata = { title: "Hakkımızda - İlanlio" };
 
 const HIGHLIGHTS = [
   {
@@ -40,7 +40,7 @@ export default function HakkimizdaPage() {
 
       <div className="mt-6 space-y-5 text-sm leading-relaxed text-slate-600 sm:text-base">
         <p>
-          <strong className="font-semibold text-foreground">İlanlık, Türkiye&apos;nin yapay zeka destekli
+          <strong className="font-semibold text-foreground">İlanlio, Türkiye&apos;nin yapay zeka destekli
           güvenilir ilan platformudur.</strong> Sitemizde yayınlanan her ilan, yapay zeka tarafından otomatik
           olarak denetlenir; bu sayede fahiş fiyatlı ve tutarsız ilanlar alıcıya ulaşmadan tespit edilir. Amacımız,
           alıcı ile satıcıyı şeffaf ve güvenli bir ortamda buluşturmaktır.

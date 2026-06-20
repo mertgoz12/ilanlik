@@ -11,7 +11,7 @@ const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
 
 const prisma = new PrismaClient({ adapter });
 
-const DEFAULT_EMAIL = "admin@ilanlik.com";
+const DEFAULT_EMAIL = "admin@ilanlio.com";
 const DEFAULT_PASSWORD = "admin12345";
 
 async function main() {

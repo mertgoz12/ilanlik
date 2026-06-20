@@ -4,7 +4,7 @@ import { AccountNav } from "@/components/account/account-nav";
 import { ToastProvider } from "@/components/admin/toast";
 
 export const metadata: Metadata = {
-  title: "Hesabım | İlanlık",
+  title: "Hesabım | İlanlio",
 };
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
