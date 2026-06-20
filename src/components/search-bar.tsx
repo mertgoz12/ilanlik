@@ -49,9 +49,16 @@ function optionKey(option: FlatOption): string {
   }
 }
 
-export function SearchBar({ className = "" }: { className?: string }) {
+type SearchBarProps = {
+  className?: string;
+  /** Mobil arama satırı açılır açılmaz inputa odaklanmak için (bkz. navbar.tsx). */
+  autoFocus?: boolean;
+};
+
+export function SearchBar({ className = "", autoFocus = false }: SearchBarProps) {
   const router = useRouter();
   const listboxId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -246,9 +253,11 @@ export function SearchBar({ className = "" }: { className?: string }) {
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
+              ref={inputRef}
               type="text"
               name="q"
               autoComplete="off"
+              autoFocus={autoFocus}
               value={query}
               onChange={(event) => {
                 const value = event.target.value;

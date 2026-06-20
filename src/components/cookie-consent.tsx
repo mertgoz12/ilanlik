@@ -85,7 +85,7 @@ export function CookieConsent() {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white p-4 shadow-soft-lg sm:p-6">
+    <div className="fixed inset-x-0 bottom-16 z-50 border-t border-slate-200 bg-white p-4 shadow-soft-lg sm:p-6 md:bottom-0">
       <div className="mx-auto max-w-6xl">
         {!showSettings ? (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

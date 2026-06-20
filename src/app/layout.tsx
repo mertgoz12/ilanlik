@@ -4,7 +4,9 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { AnnouncementBar } from "@/components/announcement-bar";
+import { BottomNav } from "@/components/bottom-nav";
 import { CookieConsent } from "@/components/cookie-consent";
+import { MobileSearchProvider } from "@/components/mobile-search-context";
 import { UnreadMessagesProvider } from "@/components/unread-messages-context";
 import { getSession } from "@/lib/session";
 import { getUnreadMessageCount } from "@/lib/messages";
@@ -55,11 +57,14 @@ export default async function RootLayout({
     <html lang="tr" className={`${inter.variable} ${sora.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <UnreadMessagesProvider initialCount={unreadCount}>
-          <AnnouncementBar />
-          <Navbar />
-          <main className="flex flex-1 flex-col">{children}</main>
-          <Footer />
-          <CookieConsent />
+          <MobileSearchProvider>
+            <AnnouncementBar />
+            <Navbar />
+            <main className="flex flex-1 flex-col pb-16 md:pb-0">{children}</main>
+            <Footer />
+            <CookieConsent />
+            <BottomNav isLoggedIn={!!session} />
+          </MobileSearchProvider>
         </UnreadMessagesProvider>
       </body>
     </html>

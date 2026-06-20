@@ -1,8 +1,49 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { TouchEvent } from "react";
 import Image from "next/image";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, ImageIcon } from "./icons";
+
+const SWIPE_THRESHOLD_PX = 40;
+
+// Ana görsel ve lightbox'ta parmakla sola/sağa kaydırarak fotoğraf
+// değiştirme - dokunma sırasında belirgin bir yatay hareket olduysa bunu
+// "swipe" sayıp ardından gelen sentetik click'i (büyütme/zoom) bastırır.
+function useSwipe(onSwipeLeft: () => void, onSwipeRight: () => void) {
+  const startX = useRef<number | null>(null);
+  const deltaX = useRef(0);
+  const wasSwipe = useRef(false);
+
+  function onTouchStart(e: TouchEvent) {
+    startX.current = e.touches[0].clientX;
+    deltaX.current = 0;
+  }
+
+  function onTouchMove(e: TouchEvent) {
+    if (startX.current === null) return;
+    deltaX.current = e.touches[0].clientX - startX.current;
+  }
+
+  function onTouchEnd() {
+    if (Math.abs(deltaX.current) > SWIPE_THRESHOLD_PX) {
+      wasSwipe.current = true;
+      if (deltaX.current < 0) onSwipeLeft();
+      else onSwipeRight();
+    }
+    startX.current = null;
+  }
+
+  function consumeWasSwipe() {
+    if (wasSwipe.current) {
+      wasSwipe.current = false;
+      return true;
+    }
+    return false;
+  }
+
+  return { onTouchStart, onTouchMove, onTouchEnd, consumeWasSwipe };
+}
 
 export function ImageGallery({
   images,
@@ -43,6 +84,15 @@ export function ImageGallery({
     };
   }, [lightboxOpen, active, goTo]);
 
+  const mainSwipe = useSwipe(
+    () => goTo(active + 1),
+    () => goTo(active - 1),
+  );
+  const lightboxSwipe = useSwipe(
+    () => goTo(active + 1),
+    () => goTo(active - 1),
+  );
+
   if (count === 0) {
     return (
       <div className="flex aspect-[16/10] w-full items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-slate-300">
@@ -53,10 +103,16 @@ export function ImageGallery({
 
   return (
     <div>
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+      <div className="relative aspect-[16/10] w-full touch-pan-y overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
         <button
           type="button"
-          onClick={() => setLightboxOpen(true)}
+          onClick={() => {
+            if (mainSwipe.consumeWasSwipe()) return;
+            setLightboxOpen(true);
+          }}
+          onTouchStart={mainSwipe.onTouchStart}
+          onTouchMove={mainSwipe.onTouchMove}
+          onTouchEnd={mainSwipe.onTouchEnd}
           className="absolute inset-0 h-full w-full cursor-zoom-in"
           aria-label="Fotoğrafı büyüt"
         >
@@ -134,21 +190,20 @@ export function ImageGallery({
               type="button"
               onClick={() => setLightboxOpen(false)}
               aria-label="Kapat"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
             >
               <CloseIcon className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="relative flex-1">
-            <Image
-              src={images[active].url}
-              alt={title}
-              fill
-              className="object-contain"
-              sizes="100vw"
-              onClick={(e) => e.stopPropagation()}
-            />
+          <div
+            className="relative flex-1 touch-pan-y"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={lightboxSwipe.onTouchStart}
+            onTouchMove={lightboxSwipe.onTouchMove}
+            onTouchEnd={lightboxSwipe.onTouchEnd}
+          >
+            <Image src={images[active].url} alt={title} fill className="object-contain" sizes="100vw" />
 
             {count > 1 && (
               <>

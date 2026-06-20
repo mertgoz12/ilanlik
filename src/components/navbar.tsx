@@ -4,6 +4,7 @@ import { getSession } from "@/lib/session";
 import { logoutAction } from "@/lib/actions/logout";
 import { isVasitaEmlakActive } from "@/lib/categories";
 import { Logo } from "./logo";
+import { MobileSearchRow, MobileSearchToggleButton } from "./mobile-search-row";
 import { NavbarMobileMenu } from "./navbar-mobile-menu";
 import { SearchBar } from "./search-bar";
 import { UserMenu } from "./user-menu";
@@ -84,14 +85,13 @@ export async function Navbar() {
           </Link>
         </div>
 
-        <div className="ml-auto md:hidden">
+        <div className="ml-auto flex items-center gap-2 md:hidden">
+          <MobileSearchToggleButton />
           <NavbarMobileMenu session={session} logoutAction={logoutAction} />
         </div>
       </div>
 
-      <div className="border-t border-slate-100 px-4 py-2.5 md:hidden">
-        <SearchBar />
-      </div>
+      <MobileSearchRow />
 
       <div className="border-t border-slate-100 bg-slate-50/60">
         <div className="mx-auto flex max-w-6xl items-center gap-2 overflow-x-auto px-4 py-2 scrollbar-hide sm:px-6 lg:px-8">

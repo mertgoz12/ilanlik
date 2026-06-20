@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import { reportListingAction, type ReportListingState } from "@/app/ilan/[listingNo]/actions";
@@ -39,6 +39,12 @@ export function SellerCard({
   const [showMessageForm, setShowMessageForm] = useState(false);
   const [following, setFollowing] = useState(isFollowing);
   const [, startFollowTransition] = useTransition();
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  function focusMessageForm() {
+    setShowMessageForm(true);
+    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   const [reportState, reportAction, reportPending] = useActionState(
     async (_prevState: ReportListingState, formData: FormData) =>
       reportListingAction(listingId, _prevState, formData),
@@ -62,7 +68,8 @@ export function SellerCard({
   }
 
   return (
-    <section className="rounded-lg bg-white p-6 shadow-soft">
+    <>
+    <section ref={cardRef} className="rounded-lg bg-white p-4 shadow-soft sm:p-6">
       <h2 className="mb-3 text-sm font-semibold text-foreground">Satıcı</h2>
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
@@ -207,5 +214,53 @@ export function SellerCard({
         </button>
       )}
     </section>
+
+    {/* Mobilde mesaj/telefon butonlarına ulaşmak için önce galeri + fiyat
+        kartını geçmek gerekmesin diye, alt navigasyon çubuğunun (BottomNav,
+        h-16) hemen üstüne sabitlenmiş bir kısayol çubuğu - aynı state'i
+        (phoneRevealed/showMessageForm) paylaşır, ayrı bir form açmaz. */}
+    {!isOwnListing && (
+      <div className="fixed inset-x-0 bottom-16 z-20 flex gap-2 border-t border-slate-200 bg-white p-3 shadow-soft-lg md:hidden">
+        {!currentUserId ? (
+          <Link
+            href={`/giris?callbackUrl=${encodeURIComponent(`/ilan/${listingNo}`)}`}
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700"
+          >
+            <MessageIcon className="h-4 w-4" />
+            Mesaj Gönder
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={focusMessageForm}
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700"
+          >
+            <MessageIcon className="h-4 w-4" />
+            Mesaj Gönder
+          </button>
+        )}
+
+        {phone &&
+          (phoneRevealed ? (
+            <a
+              href={`tel:${phone}`}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm"
+            >
+              <PhoneIcon className="h-4 w-4" />
+              Ara
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setPhoneRevealed(true)}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm"
+            >
+              <PhoneIcon className="h-4 w-4" />
+              Telefonu Göster
+            </button>
+          ))}
+      </div>
+    )}
+    </>
   );
 }

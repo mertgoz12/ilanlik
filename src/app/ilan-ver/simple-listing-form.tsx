@@ -116,7 +116,7 @@ export function SimpleListingForm({ categoryId }: { categoryId: string }) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:py-3 sm:text-sm"
         >
           {pending ? "İlan yayınlanıyor..." : "İlanı Yayınla"}
         </button>

@@ -33,20 +33,25 @@ export function NavbarMobileMenu({ session, logoutAction }: NavbarMobileMenuProp
             className="absolute inset-0 bg-slate-900/50 animate-overlay-in"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 top-0 flex h-full w-72 max-w-[85vw] flex-col gap-2 overflow-y-auto bg-white p-4 shadow-soft-lg animate-fade-in-up">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-bold text-brand">Menü</span>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Kapat">
-                <X className="h-5 w-5 text-slate-400" />
+          <div className="absolute right-0 top-0 flex h-full w-80 max-w-[88vw] flex-col gap-2 overflow-y-auto bg-white p-4 shadow-soft-lg animate-fade-in-up">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-base font-bold text-brand">Menü</span>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Kapat"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-50"
+              >
+                <X className="h-5 w-5" />
               </button>
             </div>
 
             <Link
               href="/ilan-ver"
               onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-brand shadow-sm transition-colors hover:bg-accent-dark"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3.5 text-base font-bold text-brand shadow-sm transition-colors hover:bg-accent-dark"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Ücretsiz İlan Ver
             </Link>
 
@@ -57,14 +62,14 @@ export function NavbarMobileMenu({ session, logoutAction }: NavbarMobileMenuProp
                     <Link
                       href="/admin"
                       onClick={() => setOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-slate-600 transition-colors active:bg-slate-100 hover:bg-slate-50"
                     >
-                      <ShieldCheck className="h-4 w-4" />
+                      <ShieldCheck className="h-5 w-5 text-slate-400" />
                       Yönetim Paneli
                     </Link>
                   )}
-                  <span className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700">
-                    <User className="h-4 w-4 text-slate-400" />
+                  <span className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-slate-700">
+                    <User className="h-5 w-5 text-slate-400" />
                     {session.name}
                   </span>
                   {ACCOUNT_NAV_ITEMS.map((item) => {
@@ -74,9 +79,9 @@ export function NavbarMobileMenu({ session, logoutAction }: NavbarMobileMenuProp
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-slate-600 transition-colors active:bg-slate-100 hover:bg-slate-50"
                       >
-                        <Icon className="h-4 w-4 text-slate-400" />
+                        <Icon className="h-5 w-5 text-slate-400" />
                         {item.label}
                         {item.href === "/hesabim/mesajlar" && unreadCount > 0 && (
                           <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
@@ -89,9 +94,9 @@ export function NavbarMobileMenu({ session, logoutAction }: NavbarMobileMenuProp
                   <form action={logoutAction}>
                     <button
                       type="submit"
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-base font-medium text-slate-600 transition-colors active:bg-slate-100 hover:bg-slate-50"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-5 w-5" />
                       Çıkış Yap
                     </button>
                   </form>
@@ -101,14 +106,14 @@ export function NavbarMobileMenu({ session, logoutAction }: NavbarMobileMenuProp
                   <Link
                     href="/giris"
                     onClick={() => setOpen(false)}
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                    className="rounded-lg px-3 py-3 text-base font-medium text-slate-600 transition-colors active:bg-slate-100 hover:bg-slate-50"
                   >
                     Giriş Yap
                   </Link>
                   <Link
                     href="/kayit"
                     onClick={() => setOpen(false)}
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                    className="rounded-lg px-3 py-3 text-base font-medium text-slate-600 transition-colors active:bg-slate-100 hover:bg-slate-50"
                   >
                     Üye Ol
                   </Link>

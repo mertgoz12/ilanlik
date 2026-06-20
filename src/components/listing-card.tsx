@@ -43,7 +43,7 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
             src={image.url}
             alt={listing.title}
             fill
-            sizes="(min-width: 1280px) 23vw, (min-width: 1024px) 31vw, (min-width: 640px) 47vw, 92vw"
+            sizes="(min-width: 1280px) 23vw, (min-width: 1024px) 31vw, 45vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -87,8 +87,8 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
         />
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <h3 className="line-clamp-2 min-h-10 text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
+      <div className="flex flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4">
+        <h3 className="line-clamp-2 min-h-10 break-words text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
           {listing.title}
         </h3>
 
@@ -115,7 +115,7 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
         )}
 
         <div className="mt-auto flex flex-col gap-1 pt-1">
-          <p className="text-xl font-bold text-foreground">{formatPrice(listing.price)}</p>
+          <p className="text-lg font-bold text-foreground sm:text-xl">{formatPrice(listing.price)}</p>
           {fiyatDurumu && fiyatDurumu !== "yetersiz_veri" && (
             <span
               className={`inline-flex w-fit items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${RULE_FIYAT_DURUMU_STYLES[fiyatDurumu]}`}

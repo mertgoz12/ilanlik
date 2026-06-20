@@ -299,7 +299,7 @@ export default async function ListingDetailPage({
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 pb-36 pt-8 sm:px-6 md:pb-8 lg:px-8">
       <nav className="mb-4 text-sm text-slate-500">
         <Link href="/" className="hover:text-emerald-700">
           İlanlar
@@ -330,9 +330,9 @@ export default async function ListingDetailPage({
         </div>
 
         <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <section className="rounded-lg bg-white p-6 shadow-soft">
-            <h1 className="text-2xl font-bold text-foreground">{listing.title}</h1>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-emerald-700 sm:text-4xl">
+          <section className="rounded-lg bg-white p-4 shadow-soft sm:p-6">
+            <h1 className="break-words text-xl font-bold text-foreground sm:text-2xl">{listing.title}</h1>
+            <p className="mt-3 text-2xl font-bold tracking-tight text-emerald-700 sm:text-4xl">
               {formatPrice(listing.price)}
             </p>
             <span
