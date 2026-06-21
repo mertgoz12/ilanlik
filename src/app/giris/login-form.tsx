@@ -1,9 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
+import { Mail } from "lucide-react";
 import { loginAction, type LoginState } from "./actions";
-import { AlertIcon } from "@/components/icons";
-import { errorClass, inputClass, labelClass } from "@/components/form-ui";
+import { AlertIcon, SpinnerIcon } from "@/components/icons";
+import { AuthInput } from "@/components/auth-input";
+import { AuthPasswordInput } from "@/components/auth-password-input";
 
 const initialState: LoginState = {};
 
@@ -21,49 +24,58 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         </div>
       )}
 
-      <div>
-        <label htmlFor="email" className={labelClass}>
-          E-posta
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className={inputClass}
-          placeholder="ornek@eposta.com"
-        />
-        {state.fieldErrors?.email && (
-          <p className={errorClass}>{state.fieldErrors.email[0]}</p>
-        )}
-      </div>
+      <AuthInput
+        id="email"
+        name="email"
+        type="email"
+        label="E-posta"
+        icon={Mail}
+        autoComplete="email"
+        required
+        placeholder="ornek@eposta.com"
+        error={state.fieldErrors?.email?.[0]}
+      />
 
-      <div>
-        <label htmlFor="password" className={labelClass}>
-          Şifre
+      <AuthPasswordInput
+        id="password"
+        name="password"
+        label="Şifre"
+        autoComplete="current-password"
+        required
+        placeholder="••••••••"
+        error={state.fieldErrors?.password?.[0]}
+      />
+
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            name="rememberMe"
+            defaultChecked
+            className="h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand/30"
+          />
+          Beni hatırla
         </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className={inputClass}
-          placeholder="••••••••"
-        />
-        {state.fieldErrors?.password && (
-          <p className={errorClass}>{state.fieldErrors.password[0]}</p>
-        )}
+        <Link href="/sifremi-unuttum" className="text-sm font-medium text-brand hover:text-accent-dark">
+          Şifremi unuttum
+        </Link>
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-60"
       >
+        {pending && <SpinnerIcon className="h-4 w-4 animate-spin" />}
         {pending ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
+
+      <p className="text-center text-sm text-slate-500">
+        Hesabın yok mu?{" "}
+        <Link href="/kayit" className="font-semibold text-brand hover:text-accent-dark">
+          Üye Ol
+        </Link>
+      </p>
     </form>
   );
 }

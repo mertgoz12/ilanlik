@@ -12,15 +12,18 @@ export type SessionUser = {
   role: string;
 };
 
-export async function createSession(user: SessionUser) {
+export async function createSession(user: SessionUser, options?: { rememberMe?: boolean }) {
   const token = await signSessionToken({ sub: user.id, email: user.email, name: user.name, role: user.role });
   const cookieStore = await cookies();
+  // rememberMe false ise maxAge hiç verilmez -> tarayıcı kapanınca silinen bir
+  // oturum çerezi olur. JWT'nin kendi süresi (7g) yine de değişmez, sadece
+  // çerezin tarayıcıda ne kadar kalıcı olduğu farklılaşır.
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: COOKIE_MAX_AGE,
+    ...(options?.rememberMe === false ? {} : { maxAge: COOKIE_MAX_AGE }),
   });
 }
 

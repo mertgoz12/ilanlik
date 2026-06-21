@@ -29,6 +29,9 @@ export const registerSchema = z
       .or(z.literal("")),
     password: z.string().min(6, "Şifre en az 6 karakter olmalı").max(100),
     passwordConfirm: z.string(),
+    termsAccepted: z.boolean().refine((v) => v === true, {
+      message: "Devam etmek için kullanım koşulları ve KVKK metnini kabul etmelisiniz.",
+    }),
   })
   .refine((data) => data.password === data.passwordConfirm, {
     message: "Şifreler eşleşmiyor",

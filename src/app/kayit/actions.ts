@@ -9,7 +9,7 @@ import { registerSchema } from "@/lib/validation";
 export type RegisterState = {
   error?: string;
   fieldErrors?: Partial<
-    Record<"name" | "email" | "phone" | "password" | "passwordConfirm", string[]>
+    Record<"name" | "email" | "phone" | "password" | "passwordConfirm" | "termsAccepted", string[]>
   >;
 };
 
@@ -23,6 +23,7 @@ export async function registerAction(
     phone: formData.get("phone"),
     password: formData.get("password"),
     passwordConfirm: formData.get("passwordConfirm"),
+    termsAccepted: formData.get("termsAccepted") === "on",
   });
 
   if (!parsed.success) {

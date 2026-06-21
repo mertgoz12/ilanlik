@@ -34,7 +34,8 @@ export async function loginAction(
     return { error: "Hesabınız askıya alınmıştır. Daha fazla bilgi için bizimle iletişime geçin." };
   }
 
-  await createSession({ id: user.id, email: user.email, name: user.name, role: user.role });
+  const rememberMe = formData.get("rememberMe") === "on";
+  await createSession({ id: user.id, email: user.email, name: user.name, role: user.role }, { rememberMe });
 
   const callbackUrl = formData.get("callbackUrl");
   const target =

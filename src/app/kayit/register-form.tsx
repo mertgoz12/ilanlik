@@ -1,14 +1,19 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import Link from "next/link";
+import { Mail, Phone, User } from "lucide-react";
 import { registerAction, type RegisterState } from "./actions";
-import { AlertIcon } from "@/components/icons";
-import { errorClass, inputClass, labelClass } from "@/components/form-ui";
+import { AlertIcon, SpinnerIcon } from "@/components/icons";
+import { AuthInput } from "@/components/auth-input";
+import { AuthPasswordInput } from "@/components/auth-password-input";
+import { PasswordStrengthMeter } from "@/components/password-strength-meter";
 
 const initialState: RegisterState = {};
 
 export function RegisterForm() {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
+  const [password, setPassword] = useState("");
 
   return (
     <form action={formAction} className="space-y-4">
@@ -19,104 +24,105 @@ export function RegisterForm() {
         </div>
       )}
 
+      <AuthInput
+        id="name"
+        name="name"
+        type="text"
+        label="Ad Soyad"
+        icon={User}
+        autoComplete="name"
+        required
+        placeholder="Adınız Soyadınız"
+        error={state.fieldErrors?.name?.[0]}
+      />
+
+      <AuthInput
+        id="email"
+        name="email"
+        type="email"
+        label="E-posta"
+        icon={Mail}
+        autoComplete="email"
+        required
+        placeholder="ornek@eposta.com"
+        error={state.fieldErrors?.email?.[0]}
+      />
+
+      <AuthInput
+        id="phone"
+        name="phone"
+        type="tel"
+        label="Telefon (opsiyonel)"
+        icon={Phone}
+        autoComplete="tel"
+        placeholder="05xx xxx xx xx"
+        error={state.fieldErrors?.phone?.[0]}
+      />
+
       <div>
-        <label htmlFor="name" className={labelClass}>
-          Ad Soyad
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          autoComplete="name"
+        <AuthPasswordInput
+          id="password"
+          name="password"
+          label="Şifre"
+          autoComplete="new-password"
           required
-          className={inputClass}
-          placeholder="Adınız Soyadınız"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={state.fieldErrors?.password?.[0]}
         />
-        {state.fieldErrors?.name && (
-          <p className={errorClass}>{state.fieldErrors.name[0]}</p>
-        )}
+        <PasswordStrengthMeter password={password} />
       </div>
+
+      <AuthPasswordInput
+        id="passwordConfirm"
+        name="passwordConfirm"
+        label="Şifre (Tekrar)"
+        autoComplete="new-password"
+        required
+        placeholder="••••••••"
+        error={state.fieldErrors?.passwordConfirm?.[0]}
+      />
 
       <div>
-        <label htmlFor="email" className={labelClass}>
-          E-posta
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className={inputClass}
-          placeholder="ornek@eposta.com"
-        />
-        {state.fieldErrors?.email && (
-          <p className={errorClass}>{state.fieldErrors.email[0]}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="phone" className={labelClass}>
-          Telefon <span className="font-normal text-slate-400">(opsiyonel)</span>
-        </label>
-        <input
-          id="phone"
-          name="phone"
-          type="tel"
-          autoComplete="tel"
-          className={inputClass}
-          placeholder="05xx xxx xx xx"
-        />
-        {state.fieldErrors?.phone && (
-          <p className={errorClass}>{state.fieldErrors.phone[0]}</p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="password" className={labelClass}>
-            Şifre
-          </label>
+        <label className="flex items-start gap-2.5 text-sm text-slate-600">
           <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
+            type="checkbox"
+            name="termsAccepted"
             required
-            className={inputClass}
-            placeholder="••••••••"
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand focus:ring-brand/30"
           />
-          {state.fieldErrors?.password && (
-            <p className={errorClass}>{state.fieldErrors.password[0]}</p>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="passwordConfirm" className={labelClass}>
-            Şifre (Tekrar)
-          </label>
-          <input
-            id="passwordConfirm"
-            name="passwordConfirm"
-            type="password"
-            autoComplete="new-password"
-            required
-            className={inputClass}
-            placeholder="••••••••"
-          />
-          {state.fieldErrors?.passwordConfirm && (
-            <p className={errorClass}>{state.fieldErrors.passwordConfirm[0]}</p>
-          )}
-        </div>
+          <span>
+            <Link href="/kullanim-kosullari" className="font-semibold text-brand hover:text-accent-dark">
+              Kullanım Koşulları
+            </Link>{" "}
+            ve{" "}
+            <Link href="/kvkk" className="font-semibold text-brand hover:text-accent-dark">
+              KVKK
+            </Link>{" "}
+            metnini okudum, kabul ediyorum.
+          </span>
+        </label>
+        {state.fieldErrors?.termsAccepted && (
+          <p className="mt-1.5 text-sm text-red-600">{state.fieldErrors.termsAccepted[0]}</p>
+        )}
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-60"
       >
+        {pending && <SpinnerIcon className="h-4 w-4 animate-spin" />}
         {pending ? "Hesap oluşturuluyor..." : "Üye Ol"}
       </button>
+
+      <p className="text-center text-sm text-slate-500">
+        Zaten hesabın var mı?{" "}
+        <Link href="/giris" className="font-semibold text-brand hover:text-accent-dark">
+          Giriş Yap
+        </Link>
+      </p>
     </form>
   );
 }
