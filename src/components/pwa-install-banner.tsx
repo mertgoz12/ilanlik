@@ -7,6 +7,7 @@ import { CloseIcon } from "./icons";
 const DISMISS_STORAGE_KEY = "ilanlio:pwa-install-dismissed-at";
 const DISMISS_DAYS = 7;
 const SHOW_DELAY_MS = 1500;
+const LOG_PREFIX = "[PWA banner]";
 
 // beforeinstallprompt standart DOM tipi içinde yok (Chromium'a özgü) - kendi
 // minimal arayüzümüzü tanımlıyoruz.
@@ -29,13 +30,16 @@ function isRunningStandalone(): boolean {
   return standaloneMedia || iosStandalone;
 }
 
-function wasRecentlyDismissed(): boolean {
+// Kalan gizleme süresini de döndürür - konsol logunda "neden görünmüyor"
+// sorusunu tek bakışta cevaplamak için (bkz. aşağıdaki useEffect logu).
+function dismissedRecentlyInfo(): { dismissed: boolean; remainingDays: number | null } {
   const raw = window.localStorage.getItem(DISMISS_STORAGE_KEY);
-  if (!raw) return false;
+  if (!raw) return { dismissed: false, remainingDays: null };
   const dismissedAt = Number(raw);
-  if (Number.isNaN(dismissedAt)) return false;
+  if (Number.isNaN(dismissedAt)) return { dismissed: false, remainingDays: null };
   const elapsedDays = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
-  return elapsedDays < DISMISS_DAYS;
+  const remainingDays = Math.max(0, DISMISS_DAYS - elapsedDays);
+  return { dismissed: elapsedDays < DISMISS_DAYS, remainingDays };
 }
 
 // Tarayıcının kendi "Ana ekrana ekle" önerisi güvenilir çıkmıyor: Chrome
@@ -47,6 +51,11 @@ function wasRecentlyDismissed(): boolean {
 // tetikler; yakalanmadıysa (henüz gelmedi veya platform desteklemiyor) elle
 // adım adım talimat gösterilir. Zaten ana ekrana eklenmişse veya kullanıcı
 // son 7 gün içinde kapattıysa hiç görünmez. Sadece mobilde (md:hidden + UA).
+//
+// Banner "neden çıkmıyor" diye debug etmek için her karar noktası [PWA
+// banner] önekiyle konsola loglanır - bir cihazda görünmüyorsa tarayıcı
+// konsolunu (uzaktan hata ayıklama / remote debugging ile) açıp bu logları
+// okumak kesin sebebi gösterir.
 export function PwaInstallBanner() {
   const [visible, setVisible] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
@@ -54,15 +63,45 @@ export function PwaInstallBanner() {
   const [isIos] = useState(() => typeof navigator !== "undefined" && isIosDevice());
 
   useEffect(() => {
-    if (!isMobileDevice() || isRunningStandalone() || wasRecentlyDismissed()) return;
+    const mobile = isMobileDevice();
+    const standalone = isRunningStandalone();
+    const { dismissed, remainingDays } = dismissedRecentlyInfo();
+
+    console.log(LOG_PREFIX, "kontrol:", {
+      userAgent: navigator.userAgent,
+      isMobile: mobile,
+      isIos,
+      isStandalone: standalone,
+      recentlyDismissed: dismissed,
+      dismissRemainingDays: remainingDays !== null ? remainingDays.toFixed(1) : null,
+    });
+
+    if (!mobile) {
+      console.log(LOG_PREFIX, "GÖSTERİLMİYOR: mobil cihaz olarak algılanmadı (User-Agent mobil değil).");
+      return;
+    }
+    if (standalone) {
+      console.log(LOG_PREFIX, "GÖSTERİLMİYOR: uygulama zaten ana ekrana eklenmiş/standalone modda çalışıyor.");
+      return;
+    }
+    if (dismissed) {
+      console.log(
+        LOG_PREFIX,
+        `GÖSTERİLMİYOR: kullanıcı banner'ı daha önce kapattı, ${remainingDays?.toFixed(1)} gün sonra tekrar gösterilecek. ` +
+          `Hemen test etmek için: localStorage.removeItem("${DISMISS_STORAGE_KEY}") çalıştırıp sayfayı yenileyin.`,
+      );
+      return;
+    }
 
     function handleBeforeInstallPrompt(event: Event) {
+      console.log(LOG_PREFIX, "beforeinstallprompt TETİKLENDİ - native kurulum istemi yakalandı.");
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
       setVisible(true);
     }
 
     function handleAppInstalled() {
+      console.log(LOG_PREFIX, "appinstalled - uygulama yüklendi, banner kapatılıyor.");
       setVisible(false);
       setDeferredPrompt(null);
     }
@@ -70,30 +109,44 @@ export function PwaInstallBanner() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    const timeoutId = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
+    const timeoutId = window.setTimeout(() => {
+      console.log(
+        LOG_PREFIX,
+        `${SHOW_DELAY_MS}ms doldu, beforeinstallprompt henüz gelmedi - banner yine de (elle talimat moduyla) gösteriliyor.`,
+      );
+      setVisible(true);
+    }, SHOW_DELAY_MS);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
       window.clearTimeout(timeoutId);
     };
+    // isIos bağımlılığı bilinçli olarak dışlandı: değeri mount sonrası asla
+    // değişmiyor (useState lazy initializer), efekti tekrar çalıştırmaya
+    // gerek yok.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleDismiss() {
+    console.log(LOG_PREFIX, `Kullanıcı kapattı, ${DISMISS_DAYS} gün boyunca tekrar gösterilmeyecek.`);
     window.localStorage.setItem(DISMISS_STORAGE_KEY, String(Date.now()));
     setVisible(false);
   }
 
   async function handleInstallClick() {
     if (deferredPrompt) {
+      console.log(LOG_PREFIX, "Native kurulum istemi tetikleniyor (prompt()).");
       await deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
+      const choice = await deferredPrompt.userChoice;
+      console.log(LOG_PREFIX, "Kullanıcı native istemde:", choice.outcome);
       setDeferredPrompt(null);
       setVisible(false);
       return;
     }
     // Native istem henüz yakalanmadı (ya hiç tetiklenmeyecek ya da bu
     // platformda zaten yok) - elle talimat panelini aç/kapat.
+    console.log(LOG_PREFIX, "Native istem yok, elle talimat paneli açılıyor. Platform:", isIos ? "iOS" : "Android/diğer");
     setShowSteps((value) => !value);
   }
 
