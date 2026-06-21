@@ -2,7 +2,6 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { FeaturedCategories } from "@/components/featured-categories";
-import { HomeIntroBanner } from "@/components/home-intro-banner";
 import { PopularCategoriesPanel } from "@/components/popular-categories-panel";
 import { TrustStrip } from "@/components/trust-strip";
 import { BrandGrid } from "@/components/brand-grid";
@@ -196,8 +195,6 @@ export default async function HomePage({
 
   return (
     <div>
-      {showVitrin && <HomeIntroBanner />}
-
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
         <div className="flex flex-col gap-4 lg:flex-row">
           <SidebarShell>
