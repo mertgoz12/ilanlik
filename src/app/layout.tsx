@@ -7,6 +7,7 @@ import { AnnouncementBar } from "@/components/announcement-bar";
 import { BottomNav } from "@/components/bottom-nav";
 import { CookieConsent } from "@/components/cookie-consent";
 import { MobileSearchProvider } from "@/components/mobile-search-context";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { PwaRegister } from "@/components/pwa-register";
 import { UnreadMessagesProvider } from "@/components/unread-messages-context";
 import { getSession } from "@/lib/session";
@@ -78,6 +79,7 @@ export default async function RootLayout({
           <MobileSearchProvider>
             <AnnouncementBar />
             <Navbar />
+            <PwaInstallBanner />
             <main className="flex flex-1 flex-col pb-16 md:pb-0">{children}</main>
             <Footer />
             <CookieConsent />
