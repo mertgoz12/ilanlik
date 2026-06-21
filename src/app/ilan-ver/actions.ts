@@ -1,8 +1,8 @@
 "use server";
 
 import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+import { put } from "@vercel/blob";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { destroySession, getSession } from "@/lib/session";
@@ -129,6 +129,12 @@ const MAX_IMAGES = 10;
 
 // Kaydedilen fotoğraf sayısını döner - "eksik bilgi" güven puanı kontrolü
 // için kullanılır (bkz. computeRuleTrustScore/computeGenericTrustScore).
+//
+// Fotoğraflar Vercel'in sunucusuz ortamında kalıcı olmayan yerel diske değil,
+// Vercel Blob'a yüklenir (bkz. BLOB_READ_WRITE_TOKEN). Bir fotoğrafın
+// yüklenmesi başarısız olursa o fotoğraf atlanır, ilan diğer fotoğraflarla
+// (veya fotoğrafsız) yayınlanmaya devam eder - tek bir bozuk dosya tüm ilan
+// oluşturma akışını çökertmez.
 async function saveListingImages(formData: FormData, listingId: string): Promise<number> {
   const files = formData
     .getAll("images")
@@ -137,26 +143,22 @@ async function saveListingImages(formData: FormData, listingId: string): Promise
 
   if (files.length === 0) return 0;
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "listings", listingId);
-  await mkdir(uploadDir, { recursive: true });
-
   let order = 0;
   for (const file of files) {
     if (!file.type.startsWith("image/") || file.size > MAX_IMAGE_SIZE) continue;
 
     const ext = path.extname(file.name).toLowerCase();
     const safeExt = ALLOWED_EXTENSIONS.has(ext) ? ext : ".jpg";
-    const filename = `${randomUUID()}${safeExt}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const pathname = `listings/${listingId}/${randomUUID()}${safeExt}`;
 
-    await writeFile(path.join(uploadDir, filename), buffer);
-    await prisma.listingImage.create({
-      data: {
-        url: `/uploads/listings/${listingId}/${filename}`,
-        order: order++,
-        listingId,
-      },
-    });
+    try {
+      const blob = await put(pathname, file, { access: "public" });
+      await prisma.listingImage.create({
+        data: { url: blob.url, order: order++, listingId },
+      });
+    } catch (err) {
+      console.error(`İlan fotoğrafı Vercel Blob'a yüklenemedi (${file.name}):`, err);
+    }
   }
   return order;
 }
