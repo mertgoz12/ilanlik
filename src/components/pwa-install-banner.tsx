@@ -16,6 +16,14 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+declare global {
+  interface Window {
+    // layout.tsx'teki beforeInteractive script tarafından doldurulur - bkz.
+    // o dosyadaki açıklama (hydration öncesi kaçırılan olay sorunu).
+    __pwaDeferredPrompt?: BeforeInstallPromptEvent | null;
+  }
+}
+
 function isMobileDevice(): boolean {
   return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 }
@@ -48,9 +56,17 @@ function dismissedRecentlyInfo(): { dismissed: boolean; remainingDays: number | 
 // bile bu olaya bel bağlayan bir banner aylarca görünmeyebilir. Bu yüzden
 // banner native olayı SONSUZA DEK beklemez: kısa bir gecikmeden sonra HER
 // DURUMDA gösterilir. Native istem o ana kadar yakalandıysa "Yükle" onu
-// tetikler; yakalanmadıysa (henüz gelmedi veya platform desteklemiyor) elle
-// adım adım talimat gösterilir. Zaten ana ekrana eklenmişse veya kullanıcı
-// son 7 gün içinde kapattıysa hiç görünmez. Sadece mobilde (md:hidden + UA).
+// tetikler (gerçek tek-tıkla kurulum); yakalanmadıysa (henüz gelmedi veya
+// platform desteklemiyor) elle adım adım talimat gösterilir. Zaten ana
+// ekrana eklenmişse veya kullanıcı son 7 gün içinde kapattıysa hiç
+// görünmez. Sadece mobilde (md:hidden + UA).
+//
+// beforeinstallprompt'un GERÇEK yakalanması layout.tsx'teki beforeInteractive
+// script'te olur (React hydrate olmadan önce çalışır) - bu component sadece
+// o script'in doldurduğu window.__pwaDeferredPrompt global'ini okur. Aksi
+// halde Chrome olayı hydration'dan önce ateşlerse (sık görülen bir durum)
+// React'in useEffect'i henüz bağlanmamış olacağından olay kaçırılır ve bir
+// daha asla tetiklenmez.
 //
 // Banner "neden çıkmıyor" diye debug etmek için her karar noktası [PWA
 // banner] önekiyle konsola loglanır - bir cihazda görünmüyorsa tarayıcı
@@ -74,6 +90,7 @@ export function PwaInstallBanner() {
       isStandalone: standalone,
       recentlyDismissed: dismissed,
       dismissRemainingDays: remainingDays !== null ? remainingDays.toFixed(1) : null,
+      earlyCapturedAlready: Boolean(window.__pwaDeferredPrompt),
     });
 
     if (!mobile) {
@@ -93,23 +110,38 @@ export function PwaInstallBanner() {
       return;
     }
 
-    function handleBeforeInstallPrompt(event: Event) {
-      console.log(LOG_PREFIX, "beforeinstallprompt TETİKLENDİ - native kurulum istemi yakalandı.");
-      event.preventDefault();
-      setDeferredPrompt(event as BeforeInstallPromptEvent);
+    let adopted = false;
+
+    function adoptDeferredPrompt(source: string) {
+      const event = window.__pwaDeferredPrompt;
+      if (!event) return false;
+      console.log(LOG_PREFIX, `Native kurulum istemi hazır (kaynak: ${source}) - tek tıkla kurulum mümkün.`);
+      adopted = true;
+      setDeferredPrompt(event);
       setVisible(true);
+      return true;
+    }
+
+    // Olay bu component mount olmadan ÖNCE (layout.tsx'teki ham <head>
+    // script'i tarafından) zaten yakalanmış olabilir.
+    adoptDeferredPrompt("hydration öncesi yakalandı");
+
+    function handlePwaInstallReady() {
+      adoptDeferredPrompt("hydration sonrası geldi");
     }
 
     function handleAppInstalled() {
       console.log(LOG_PREFIX, "appinstalled - uygulama yüklendi, banner kapatılıyor.");
+      window.__pwaDeferredPrompt = null;
       setVisible(false);
       setDeferredPrompt(null);
     }
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("pwa-install-ready", handlePwaInstallReady);
     window.addEventListener("appinstalled", handleAppInstalled);
 
     const timeoutId = window.setTimeout(() => {
+      if (adopted) return; // native istem zaten yakalandı, yedek mesaja gerek yok.
       console.log(
         LOG_PREFIX,
         `${SHOW_DELAY_MS}ms doldu, beforeinstallprompt henüz gelmedi - banner yine de (elle talimat moduyla) gösteriliyor.`,
@@ -118,7 +150,7 @@ export function PwaInstallBanner() {
     }, SHOW_DELAY_MS);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("pwa-install-ready", handlePwaInstallReady);
       window.removeEventListener("appinstalled", handleAppInstalled);
       window.clearTimeout(timeoutId);
     };
@@ -140,6 +172,7 @@ export function PwaInstallBanner() {
       await deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       console.log(LOG_PREFIX, "Kullanıcı native istemde:", choice.outcome);
+      window.__pwaDeferredPrompt = null;
       setDeferredPrompt(null);
       setVisible(false);
       return;

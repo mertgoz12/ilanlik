@@ -64,6 +64,26 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// React hydrate olmadan (PwaInstallBanner'ın useEffect'i bağlanmadan) ÖNCE
+// beforeinstallprompt ateşlenirse, dinleyici henüz takılı olmadığından olay
+// sonsuza dek kaçırılır - kaçırılan bir olay bir daha asla tekrar
+// tetiklenmez. next/script'in "beforeInteractive" stratejisi bu projede
+// (App Router + Turbopack) script'i RSC akışı üzerinden React ağacının bir
+// parçası olarak gönderiyor; yani gerçekte hydration'dan ÖNCE çalışmıyor -
+// bu yüzden burada <head> içine GERÇEKTEN ham, statik bir <script> etiketi
+// olarak (next/script kullanmadan) gömülüyor; tarayıcı bunu dokümanı
+// parse ederken, herhangi bir React/Next kodu çalışmadan önce işler.
+const PWA_INSTALL_CAPTURE_SCRIPT = `
+  window.__pwaDeferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if (!isMobile) return;
+    e.preventDefault();
+    window.__pwaDeferredPrompt = e;
+    window.dispatchEvent(new Event("pwa-install-ready"));
+  });
+`;
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -74,6 +94,9 @@ export default async function RootLayout({
 
   return (
     <html lang="tr" className={`${inter.variable} ${sora.variable} h-full antialiased`}>
+      <head>
+        <script id="pwa-install-capture" dangerouslySetInnerHTML={{ __html: PWA_INSTALL_CAPTURE_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <UnreadMessagesProvider initialCount={unreadCount}>
           <MobileSearchProvider>
