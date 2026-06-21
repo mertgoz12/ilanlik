@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { FeaturedCategories } from "@/components/featured-categories";
-import { Hero } from "@/components/hero";
+import { HomeIntroBanner } from "@/components/home-intro-banner";
 import { TrustStrip } from "@/components/trust-strip";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
@@ -33,8 +33,8 @@ import {
 } from "@/lib/rule-analysis";
 
 const PAGE_SIZE = 12;
-const FEATURED_COUNT = 8;
-const RECENT_COUNT = 8;
+const FEATURED_COUNT = 12;
+const RECENT_COUNT = 12;
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -195,7 +195,7 @@ export default async function HomePage({
 
   return (
     <div>
-      {showVitrin && <Hero />}
+      {showVitrin && <HomeIntroBanner />}
       <FeaturedCategories />
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
