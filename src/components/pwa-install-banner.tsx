@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Share, Smartphone } from "lucide-react";
+import { MoreVertical, Share, Smartphone } from "lucide-react";
 import { CloseIcon } from "./icons";
 
 const DISMISS_STORAGE_KEY = "ilanlio:pwa-install-dismissed-at";
 const DISMISS_DAYS = 7;
-const IOS_SHOW_DELAY_MS = 2000;
+const SHOW_DELAY_MS = 1500;
 
 // beforeinstallprompt standart DOM tipi içinde yok (Chromium'a özgü) - kendi
 // minimal arayüzümüzü tanımlıyoruz.
@@ -38,28 +38,23 @@ function wasRecentlyDismissed(): boolean {
   return elapsedDays < DISMISS_DAYS;
 }
 
-// Tarayıcının kendi "Ana ekrana ekle" önerisi (mini-infobar) güvenilir
-// çıkmadığından (heuristik/throttling tarayıcıya göre değişir) site kendi
-// bildirimini gösterir: Android/Chrome'da gerçek native istemi (prompt())
-// tetikler, iOS Safari'de (native istem hiç yok) Paylaş menüsü adımlarını
-// gösterir. Zaten ana ekrana eklenmişse veya kullanıcı son 7 gün içinde
-// kapattıysa hiç görünmez. Sadece mobilde (md:hidden + UA kontrolü).
+// Tarayıcının kendi "Ana ekrana ekle" önerisi güvenilir çıkmıyor: Chrome
+// beforeinstallprompt olayını kendi "kullanıcı katılımı" sezgiselleriyle
+// geciktirebilir, hatta hiç tetiklemeyebilir - mükemmel bir PWA kurulumunda
+// bile bu olaya bel bağlayan bir banner aylarca görünmeyebilir. Bu yüzden
+// banner native olayı SONSUZA DEK beklemez: kısa bir gecikmeden sonra HER
+// DURUMDA gösterilir. Native istem o ana kadar yakalandıysa "Yükle" onu
+// tetikler; yakalanmadıysa (henüz gelmedi veya platform desteklemiyor) elle
+// adım adım talimat gösterilir. Zaten ana ekrana eklenmişse veya kullanıcı
+// son 7 gün içinde kapattıysa hiç görünmez. Sadece mobilde (md:hidden + UA).
 export function PwaInstallBanner() {
   const [visible, setVisible] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-  const [showIosSteps, setShowIosSteps] = useState(false);
+  const [showSteps, setShowSteps] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isIos] = useState(() => typeof navigator !== "undefined" && isIosDevice());
 
   useEffect(() => {
     if (!isMobileDevice() || isRunningStandalone() || wasRecentlyDismissed()) return;
-
-    if (isIosDevice()) {
-      const timeoutId = window.setTimeout(() => {
-        setIsIos(true);
-        setVisible(true);
-      }, IOS_SHOW_DELAY_MS);
-      return () => window.clearTimeout(timeoutId);
-    }
 
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
@@ -74,9 +69,13 @@ export function PwaInstallBanner() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
+
+    const timeoutId = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
+      window.clearTimeout(timeoutId);
     };
   }, []);
 
@@ -86,15 +85,16 @@ export function PwaInstallBanner() {
   }
 
   async function handleInstallClick() {
-    if (isIos) {
-      setShowIosSteps((value) => !value);
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+      setVisible(false);
       return;
     }
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
-    setVisible(false);
+    // Native istem henüz yakalanmadı (ya hiç tetiklenmeyecek ya da bu
+    // platformda zaten yok) - elle talimat panelini aç/kapat.
+    setShowSteps((value) => !value);
   }
 
   if (!visible) return null;
@@ -126,18 +126,31 @@ export function PwaInstallBanner() {
         </button>
       </div>
 
-      {showIosSteps && (
+      {showSteps && (
         <div className="border-t border-amber-200/60 px-4 py-3 text-xs text-slate-700">
-          <ol className="list-inside list-decimal space-y-1.5">
-            <li className="flex flex-wrap items-center gap-1">
-              Tarayıcıdaki
-              <Share className="h-3.5 w-3.5 shrink-0 text-brand" />
-              <strong>Paylaş</strong> ikonuna dokunun
-            </li>
-            <li>
-              Açılan listede <strong>&quot;Ana Ekrana Ekle&quot;</strong>yi seçin
-            </li>
-          </ol>
+          {isIos ? (
+            <ol className="list-inside list-decimal space-y-1.5">
+              <li className="flex flex-wrap items-center gap-1">
+                Tarayıcıdaki
+                <Share className="h-3.5 w-3.5 shrink-0 text-brand" />
+                <strong>Paylaş</strong> ikonuna dokunun
+              </li>
+              <li>
+                Açılan listede <strong>&quot;Ana Ekrana Ekle&quot;</strong>yi seçin
+              </li>
+            </ol>
+          ) : (
+            <ol className="list-inside list-decimal space-y-1.5">
+              <li className="flex flex-wrap items-center gap-1">
+                Tarayıcının sağ üstündeki
+                <MoreVertical className="h-3.5 w-3.5 shrink-0 text-brand" />
+                menüye dokunun
+              </li>
+              <li>
+                <strong>&quot;Ana ekrana ekle&quot;</strong> veya <strong>&quot;Uygulamayı yükle&quot;</strong>yi seçin
+              </li>
+            </ol>
+          )}
         </div>
       )}
     </div>
