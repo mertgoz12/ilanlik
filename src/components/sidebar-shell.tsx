@@ -19,8 +19,8 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
         </button>
       </div>
 
-      <aside className="hidden w-64 shrink-0 lg:block">
-        <div className="sticky top-20 rounded-lg bg-white p-4 shadow-soft">{children}</div>
+      <aside className="hidden w-56 shrink-0 lg:block">
+        <div className="sticky top-20 rounded-lg bg-white p-2.5 shadow-soft">{children}</div>
       </aside>
 
       {open && (

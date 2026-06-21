@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { FeaturedCategories } from "@/components/featured-categories";
 import { HomeIntroBanner } from "@/components/home-intro-banner";
+import { PopularCategoriesPanel } from "@/components/popular-categories-panel";
 import { TrustStrip } from "@/components/trust-strip";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
@@ -196,10 +197,9 @@ export default async function HomePage({
   return (
     <div>
       {showVitrin && <HomeIntroBanner />}
-      <FeaturedCategories />
 
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <div className="flex flex-col gap-6 lg:flex-row">
+      <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row">
           <SidebarShell>
             <CategorySidebar activeSlug={sp.kategori} />
           </SidebarShell>
@@ -209,10 +209,10 @@ export default async function HomePage({
               <>
                 {featuredListings.length > 0 && (
                   <section>
-                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    <h2 className="text-lg font-bold tracking-tight text-foreground">
                       Vitrin İlanları
                     </h2>
-                    <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                       {featuredListings.map((listing) => (
                         <ListingCard
                           key={listing.id}
@@ -226,14 +226,16 @@ export default async function HomePage({
                   </section>
                 )}
 
+                <FeaturedCategories />
+
                 {vasitaEmlakActive && <BrandGrid />}
 
                 {recentListings.length > 0 && (
-                  <section className="mt-12">
-                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  <section className="mt-5">
+                    <h2 className="text-lg font-bold tracking-tight text-foreground">
                       Son Eklenen İlanlar
                     </h2>
-                    <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                       {recentListings.map((listing) => (
                         <ListingCard
                           key={listing.id}
@@ -246,6 +248,8 @@ export default async function HomePage({
                     </div>
                   </section>
                 )}
+
+                <PopularCategoriesPanel />
               </>
             ) : categoryComingSoon ? (
               <div className="mt-6 flex flex-col items-center justify-center rounded-lg bg-white py-20 text-center shadow-soft">
@@ -271,9 +275,9 @@ export default async function HomePage({
               <>
                 <ListingFilters searchParams={sp} isLoggedIn={!!session} />
 
-                <div className="mt-12 flex items-end justify-between gap-4">
+                <div className="mt-5 flex items-end justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    <h2 className="text-lg font-bold tracking-tight text-foreground">
                       {listingsHeading}
                     </h2>
                     <p className="mt-1 text-sm text-slate-500">
@@ -283,7 +287,7 @@ export default async function HomePage({
                 </div>
 
                 {listings.length === 0 ? (
-                  <div className="mt-6 flex flex-col items-center justify-center rounded-lg bg-white py-16 text-center shadow-soft">
+                  <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white py-16 text-center shadow-soft">
                     <SearchIcon className="h-10 w-10 text-slate-300" />
                     <p className="mt-4 text-sm font-medium text-slate-600">
                       Aramanıza uygun ilan bulunamadı.
@@ -296,7 +300,7 @@ export default async function HomePage({
                     </Link>
                   </div>
                 ) : (
-                  <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                     {listings.map((listing) => (
                       <ListingCard
                         key={listing.id}
