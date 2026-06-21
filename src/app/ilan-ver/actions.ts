@@ -1,13 +1,11 @@
 "use server";
 
-import { randomUUID } from "crypto";
-import path from "path";
-import { put } from "@vercel/blob";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { destroySession, getSession } from "@/lib/session";
 import { buildAnalysisInput, buildGenericAnalysisInput, runAiAnalysis, runGenericAiAnalysis } from "@/lib/ai-analysis";
 import { getEffectiveSettings, isAiAnalysisAutoEnabled } from "@/lib/analysis-config";
+import { MAX_IMAGES_PER_LISTING, uploadListingPhoto } from "@/lib/listing-photos";
 import {
   computeGenericRuleAnalysis,
   computeRuleAnalysis,
@@ -123,41 +121,29 @@ export type SimpleListingFormState = {
   listingNo?: string;
 };
 
-const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_IMAGES = 10;
-
 // Kaydedilen fotoğraf sayısını döner - "eksik bilgi" güven puanı kontrolü
 // için kullanılır (bkz. computeRuleTrustScore/computeGenericTrustScore).
 //
 // Fotoğraflar Vercel'in sunucusuz ortamında kalıcı olmayan yerel diske değil,
-// Vercel Blob'a yüklenir (bkz. BLOB_READ_WRITE_TOKEN). Bir fotoğrafın
-// yüklenmesi başarısız olursa o fotoğraf atlanır, ilan diğer fotoğraflarla
-// (veya fotoğrafsız) yayınlanmaya devam eder - tek bir bozuk dosya tüm ilan
-// oluşturma akışını çökertmez.
+// Vercel Blob'a yüklenir (bkz. lib/listing-photos.ts, BLOB_READ_WRITE_TOKEN).
+// Bir fotoğrafın yüklenmesi başarısız olursa o fotoğraf atlanır, ilan diğer
+// fotoğraflarla (veya fotoğrafsız) yayınlanmaya devam eder - tek bir bozuk
+// dosya tüm ilan oluşturma akışını çökertmez.
 async function saveListingImages(formData: FormData, listingId: string): Promise<number> {
   const files = formData
     .getAll("images")
     .filter((entry): entry is File => entry instanceof File && entry.size > 0)
-    .slice(0, MAX_IMAGES);
+    .slice(0, MAX_IMAGES_PER_LISTING);
 
   if (files.length === 0) return 0;
 
   let order = 0;
   for (const file of files) {
-    if (!file.type.startsWith("image/") || file.size > MAX_IMAGE_SIZE) continue;
-
-    const ext = path.extname(file.name).toLowerCase();
-    const safeExt = ALLOWED_EXTENSIONS.has(ext) ? ext : ".jpg";
-    const pathname = `listings/${listingId}/${randomUUID()}${safeExt}`;
-
-    try {
-      const blob = await put(pathname, file, { access: "public" });
+    const result = await uploadListingPhoto(file, listingId);
+    if (result.ok) {
       await prisma.listingImage.create({
-        data: { url: blob.url, order: order++, listingId },
+        data: { url: result.url, order: order++, listingId },
       });
-    } catch (err) {
-      console.error(`İlan fotoğrafı Vercel Blob'a yüklenemedi (${file.name}):`, err);
     }
   }
   return order;

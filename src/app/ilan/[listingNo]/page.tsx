@@ -28,7 +28,7 @@ import { VehicleTrimSpecs } from "@/components/vehicle-trim-specs";
 import { ListingCard } from "@/components/listing-card";
 import { ListingTabs, type ListingTab } from "@/components/listing-tabs";
 import { OptionPanel } from "@/components/option-panel";
-import { LocationIcon } from "@/components/icons";
+import { EyeIcon, LocationIcon } from "@/components/icons";
 
 const NOT_SPECIFIED = "Belirtilmemiş";
 
@@ -96,6 +96,18 @@ export default async function ListingDetailPage({
       session?.id === listing.optionHolderId || session?.id === listing.userId || session?.role === "admin";
     if (!canView) notFound();
   }
+
+  // Basit görüntülenme sayacı: ilan gerçekten gösterilebilir durumdaysa
+  // (yukarıdaki kontrolleri geçtiyse) her sayfa açılışında +1. Tekilleştirme
+  // (aynı ziyaretçinin tekrar açması) bilinçli olarak yapılmıyor - basit
+  // tutulması istendi. Güncel değeri (henüz bayat olan `listing.views`
+  // yerine) doğrudan update'in döndürdüğü satırdan kullanıyoruz.
+  const viewsResult = await prisma.listing.update({
+    where: { id: listing.id },
+    data: { views: { increment: 1 } },
+    select: { views: true },
+  });
+  const views = viewsResult.views;
 
   const optionSettings = await getOptionSettings();
 
@@ -349,6 +361,11 @@ export default async function ListingDetailPage({
               <span>{formatDate(listing.createdAt)}</span>
               <span className="text-slate-300">·</span>
               <span>İlan No: {listing.listingNo}</span>
+              <span className="text-slate-300">·</span>
+              <span className="flex items-center gap-1">
+                <EyeIcon className="h-4 w-4" />
+                {views} görüntülenme
+              </span>
             </div>
           </section>
 
