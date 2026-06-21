@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
@@ -7,6 +7,7 @@ import { AnnouncementBar } from "@/components/announcement-bar";
 import { BottomNav } from "@/components/bottom-nav";
 import { CookieConsent } from "@/components/cookie-consent";
 import { MobileSearchProvider } from "@/components/mobile-search-context";
+import { PwaRegister } from "@/components/pwa-register";
 import { UnreadMessagesProvider } from "@/components/unread-messages-context";
 import { getSession } from "@/lib/session";
 import { getUnreadMessageCount } from "@/lib/messages";
@@ -43,6 +44,23 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
+  appleWebApp: {
+    capable: true,
+    title: "İlanlio",
+    statusBarStyle: "default",
+  },
+  // appleWebApp.capable sadece daha yeni "mobile-web-app-capable" etiketini
+  // üretir; eski iOS/Safari sürümleri "Ana Ekrana Ekle" sonrası tam ekran
+  // (adres çubuğusuz) açılış için hâlâ apple- önekli etiketi arar.
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1B2A4A",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default async function RootLayout({
@@ -64,6 +82,7 @@ export default async function RootLayout({
             <Footer />
             <CookieConsent />
             <BottomNav isLoggedIn={!!session} />
+            <PwaRegister />
           </MobileSearchProvider>
         </UnreadMessagesProvider>
       </body>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Çevrimdışı - İlanlio</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: #1b2a4a;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+        text-align: center;
+        padding: 24px;
+      }
+      .wordmark {
+        font-size: 28px;
+        font-weight: 800;
+      }
+      .wordmark .accent {
+        color: #f5a623;
+      }
+      p {
+        margin: 0;
+        max-width: 320px;
+        color: #c7cede;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      button {
+        margin-top: 8px;
+        border: none;
+        border-radius: 8px;
+        background: #f5a623;
+        color: #1b2a4a;
+        font-weight: 700;
+        font-size: 14px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wordmark">ilan<span class="accent">lio</span><span class="accent">.com</span></div>
+    <p>İnternet bağlantınız yok gibi görünüyor. Bağlantınızı kontrol edip tekrar deneyebilirsiniz.</p>
+    <button onclick="location.reload()">Tekrar Dene</button>
+  </body>
+</html>
