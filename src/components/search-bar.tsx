@@ -53,14 +53,17 @@ type SearchBarProps = {
   className?: string;
   /** Mobil arama satırı açılır açılmaz inputa odaklanmak için (bkz. navbar.tsx). */
   autoFocus?: boolean;
+  /** Arama çubuğunun yanındaki "Tüm Kategoriler" seçici - verilmezse gösterilmez. */
+  categoryOptions?: { slug: string; name: string }[];
 };
 
-export function SearchBar({ className = "", autoFocus = false }: SearchBarProps) {
+export function SearchBar({ className = "", autoFocus = false, categoryOptions }: SearchBarProps) {
   const router = useRouter();
   const listboxId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -204,9 +207,12 @@ export function SearchBar({ className = "", autoFocus = false }: SearchBarProps)
   }
 
   function submitRawQuery() {
-    if (!trimmedQuery) return;
-    setRecentSearches(addRecentSearch(trimmedQuery));
-    closeAndNavigate(`/?q=${encodeURIComponent(trimmedQuery)}`);
+    if (!trimmedQuery && !category) return;
+    if (trimmedQuery) setRecentSearches(addRecentSearch(trimmedQuery));
+    const params = new URLSearchParams();
+    if (trimmedQuery) params.set("q", trimmedQuery);
+    if (category) params.set("kategori", category);
+    closeAndNavigate(`/?${params.toString()}`);
   }
 
   function handleRemoveRecent(event: React.MouseEvent, term: string) {
@@ -275,14 +281,31 @@ export function SearchBar({ className = "", autoFocus = false }: SearchBarProps)
               aria-controls={listboxId}
               aria-autocomplete="list"
               aria-activedescendant={activeIndex >= 0 ? `${listboxId}-${activeIndex}` : undefined}
-              className="w-full rounded-l-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-slate-400 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/10"
+              className={`w-full rounded-l-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-slate-400 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/10 ${
+                categoryOptions ? "" : "rounded-r-lg"
+              }`}
             />
           </div>
+          {categoryOptions && (
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              aria-label="Kategori seç"
+              className="hidden shrink-0 border-y border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand/10 sm:block"
+            >
+              <option value="">Tüm Kategoriler</option>
+              {categoryOptions.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
           <button
             type="submit"
-            className="shrink-0 rounded-r-lg border border-l-0 border-brand bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-900"
+            className="shrink-0 rounded-r-lg bg-accent px-5 py-2.5 text-sm font-bold text-brand shadow-sm transition-colors hover:bg-accent-dark"
           >
-            Ara
+            ARA
           </button>
         </div>
       </form>

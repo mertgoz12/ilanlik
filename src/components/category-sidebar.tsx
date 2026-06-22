@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { COMING_SOON_SLUGS, isVasitaEmlakActive } from "@/lib/categories";
+import { getCategoryVisual } from "@/lib/category-visuals";
 import { ComingSoonBadge, ComingSoonTrigger } from "./coming-soon";
-import { ChevronDownIcon } from "./icons";
+import { ChevronDownIcon, FolderIcon } from "./icons";
 
 export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
   const categories = await prisma.category.findMany({
@@ -27,14 +28,16 @@ export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
 
       {categories.map((cat) => {
         const total = cat._count.listings + cat.children.reduce((sum, c) => sum + c._count.listings, 0);
+        const { icon: Icon } = getCategoryVisual(cat.slug);
 
         if (!vasitaEmlakActive && COMING_SOON_SLUGS.includes(cat.slug)) {
           return (
             <ComingSoonTrigger
               key={cat.id}
-              className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-semibold text-slate-400"
+              className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-[13px] font-semibold text-slate-400"
             >
-              <span>{cat.name}</span>
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="flex-1">{cat.name}</span>
               <ComingSoonBadge />
             </ComingSoonTrigger>
           );
@@ -46,11 +49,12 @@ export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
             <Link
               key={cat.id}
               href={`/?kategori=${cat.slug}`}
-              className={`flex items-center justify-between rounded-md px-2 py-1.5 text-[13px] font-semibold transition-colors ${
+              className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-semibold transition-colors ${
                 active ? "bg-accent-light text-brand" : "text-foreground hover:bg-slate-50"
               }`}
             >
-              <span>{cat.name}</span>
+              <Icon className={`h-4 w-4 shrink-0 ${active ? "text-brand" : "text-slate-400"}`} />
+              <span className="flex-1">{cat.name}</span>
               <span className="text-[11px] font-normal text-slate-400">({total})</span>
             </Link>
           );
@@ -61,7 +65,8 @@ export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
 
         return (
           <details key={cat.id} className="group" open={isOpen}>
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+              <Icon className="h-4 w-4 shrink-0 text-slate-400" />
               <Link href={`/?kategori=${cat.slug}`} className="flex-1 text-[13px] font-semibold text-foreground">
                 {cat.name} <span className="text-[11px] font-normal text-slate-400">({total})</span>
               </Link>
@@ -90,6 +95,14 @@ export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
           </details>
         );
       })}
+
+      <Link
+        href="/site-haritasi"
+        className="mt-1.5 flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-semibold text-brand transition-colors hover:bg-slate-50"
+      >
+        <FolderIcon className="h-4 w-4 shrink-0" />
+        Tüm Kategorileri Gör
+      </Link>
     </nav>
   );
 }

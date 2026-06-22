@@ -25,6 +25,7 @@ import {
   Music2,
   PawPrint,
   Shirt,
+  ShoppingBag,
   Smartphone,
   Sofa,
   Tractor,
@@ -114,6 +115,14 @@ type CategoryVisual = { icon: ComponentType<{ className?: string }>; theme: Cate
 // (bkz. listing-card.tsx) ve kategori kartlarında (featured-categories.tsx)
 // kullanılır. Eşleşme bulunamazsa DEFAULT_CATEGORY_VISUAL'a düşer.
 export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
+  // Üst kategori başlıkları (sol menüdeki ana satırlar)
+  emlak: { icon: Home, theme: "indigo" },
+  vasita: { icon: Car, theme: "rose" },
+  "yedek-parca-aksesuar-donanim-tuning": { icon: Wrench, theme: "slate" },
+  "ikinci-el-ve-sifir-alisveris": { icon: ShoppingBag, theme: "emerald" },
+  "is-makineleri-sanayi": { icon: Factory, theme: "amber" },
+  "hayvanlar-alemi": { icon: PawPrint, theme: "lime" },
+
   // İkinci El ve Sıfır Alışveriş
   "cep-telefonu": { icon: Smartphone, theme: "indigo" },
   bilgisayar: { icon: Laptop, theme: "sky" },

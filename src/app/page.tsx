@@ -4,6 +4,11 @@ import type { Prisma } from "@/generated/prisma/client";
 import { FeaturedCategories } from "@/components/featured-categories";
 import { PopularCategoriesPanel } from "@/components/popular-categories-panel";
 import { TrustStrip } from "@/components/trust-strip";
+import { TrustBanner } from "@/components/home/trust-banner";
+import { QuickPostCard } from "@/components/home/quick-post-card";
+import { SafetyTipsCard } from "@/components/home/safety-tips-card";
+import { StatsCard } from "@/components/home/stats-card";
+import { StorePromoCard } from "@/components/home/store-promo-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
 import { ListingFilters } from "@/components/listing-filters";
@@ -86,7 +91,8 @@ export default async function HomePage({
     !sp.minYear &&
     !sp.maxYear &&
     !sp.minPrice &&
-    !sp.maxPrice;
+    !sp.maxPrice &&
+    !sp.tum;
 
   const vasitaEmlakActive = isVasitaEmlakActive();
   const categoryComingSoon = !!sp.kategori && isComingSoonSlug(sp.kategori);
@@ -196,20 +202,22 @@ export default async function HomePage({
   return (
     <div>
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-        <div className="flex flex-col gap-4 lg:flex-row">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)] xl:grid-cols-[224px_minmax(0,1fr)_280px]">
           <SidebarShell>
             <CategorySidebar activeSlug={sp.kategori} />
           </SidebarShell>
 
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0">
             {showVitrin ? (
               <>
+                <TrustBanner />
+
                 {featuredListings.length > 0 && (
-                  <section>
+                  <section className="mt-5">
                     <h2 className="text-lg font-bold tracking-tight text-foreground">
-                      Vitrin İlanları
+                      Öne Çıkan İlanlar
                     </h2>
-                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
                       {featuredListings.map((listing) => (
                         <ListingCard
                           key={listing.id}
@@ -229,10 +237,18 @@ export default async function HomePage({
 
                 {recentListings.length > 0 && (
                   <section className="mt-5">
-                    <h2 className="text-lg font-bold tracking-tight text-foreground">
-                      Son Eklenen İlanlar
-                    </h2>
-                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    <div className="flex items-end justify-between gap-3">
+                      <h2 className="text-lg font-bold tracking-tight text-foreground">
+                        Yeni Eklenen İlanlar
+                      </h2>
+                      <Link
+                        href="/?tum=1"
+                        className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
+                      >
+                        Tümünü Gör ›
+                      </Link>
+                    </div>
+                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                       {recentListings.map((listing) => (
                         <ListingCard
                           key={listing.id}
@@ -316,6 +332,15 @@ export default async function HomePage({
               </>
             )}
           </div>
+
+          {showVitrin && (
+            <aside className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 xl:col-span-1 xl:grid-cols-1">
+              <QuickPostCard />
+              <SafetyTipsCard />
+              <StatsCard />
+              <StorePromoCard />
+            </aside>
+          )}
         </div>
       </div>
 

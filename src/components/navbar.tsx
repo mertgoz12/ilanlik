@@ -3,35 +3,22 @@ import { Plus, ShieldCheck } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { logoutAction } from "@/lib/actions/logout";
-import { isVasitaEmlakActive } from "@/lib/categories";
+import { isVasitaEmlakActive, CATEGORY_TREE, COMING_SOON_SLUGS } from "@/lib/categories";
 import { Logo } from "./logo";
 import { MobileSearchRow, MobileSearchToggleButton } from "./mobile-search-row";
 import { NavbarMobileMenu } from "./navbar-mobile-menu";
 import { SearchBar } from "./search-bar";
 import { UserMenu } from "./user-menu";
 
-// Vasıta aktif olduğunda kullanılacak eski hızlı filtreler - kod silinmedi,
-// bayrak açıldığında geri döner (bkz. ARAC_EMLAK_AKTIF).
-const VASITA_QUICK_LINKS = [
-  { label: "BMW", href: "/?brand=BMW" },
-  { label: "Mercedes-Benz", href: "/?brand=Mercedes-Benz" },
-  { label: "Volkswagen", href: "/?brand=Volkswagen" },
-  { label: "0 - 500.000 ₺", href: "/?maxPrice=500000" },
-  { label: "2020 ve üzeri", href: "/?minYear=2020" },
-  { label: "Elektrikli", href: "/?fuelType=Elektrik" },
-  { label: "SUV", href: "/?kategori=arazi-suv-pickup" },
-  { label: "Dizel", href: "/?fuelType=Dizel" },
-];
-
-// İlk yayın sürümünde vitrin ikinci el/sıfır ürünlere odaklı.
-const IKINCI_EL_QUICK_LINKS = [
-  { label: "Cep Telefonu", href: "/?kategori=cep-telefonu" },
-  { label: "Bilgisayar", href: "/?kategori=bilgisayar" },
-  { label: "Ev Elektroniği", href: "/?kategori=ev-elektronigi" },
-  { label: "Giyim & Aksesuar", href: "/?kategori=giyim-aksesuar" },
-  { label: "Spor", href: "/?kategori=spor" },
-  { label: "Oyun & Hobi", href: "/?kategori=oyun-hobi" },
-  { label: "0 - 1.000 ₺", href: "/?maxPrice=1000" },
+const POPULAR_QUICK_LINKS = [
+  "iPhone 14",
+  "Laptop",
+  "Koltuk Takımı",
+  "PlayStation 5",
+  "iPad",
+  "Buzdolabı",
+  "Araç",
+  "Kombi",
 ];
 
 export async function Navbar() {
@@ -41,14 +28,17 @@ export async function Navbar() {
   const avatarUrl = session
     ? ((await prisma.user.findUnique({ where: { id: session.id }, select: { avatarUrl: true } }))?.avatarUrl ?? null)
     : null;
-  const quickLinks = isVasitaEmlakActive() ? VASITA_QUICK_LINKS : IKINCI_EL_QUICK_LINKS;
+  const vasitaEmlakActive = isVasitaEmlakActive();
+  const categoryOptions = CATEGORY_TREE.filter(
+    (node) => vasitaEmlakActive || !COMING_SOON_SLUGS.includes(node.slug),
+  ).map((node) => ({ slug: node.slug, name: node.name }));
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
         <Logo size="md" />
 
-        <SearchBar className="hidden flex-1 md:block" />
+        <SearchBar className="hidden flex-1 md:block" categoryOptions={categoryOptions} />
 
         <div className="ml-auto hidden items-center gap-2 md:flex">
           {session ? (
@@ -104,13 +94,13 @@ export async function Navbar() {
           <span className="hidden shrink-0 text-xs font-semibold text-slate-400 sm:inline">
             Popüler:
           </span>
-          {quickLinks.map((link) => (
+          {POPULAR_QUICK_LINKS.map((term) => (
             <Link
-              key={link.label}
-              href={link.href}
+              key={term}
+              href={`/?q=${encodeURIComponent(term)}`}
               className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition-colors hover:border-accent hover:bg-accent-light hover:text-brand"
             >
-              {link.label}
+              {term}
             </Link>
           ))}
         </div>
