@@ -6,16 +6,16 @@ import { LoginForm } from "./login-form";
 export default async function GirisPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const session = await getSession();
   if (session) redirect("/");
 
-  const { callbackUrl } = await searchParams;
+  const { callbackUrl, error } = await searchParams;
 
   return (
     <AuthLayout title="Giriş Yap" subtitle="Hesabına giriş yap, ilan ver ve ilanlarını yönet.">
-      <LoginForm callbackUrl={callbackUrl} />
+      <LoginForm callbackUrl={callbackUrl} socialError={error} />
     </AuthLayout>
   );
 }

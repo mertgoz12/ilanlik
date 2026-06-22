@@ -11,17 +11,30 @@ import { SocialAuthButtons } from "@/components/social-auth-buttons";
 
 const initialState: LoginState = {};
 
-export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
+const SOCIAL_ERROR_MESSAGES: Record<string, string> = {
+  google_failed: "Google ile giriş sırasında bir sorun oluştu. Lütfen tekrar deneyin.",
+  google_unverified: "Google hesabının e-postası doğrulanmamış. Lütfen başka bir yöntemle giriş yapın.",
+  banned: "Hesabınız askıya alınmıştır. Daha fazla bilgi için bizimle iletişime geçin.",
+};
+
+export function LoginForm({
+  callbackUrl,
+  socialError,
+}: {
+  callbackUrl?: string;
+  socialError?: string;
+}) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
+  const socialErrorMessage = socialError ? SOCIAL_ERROR_MESSAGES[socialError] : undefined;
 
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="callbackUrl" value={callbackUrl ?? ""} />
 
-      {state.error && (
+      {(state.error || socialErrorMessage) && (
         <div className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700">
           <AlertIcon className="h-4 w-4 shrink-0" />
-          {state.error}
+          {state.error || socialErrorMessage}
         </div>
       )}
 
@@ -71,7 +84,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         {pending ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
 
-      <SocialAuthButtons actionLabel="ile giriş yap" />
+      <SocialAuthButtons actionLabel="ile giriş yap" callbackUrl={callbackUrl} />
 
       <p className="text-center text-sm text-slate-500">
         Hesabın yok mu?{" "}

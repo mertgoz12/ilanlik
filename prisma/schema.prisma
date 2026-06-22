@@ -20,6 +20,11 @@ model User {
   ilce      String?
   avatarUrl String?
 
+  // Google ile giriş yapan hesaplarda Google'ın kararlı kullanıcı kimliği
+  // ("sub" claim). E-posta/şifre ile açılmış bir hesaba sonradan Google ile
+  // giriş yapılırsa bu alan dolar (hesaplar e-posta üzerinden birleştirilir).
+  googleId String? @unique
+
   // Yönetim paneli alanları
   role         String  @default("user") // "user" | "admin"
   isBanned     Boolean @default(false)
