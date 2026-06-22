@@ -6,6 +6,16 @@ import { hashPassword } from "@/lib/password";
 import { createSession } from "@/lib/session";
 import { registerSchema } from "@/lib/validation";
 
+// Sahibinden tarzı e-posta-önce akışın 1. adımı: kullanıcı sadece e-posta
+// girip "Devam Et"e bastığında, asıl forma (ad/şifre/KVKK) geçmeden önce
+// bu e-postanın zaten kayıtlı olup olmadığını anında bildirir.
+export async function checkEmailExistsAction(email: string): Promise<{ exists: boolean }> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return { exists: false };
+  const user = await prisma.user.findUnique({ where: { email: normalized }, select: { id: true } });
+  return { exists: !!user };
+}
+
 export type RegisterState = {
   error?: string;
   fieldErrors?: Partial<

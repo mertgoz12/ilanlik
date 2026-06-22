@@ -7,6 +7,7 @@ import { loginAction, type LoginState } from "./actions";
 import { AlertIcon, SpinnerIcon } from "@/components/icons";
 import { AuthInput } from "@/components/auth-input";
 import { AuthPasswordInput } from "@/components/auth-password-input";
+import { SocialAuthButtons } from "@/components/social-auth-buttons";
 
 const initialState: LoginState = {};
 
@@ -69,6 +70,8 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         {pending && <SpinnerIcon className="h-4 w-4 animate-spin" />}
         {pending ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
+
+      <SocialAuthButtons actionLabel="ile giriş yap" />
 
       <p className="text-center text-sm text-slate-500">
         Hesabın yok mu?{" "}
