@@ -8,7 +8,7 @@ import { TrustBanner } from "@/components/home/trust-banner";
 import { QuickPostCard } from "@/components/home/quick-post-card";
 import { SafetyTipsCard } from "@/components/home/safety-tips-card";
 import { StatsCard } from "@/components/home/stats-card";
-import { StorePromoCard } from "@/components/home/store-promo-card";
+import { SignupPromoCard } from "@/components/home/signup-promo-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
 import { ListingFilters } from "@/components/listing-filters";
@@ -40,6 +40,11 @@ import {
 const PAGE_SIZE = 12;
 const FEATURED_COUNT = 12;
 const RECENT_COUNT = 12;
+// "Öne Çıkan İlanlar" başlığı ayrı bir bölüm olarak ancak bu kadar (veya
+// daha fazla) öne çıkarılmış ilan varsa gösterilir; aksi halde sayfa az
+// ilanla yarım/boş durmasın diye tüm ilanlar tek "Yeni Eklenen İlanlar"
+// bölümünde birleştirilir (bkz. showSeparateFeatured).
+const MIN_FEATURED_FOR_SECTION = 4;
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -116,8 +121,8 @@ export default async function HomePage({
   const [
     listings,
     total,
-    featuredListings,
-    recentListings,
+    listingPool,
+    featuredCount,
     vehicleComparablePool,
     genericComparablePool,
   ] = await Promise.all([
@@ -133,20 +138,15 @@ export default async function HomePage({
     categoryComingSoon ? 0 : prisma.listing.count({ where }),
     showVitrin
       ? prisma.listing.findMany({
-          where: { isFeatured: true, status: "active", optionStatus: { not: "opsiyonlandi" }, ...excludeComingSoon },
-          orderBy: { createdAt: "desc" },
-          take: FEATURED_COUNT,
+          where: { status: "active", optionStatus: { not: "opsiyonlandi" }, ...excludeComingSoon },
+          orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+          take: FEATURED_COUNT + RECENT_COUNT,
           include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
         })
       : Promise.resolve([]),
     showVitrin
-      ? prisma.listing.findMany({
-          where: { isFeatured: false, status: "active", optionStatus: { not: "opsiyonlandi" }, ...excludeComingSoon },
-          orderBy: { createdAt: "desc" },
-          take: RECENT_COUNT,
-          include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
-        })
-      : Promise.resolve([]),
+      ? prisma.listing.count({ where: { isFeatured: true, status: "active", optionStatus: { not: "opsiyonlandi" }, ...excludeComingSoon } })
+      : 0,
     // KATMAN 1 (kural tabanlı fiyat aralığı) için emsal ilan havuzları - sadece aktif ilanlar.
     prisma.listing.findMany({
       where: { brand: { not: null }, model: { not: null }, year: { not: null }, km: { not: null }, status: "active" },
@@ -157,6 +157,16 @@ export default async function HomePage({
       select: { id: true, categoryId: true, title: true, price: true },
     }),
   ]);
+
+  // Yeterince öne çıkarılmış ilan varsa "Öne Çıkan İlanlar" ayrı gösterilir;
+  // yoksa hepsi "Yeni Eklenen İlanlar" altında birleştirilir (bkz. yukarıdaki not).
+  const showSeparateFeatured = featuredCount >= MIN_FEATURED_FOR_SECTION;
+  const featuredListings = showSeparateFeatured
+    ? listingPool.filter((l) => l.isFeatured).slice(0, FEATURED_COUNT)
+    : [];
+  const recentListings = showSeparateFeatured
+    ? listingPool.filter((l) => !l.isFeatured).slice(0, RECENT_COUNT)
+    : listingPool.slice(0, RECENT_COUNT);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -338,7 +348,7 @@ export default async function HomePage({
               <QuickPostCard />
               <SafetyTipsCard />
               <StatsCard />
-              <StorePromoCard />
+              {!session && <SignupPromoCard />}
             </aside>
           )}
         </div>

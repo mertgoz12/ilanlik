@@ -54,7 +54,7 @@ export function FeaturedCategories() {
       <div className="relative mt-2.5">
         <div
           ref={scrollRef}
-          className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide sm:gap-3"
+          className="flex gap-2.5 overflow-x-auto pb-1 pr-11 scrollbar-hide sm:gap-3 sm:pr-12"
         >
           {categories.map(({ name, slug }) => {
             const { icon: Icon, theme } = getCategoryVisual(slug);
@@ -63,17 +63,14 @@ export function FeaturedCategories() {
               <Link
                 key={slug}
                 href={`/?kategori=${slug}`}
-                className={`group relative flex w-24 shrink-0 flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br ${t.wash} p-2.5 text-center shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-lg sm:w-28 sm:p-3`}
+                className="group flex w-24 shrink-0 flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 text-center shadow-soft transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-soft-lg sm:w-28"
               >
                 <span
-                  className={`absolute -right-5 -top-5 h-16 w-16 rounded-full blur-xl transition-transform duration-300 group-hover:scale-125 ${t.glow}`}
-                />
-                <span
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-soft transition-transform duration-200 group-hover:-rotate-3 group-hover:scale-110 sm:h-11 sm:w-11 ${t.badge}`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-soft transition-transform duration-200 group-hover:scale-110 sm:h-11 sm:w-11 ${t.badge}`}
                 >
                   <Icon className="h-4.5 w-4.5 sm:h-5.5 sm:w-5.5" />
                 </span>
-                <span className="relative text-[11px] font-bold leading-tight text-foreground sm:text-xs">
+                <span className="text-[11px] font-bold leading-tight text-foreground sm:text-xs">
                   {name}
                 </span>
               </Link>
@@ -85,7 +82,7 @@ export function FeaturedCategories() {
           type="button"
           onClick={scrollRight}
           aria-label="Sağa kaydır"
-          className="absolute -right-2 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-500 shadow-soft-lg transition-colors hover:text-brand sm:flex"
+          className="absolute right-1 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-500 shadow-soft-lg ring-1 ring-slate-100 transition-colors hover:text-brand sm:flex"
         >
           <ChevronRightIcon className="h-4 w-4" />
         </button>
