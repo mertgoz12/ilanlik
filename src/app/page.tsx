@@ -212,7 +212,7 @@ export default async function HomePage({
   return (
     <div>
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)] xl:grid-cols-[224px_minmax(0,1fr)_280px]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)] xl:grid-cols-[224px_minmax(0,1fr)_256px]">
           <SidebarShell>
             <CategorySidebar activeSlug={sp.kategori} />
           </SidebarShell>
@@ -227,7 +227,7 @@ export default async function HomePage({
                     <h2 className="text-lg font-bold tracking-tight text-foreground">
                       Öne Çıkan İlanlar
                     </h2>
-                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+                    <div className="mt-2.5 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
                       {featuredListings.map((listing) => (
                         <ListingCard
                           key={listing.id}
@@ -258,7 +258,7 @@ export default async function HomePage({
                         Tümünü Gör ›
                       </Link>
                     </div>
-                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                    <div className="mt-2.5 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
                       {recentListings.map((listing) => (
                         <ListingCard
                           key={listing.id}
@@ -323,7 +323,7 @@ export default async function HomePage({
                     </Link>
                   </div>
                 ) : (
-                  <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  <div className="mt-3 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
                     {listings.map((listing) => (
                       <ListingCard
                         key={listing.id}

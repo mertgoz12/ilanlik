@@ -46,22 +46,22 @@ export function TrustBanner() {
             Tüm ilanlar yapay zeka ile analiz edilir, riskli ilanlar engellenir.
           </p>
 
-          <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+          <div className="mt-3 grid grid-cols-1 gap-2.5 lg:grid-cols-3">
             {FEATURES.map(({ icon: Icon, title, text }) => (
               <div key={title} className="flex items-center gap-2">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-brand shadow-soft">
                   <Icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-brand">{title}</p>
-                  <p className="truncate text-[11px] text-brand/60">{text}</p>
+                  <p className="text-xs font-bold leading-tight text-brand">{title}</p>
+                  <p className="text-[11px] leading-tight text-brand/60">{text}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative hidden h-24 w-24 shrink-0 items-center justify-center sm:flex">
+        <div className="relative hidden h-24 w-24 shrink-0 items-center justify-center lg:flex">
           <span className="absolute h-24 w-24 rounded-full bg-accent/25 blur-xl" />
           <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-white shadow-soft-lg">
             <ShieldCheck className="h-8 w-8" />

@@ -59,7 +59,7 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
           </div>
         )}
 
-        <div className="absolute inset-x-1.5 top-1.5 flex items-start justify-between gap-1.5">
+        <div className="absolute inset-x-1.5 top-1.5 flex items-start justify-between gap-1">
           {isVehicle ? (
             <span
               className={`min-w-0 truncate rounded-md border px-1.5 py-0.5 text-[11px] font-semibold backdrop-blur-md bg-white/70 ${DAMAGE_STATUS_STYLES[listing.damageStatus!]}`}
@@ -71,11 +71,19 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
               {listing.category.name}
             </span>
           )}
-          <TrustBadge
-            score={trustScore}
-            size="sm"
-            className="shrink-0 rounded-full bg-white/80 shadow-soft backdrop-blur-md"
-          />
+          <div className="flex shrink-0 items-center gap-1">
+            <TrustBadge
+              score={trustScore}
+              size="sm"
+              className="shrink-0 rounded-full bg-white/80 shadow-soft backdrop-blur-md"
+            />
+            <FavoriteButton
+              className="h-7 w-7"
+              listingId={listing.id}
+              initialFavorited={isFavorited}
+              isLoggedIn={!!currentUserId}
+            />
+          </div>
         </div>
 
         <span
@@ -85,13 +93,6 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
           <Sparkles className="h-3 w-3 shrink-0 text-accent-dark" />
           YZ Onaylı
         </span>
-
-        <FavoriteButton
-          className="absolute bottom-1.5 right-1.5"
-          listingId={listing.id}
-          initialFavorited={isFavorited}
-          isLoggedIn={!!currentUserId}
-        />
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-2 sm:p-2.5">
