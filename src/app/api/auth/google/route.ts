@@ -6,6 +6,15 @@ import { buildGoogleAuthUrl, GOOGLE_OAUTH_STATE_COOKIE } from "@/lib/google-oaut
 // Google'ın kendi onay ekranına yönlendirir. CSRF korumasi için rastgele bir
 // nonce üretilip kısa ömürlü bir cookie'de saklanır, callback'te eşleştirilir.
 export async function GET(request: NextRequest) {
+  console.log(
+    "[google-oauth] GOOGLE_CLIENT_ID set:",
+    Boolean(process.env.GOOGLE_CLIENT_ID),
+    "GOOGLE_CLIENT_SECRET set:",
+    Boolean(process.env.GOOGLE_CLIENT_SECRET),
+    "NODE_ENV:",
+    process.env.NODE_ENV,
+  );
+
   const callbackUrlParam = request.nextUrl.searchParams.get("callbackUrl");
   const callbackUrl = callbackUrlParam && callbackUrlParam.startsWith("/") ? callbackUrlParam : "/";
 
