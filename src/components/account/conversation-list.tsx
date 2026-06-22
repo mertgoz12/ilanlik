@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Avatar } from "@/components/avatar";
 import { RelativeTime } from "@/components/relative-time";
 import { ImageIcon, InboxIcon } from "@/components/icons";
 import type { ConversationListItem } from "@/lib/messages";
@@ -33,14 +34,22 @@ export function ConversationList({ conversations, activeId, currentUserId }: Con
             href={`/hesabim/mesajlar?c=${c.id}`}
             className={`flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 ${active ? "bg-accent-light" : ""}`}
           >
-            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-              {c.listingImageUrl ? (
-                <Image src={c.listingImageUrl} alt="" fill sizes="48px" className="object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-slate-300">
-                  <ImageIcon className="h-5 w-5" />
-                </div>
-              )}
+            <div className="relative shrink-0">
+              <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100">
+                {c.listingImageUrl ? (
+                  <Image src={c.listingImageUrl} alt="" fill sizes="48px" className="object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-5 w-5" />
+                  </div>
+                )}
+              </div>
+              <Avatar
+                name={c.otherUserName}
+                src={c.otherUserAvatarUrl}
+                size="xs"
+                className="absolute -bottom-1 -right-1 ring-2 ring-white"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">

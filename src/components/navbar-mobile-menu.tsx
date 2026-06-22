@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogOut, Menu, Plus, ShieldCheck, User, X } from "lucide-react";
+import { LogOut, Menu, Plus, ShieldCheck, X } from "lucide-react";
 import type { SessionUser } from "@/lib/session";
 import { ACCOUNT_NAV_ITEMS } from "@/lib/account-nav";
+import { Avatar } from "@/components/avatar";
 import { useUnreadMessages } from "@/components/unread-messages-context";
 
 type NavbarMobileMenuProps = {
   session: SessionUser | null;
+  avatarUrl: string | null;
   logoutAction: () => Promise<void>;
 };
 
-export function NavbarMobileMenu({ session, logoutAction }: NavbarMobileMenuProps) {
+export function NavbarMobileMenu({ session, avatarUrl, logoutAction }: NavbarMobileMenuProps) {
   const [open, setOpen] = useState(false);
   const { count: unreadCount } = useUnreadMessages();
 
@@ -69,7 +71,7 @@ export function NavbarMobileMenu({ session, logoutAction }: NavbarMobileMenuProp
                     </Link>
                   )}
                   <span className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-slate-700">
-                    <User className="h-5 w-5 text-slate-400" />
+                    <Avatar name={session.name} src={avatarUrl} size="sm" />
                     {session.name}
                   </span>
                   {ACCOUNT_NAV_ITEMS.map((item) => {

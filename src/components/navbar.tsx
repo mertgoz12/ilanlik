@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus, ShieldCheck } from "lucide-react";
 import { getSession } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
 import { logoutAction } from "@/lib/actions/logout";
 import { isVasitaEmlakActive } from "@/lib/categories";
 import { Logo } from "./logo";
@@ -35,6 +36,11 @@ const IKINCI_EL_QUICK_LINKS = [
 
 export async function Navbar() {
   const session = await getSession();
+  // avatarUrl JWT'ye gömülmez (profil fotoğrafı değişince anında yansısın
+  // diye) - oturum varsa burada DB'den taze okunur.
+  const avatarUrl = session
+    ? ((await prisma.user.findUnique({ where: { id: session.id }, select: { avatarUrl: true } }))?.avatarUrl ?? null)
+    : null;
   const quickLinks = isVasitaEmlakActive() ? VASITA_QUICK_LINKS : IKINCI_EL_QUICK_LINKS;
 
   return (
@@ -57,7 +63,7 @@ export async function Navbar() {
                   <span className="hidden lg:inline">Yönetim Paneli</span>
                 </Link>
               )}
-              <UserMenu name={session.name} logoutAction={logoutAction} />
+              <UserMenu name={session.name} avatarUrl={avatarUrl} logoutAction={logoutAction} />
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -87,7 +93,7 @@ export async function Navbar() {
 
         <div className="ml-auto flex items-center gap-2 md:hidden">
           <MobileSearchToggleButton />
-          <NavbarMobileMenu session={session} logoutAction={logoutAction} />
+          <NavbarMobileMenu session={session} avatarUrl={avatarUrl} logoutAction={logoutAction} />
         </div>
       </div>
 

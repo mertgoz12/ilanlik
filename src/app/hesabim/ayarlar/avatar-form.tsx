@@ -2,7 +2,8 @@
 
 import { useRef, useState, type ChangeEvent } from "react";
 import { useToast } from "@/components/admin/toast";
-import { ImageIcon, UserIcon } from "@/components/icons";
+import { Avatar } from "@/components/avatar";
+import { ImageIcon } from "@/components/icons";
 import { updateAvatarAction, type AvatarFormState } from "./actions";
 
 const initialState: AvatarFormState = {};
@@ -44,13 +45,7 @@ export function AvatarForm({ avatarUrl, name }: { avatarUrl: string | null; name
 
   return (
     <div className="flex items-center gap-4">
-      <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-400">
-        {preview ? (
-          <img src={preview} alt={name} className="h-full w-full object-cover" />
-        ) : (
-          <UserIcon className="h-8 w-8" />
-        )}
-      </span>
+      <Avatar name={name} src={preview} size="xl" />
       <div>
         <button
           type="button"

@@ -7,11 +7,13 @@ import { reportListingAction, type ReportListingState } from "@/app/ilan/[listin
 import { startConversationAction, type MessageFormState } from "@/app/hesabim/mesajlar/actions";
 import { toggleSellerFollowAction } from "@/lib/social-actions";
 import { MAX_MESSAGE_LENGTH } from "@/lib/message-filters";
+import { Avatar } from "./avatar";
 import { errorClass, inputClass } from "./form-ui";
-import { CheckIcon, FlagIcon, MessageIcon, PhoneIcon, UserIcon, UsersIcon } from "./icons";
+import { CheckIcon, FlagIcon, MessageIcon, PhoneIcon, UsersIcon } from "./icons";
 
 type SellerCardProps = {
   name: string;
+  avatarUrl: string | null;
   createdAt: Date | string;
   phone: string | null;
   listingId: string;
@@ -26,6 +28,7 @@ const initialMessageState: MessageFormState = {};
 
 export function SellerCard({
   name,
+  avatarUrl,
   createdAt,
   phone,
   listingId,
@@ -72,9 +75,7 @@ export function SellerCard({
     <section ref={cardRef} className="rounded-lg bg-white p-4 shadow-soft sm:p-6">
       <h2 className="mb-3 text-sm font-semibold text-foreground">Satıcı</h2>
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-          <UserIcon className="h-5 w-5" />
-        </span>
+        <Avatar name={name} src={avatarUrl} size="md" />
         <div>
           <p className="text-sm font-semibold text-foreground">{name}</p>
           <p className="text-xs text-slate-400">Üyelik: {formatDate(createdAt)}</p>

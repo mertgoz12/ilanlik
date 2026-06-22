@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Avatar } from "@/components/avatar";
 import { ChevronLeftIcon, ImageIcon } from "@/components/icons";
 import { RelativeTime } from "@/components/relative-time";
 import { useUnreadMessages } from "@/components/unread-messages-context";
@@ -50,14 +51,22 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
         <Link href="/hesabim/mesajlar" className="text-slate-400 hover:text-slate-600 md:hidden">
           <ChevronLeftIcon className="h-5 w-5" />
         </Link>
-        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-          {listingImage ? (
-            <Image src={listingImage} alt="" fill sizes="40px" className="object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-slate-300">
-              <ImageIcon className="h-4 w-4" />
-            </div>
-          )}
+        <div className="relative shrink-0">
+          <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-slate-100">
+            {listingImage ? (
+              <Image src={listingImage} alt="" fill sizes="40px" className="object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-slate-300">
+                <ImageIcon className="h-4 w-4" />
+              </div>
+            )}
+          </div>
+          <Avatar
+            name={otherUser.name}
+            src={otherUser.avatarUrl}
+            size="xs"
+            className="absolute -bottom-1 -right-1 ring-2 ring-white"
+          />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">{otherUser.name}</p>
@@ -75,7 +84,11 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
         {conversation.messages.map((message) => {
           const isOwn = message.senderId === currentUserId;
           return (
-            <div key={message.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+            <div
+              key={message.id}
+              className={`flex items-end gap-1.5 ${isOwn ? "flex-row-reverse justify-start" : "justify-start"}`}
+            >
+              <Avatar name={message.sender.name} src={message.sender.avatarUrl} size="xs" className="mb-0.5" />
               <div
                 className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm ${
                   isOwn ? "bg-brand text-white" : "bg-slate-100 text-foreground"

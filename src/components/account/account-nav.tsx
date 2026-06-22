@@ -3,19 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ACCOUNT_NAV_ITEMS } from "@/lib/account-nav";
-import { UserIcon } from "@/components/icons";
+import { Avatar } from "@/components/avatar";
 import { useUnreadMessages } from "@/components/unread-messages-context";
 
-export function AccountNav({ userName }: { userName: string }) {
+export function AccountNav({ userName, avatarUrl }: { userName: string; avatarUrl: string | null }) {
   const pathname = usePathname();
   const { count: unreadCount } = useUnreadMessages();
 
   return (
     <aside className="lg:w-64 lg:shrink-0">
       <div className="mb-4 hidden items-center gap-3 lg:flex">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand text-accent shadow-soft">
-          <UserIcon className="h-5.5 w-5.5" />
-        </span>
+        <Avatar name={userName} src={avatarUrl} size="lg" className="shadow-soft" />
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Hesabım</p>
           <p className="truncate text-sm font-semibold text-foreground">{userName}</p>

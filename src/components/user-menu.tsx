@@ -2,16 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import { ACCOUNT_NAV_ITEMS } from "@/lib/account-nav";
+import { Avatar } from "@/components/avatar";
 import { useUnreadMessages } from "@/components/unread-messages-context";
 
 type UserMenuProps = {
   name: string;
+  avatarUrl: string | null;
   logoutAction: () => Promise<void>;
 };
 
-export function UserMenu({ name, logoutAction }: UserMenuProps) {
+export function UserMenu({ name, avatarUrl, logoutAction }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { count: unreadCount } = useUnreadMessages();
@@ -32,8 +34,8 @@ export function UserMenu({ name, logoutAction }: UserMenuProps) {
         aria-expanded={open}
         className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
       >
-        <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-          <User className="h-4 w-4" />
+        <span className="relative shrink-0">
+          <Avatar name={name} src={avatarUrl} size="xs" />
           {unreadCount > 0 && (
             <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}

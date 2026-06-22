@@ -8,6 +8,7 @@ export type ConversationListItem = {
   listingImageUrl: string | null;
   otherUserId: string;
   otherUserName: string;
+  otherUserAvatarUrl: string | null;
   lastMessage: { body: string; createdAt: Date; senderId: string } | null;
   unreadCount: number;
   updatedAt: Date;
@@ -21,8 +22,8 @@ export async function getUserConversations(userId: string): Promise<Conversation
       listing: {
         select: { id: true, title: true, listingNo: true, images: { orderBy: { order: "asc" }, take: 1 } },
       },
-      buyer: { select: { id: true, name: true } },
-      seller: { select: { id: true, name: true } },
+      buyer: { select: { id: true, name: true, avatarUrl: true } },
+      seller: { select: { id: true, name: true, avatarUrl: true } },
       messages: { orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
@@ -41,6 +42,7 @@ export async function getUserConversations(userId: string): Promise<Conversation
         listingImageUrl: c.listing.images[0]?.url ?? null,
         otherUserId: otherUser.id,
         otherUserName: otherUser.name,
+        otherUserAvatarUrl: otherUser.avatarUrl,
         lastMessage: c.messages[0]
           ? { body: c.messages[0].body, createdAt: c.messages[0].createdAt, senderId: c.messages[0].senderId }
           : null,
@@ -64,11 +66,11 @@ export async function getConversationDetail(conversationId: string, userId: stri
           images: { orderBy: { order: "asc" }, take: 1 },
         },
       },
-      buyer: { select: { id: true, name: true } },
-      seller: { select: { id: true, name: true } },
+      buyer: { select: { id: true, name: true, avatarUrl: true } },
+      seller: { select: { id: true, name: true, avatarUrl: true } },
       messages: {
         orderBy: { createdAt: "asc" },
-        include: { sender: { select: { id: true, name: true } } },
+        include: { sender: { select: { id: true, name: true, avatarUrl: true } } },
       },
     },
   });

@@ -80,7 +80,7 @@ export default async function ListingDetailPage({
     include: {
       images: { orderBy: { order: "asc" } },
       category: { include: { parent: true } },
-      user: { select: { id: true, name: true, phone: true, createdAt: true } },
+      user: { select: { id: true, name: true, phone: true, createdAt: true, avatarUrl: true } },
       optionHolder: { select: { id: true, name: true } },
     },
   });
@@ -371,6 +371,7 @@ export default async function ListingDetailPage({
 
           <SellerCard
             name={listing.user.name}
+            avatarUrl={listing.user.avatarUrl}
             createdAt={listing.user.createdAt}
             phone={listing.user.phone}
             listingId={listing.id}
