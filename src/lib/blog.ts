@@ -44,7 +44,7 @@ export async function getLatestPostsForHome(take = 4) {
     where: { status: "yayinda" },
     orderBy: { publishedAt: "desc" },
     take,
-    select: { id: true, title: true, slug: true, publishedAt: true },
+    select: { id: true, title: true, slug: true, coverImageUrl: true, publishedAt: true },
   });
 }
 

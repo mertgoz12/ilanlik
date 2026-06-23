@@ -8,8 +8,13 @@ import { TrustBanner } from "@/components/home/trust-banner";
 import { QuickPostCard } from "@/components/home/quick-post-card";
 import { SafetyTipsCard } from "@/components/home/safety-tips-card";
 import { BlogTipsCard } from "@/components/home/blog-tips-card";
-import { StatsCard } from "@/components/home/stats-card";
+import { HowItWorksCard } from "@/components/home/how-it-works-card";
+import { WhyIlanlioCard } from "@/components/home/why-ilanlio-card";
 import { SignupPromoCard } from "@/components/home/signup-promo-card";
+// StatsCard ("Bugün ilanlio'da") şimdilik gizli - sayılar (ilan/kullanıcı
+// sayısı) henüz anlamlı bir ölçek kazanmadı. Kod silinmedi; sayılar
+// artınca tek satır ile (import + JSX) geri eklenebilir.
+// import { StatsCard } from "@/components/home/stats-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
 import { ListingFilters } from "@/components/listing-filters";
@@ -349,7 +354,8 @@ export default async function HomePage({
               <QuickPostCard />
               <SafetyTipsCard />
               <BlogTipsCard />
-              <StatsCard />
+              <HowItWorksCard />
+              <WhyIlanlioCard />
               {!session && <SignupPromoCard />}
             </aside>
           )}
