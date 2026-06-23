@@ -1,6 +1,7 @@
 import { TRUST_TONE_COLORS, trustScoreTone } from "@/lib/trust";
 
 const SIZES = {
+  xs: { box: 26, stroke: 3, font: "text-[9px]" },
   sm: { box: 40, stroke: 4, font: "text-[11px]" },
   md: { box: 56, stroke: 5, font: "text-sm" },
   lg: { box: 112, stroke: 8, font: "text-3xl" },

@@ -59,26 +59,27 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
           </div>
         )}
 
-        <div className="absolute inset-x-1.5 top-1.5 flex items-start justify-between gap-1">
+        <div className="absolute inset-x-1 top-1 flex items-start justify-between gap-1">
           {isVehicle ? (
             <span
-              className={`min-w-0 truncate rounded-md border px-1.5 py-0.5 text-[11px] font-semibold backdrop-blur-md bg-white/70 ${DAMAGE_STATUS_STYLES[listing.damageStatus!]}`}
+              className={`min-w-0 truncate rounded-md border px-1 py-0.5 text-[9px] font-semibold backdrop-blur-sm bg-white/55 ${DAMAGE_STATUS_STYLES[listing.damageStatus!]}`}
             >
               {damageStatusLabel(listing.damageStatus!)}
             </span>
           ) : (
-            <span className="min-w-0 truncate rounded-md border border-slate-200 bg-white/80 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600 backdrop-blur-md">
+            <span className="min-w-0 truncate rounded-md border border-slate-200/60 bg-white/55 px-1 py-0.5 text-[9px] font-semibold text-slate-600 backdrop-blur-sm">
               {listing.category.name}
             </span>
           )}
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 flex-col items-center gap-1">
             <TrustBadge
               score={trustScore}
-              size="sm"
-              className="shrink-0 rounded-full bg-white/80 shadow-soft backdrop-blur-md"
+              size="xs"
+              className="shrink-0 rounded-full bg-white/60 shadow-sm backdrop-blur-sm"
             />
             <FavoriteButton
-              className="h-7 w-7"
+              size="xs"
+              className="bg-white/50"
               listingId={listing.id}
               initialFavorited={isFavorited}
               isLoggedIn={!!currentUserId}
@@ -88,9 +89,9 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
 
         <span
           title="Yapay Zeka Onaylı"
-          className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-md border border-white/40 bg-white/55 px-1.5 py-0.5 text-[10px] font-semibold text-brand backdrop-blur-md"
+          className="absolute bottom-1 left-1 inline-flex items-center gap-0.5 rounded-md border border-white/30 bg-white/40 px-1 py-0.5 text-[8px] font-semibold text-brand backdrop-blur-sm"
         >
-          <Sparkles className="h-3 w-3 shrink-0 text-accent-dark" />
+          <Sparkles className="h-2 w-2 shrink-0 text-accent-dark" />
           YZ Onaylı
         </span>
       </div>
