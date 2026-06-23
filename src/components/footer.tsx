@@ -12,6 +12,7 @@ type FooterLink = { label: string; href: string; comingSoon?: boolean };
 const CORPORATE_LINKS: FooterLink[] = [
   { label: "Hakkımızda", href: "/hakkimizda" },
   { label: "Nasıl Çalışır", href: "/nasil-calisir" },
+  { label: "Blog", href: "/blog" },
   { label: "Kariyer", href: "/kariyer" },
   { label: "Site Haritası", href: "/site-haritasi" },
   { label: "İletişim", href: "/iletisim" },

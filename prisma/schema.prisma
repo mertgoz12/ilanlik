@@ -57,6 +57,8 @@ model User {
   // Opsiyonlama (rezervasyon) sistemi
   heldOptions      ListingOption[] @relation("ListingOptionBuyer")
   optionedListings Listing[]       @relation("ListingOptionHolder")
+
+  blogPosts BlogPost[]
 }
 
 model Category {
@@ -397,4 +399,27 @@ model VehicleTrim {
 
   @@unique([generationId, name])
   @@index([generationId])
+}
+
+// Blog yazıları - içerik Markdown olarak saklanır (bkz. src/lib/blog.ts,
+// react-markdown ile render edilir). Kapak/içi görselleri Vercel Blob'a
+// yüklenir (bkz. src/lib/blog-photos.ts, listing-photos.ts ile aynı desen).
+model BlogPost {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  excerpt        String
+  content        String
+  coverImageUrl  String?
+  category       String // bkz. BLOG_CATEGORIES (src/lib/blog.ts) - sabit seçenek listesi
+  readingMinutes Int      @default(5)
+  status         String   @default("yayinda") // "taslak" | "yayinda"
+  authorId       String?
+  author         User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  publishedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([category])
 }

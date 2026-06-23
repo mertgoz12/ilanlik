@@ -7,6 +7,7 @@ import { TrustStrip } from "@/components/trust-strip";
 import { TrustBanner } from "@/components/home/trust-banner";
 import { QuickPostCard } from "@/components/home/quick-post-card";
 import { SafetyTipsCard } from "@/components/home/safety-tips-card";
+import { BlogTipsCard } from "@/components/home/blog-tips-card";
 import { StatsCard } from "@/components/home/stats-card";
 import { SignupPromoCard } from "@/components/home/signup-promo-card";
 import { BrandGrid } from "@/components/brand-grid";
@@ -347,6 +348,7 @@ export default async function HomePage({
             <aside className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 xl:col-span-1 xl:grid-cols-1">
               <QuickPostCard />
               <SafetyTipsCard />
+              <BlogTipsCard />
               <StatsCard />
               {!session && <SignupPromoCard />}
             </aside>

@@ -8,6 +8,7 @@ import {
   GaugeIcon,
   InboxIcon,
   SparkleIcon,
+  TagIcon,
   UserIcon,
 } from "@/components/icons";
 import type { Accent } from "@/components/admin/accent";
@@ -26,6 +27,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { href: "/admin/moderasyon", label: "Moderasyon Kuyruğu", icon: FlagIcon, accent: "amber" },
   { href: "/admin/kullanicilar", label: "Kullanıcı Yönetimi", icon: UserIcon, accent: "indigo" },
   { href: "/admin/kategoriler", label: "Kategori Yönetimi", icon: FolderIcon, accent: "violet" },
+  { href: "/admin/blog", label: "Blog Yönetimi", icon: TagIcon, accent: "violet" },
   { href: "/admin/yapay-zeka", label: "Yapay Zeka Kontrol Paneli", icon: SparkleIcon, accent: "emerald" },
   { href: "/admin/arac-veritabani", label: "Araç Veritabanı", icon: GaugeIcon, accent: "red" },
   { href: "/admin/demo-verileri", label: "Demo Veri Yönetimi", icon: InboxIcon, accent: "slate" },

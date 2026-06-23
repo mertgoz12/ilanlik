@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LifeBuoy, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { BookOpen, LifeBuoy, Mail, ShieldCheck, Sparkles } from "lucide-react";
 
 export function AnnouncementBar() {
   return (
@@ -13,6 +13,13 @@ export function AnnouncementBar() {
           </span>
         </p>
         <nav className="hidden shrink-0 items-center gap-4 sm:flex">
+          <Link
+            href="/blog"
+            className="flex items-center gap-1.5 text-white/75 transition-colors hover:text-white"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            Blog
+          </Link>
           <Link
             href="/nasil-calisir"
             className="flex items-center gap-1.5 text-white/75 transition-colors hover:text-white"
