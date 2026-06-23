@@ -7,8 +7,9 @@
 export const BLOG_CATEGORIES = [
   "Güvenli Alışveriş",
   "İpuçları",
-  "Rehberler",
-  "Kategori Tavsiyeleri",
+  "Araç",
+  "Emlak",
+  "Satıcı İpuçları",
 ] as const;
 
 export type BlogCategory = (typeof BLOG_CATEGORIES)[number];
