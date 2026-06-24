@@ -2,32 +2,44 @@ import type { ComponentType } from "react";
 import {
   Anchor,
   Baby,
+  Backpack,
   Beef,
   Bike,
-  Bird,
+  Bone,
   Book,
+  Boxes,
   Briefcase,
   Building,
   Building2,
   Camera,
   Car,
   Castle,
+  Code2,
+  Cpu,
   Dumbbell,
   Factory,
   Fish,
   Gamepad2,
   Gem,
   GraduationCap,
+  Hammer,
+  Headphones,
   Home,
+  Languages,
   Laptop,
   MapPin,
   Mountain,
   Music2,
+  PaintRoller,
   PawPrint,
+  Pencil,
+  ShieldPlus,
   Shirt,
   ShoppingBag,
   Smartphone,
   Sofa,
+  Sparkles,
+  Stethoscope,
   Tractor,
   Truck,
   Tv,
@@ -112,8 +124,9 @@ export const CATEGORY_THEME_CLASSES: Record<
 type CategoryVisual = { icon: ComponentType<{ className?: string }>; theme: CategoryThemeKey };
 
 // Kategori slug'ına göre ikon + renk teması - ilan görseli olmadığında
-// (bkz. listing-card.tsx) ve kategori kartlarında (featured-categories.tsx)
-// kullanılır. Eşleşme bulunamazsa DEFAULT_CATEGORY_VISUAL'a düşer.
+// (bkz. listing-card.tsx) ve kategori kartlarında/sol menüde (bkz.
+// featured-categories.tsx, category-sidebar.tsx) kullanılır. Eşleşme
+// bulunamazsa DEFAULT_CATEGORY_VISUAL'a düşer.
 export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
   // Üst kategori başlıkları (sol menüdeki ana satırlar)
   emlak: { icon: Home, theme: "indigo" },
@@ -129,20 +142,26 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
   "fotograf-kamera": { icon: Camera, theme: "cyan" },
   "ev-dekorasyon": { icon: Sofa, theme: "amber" },
   "ev-elektronigi": { icon: Tv, theme: "violet" },
+  "elektrikli-ev-aletleri": { icon: Zap, theme: "cyan" },
   "giyim-aksesuar": { icon: Shirt, theme: "rose" },
   saat: { icon: Watch, theme: "fuchsia" },
   "anne-bebek": { icon: Baby, theme: "rose" },
-  "kitap-dergi-film-muzik": { icon: Book, theme: "sky" },
+  "kisisel-bakim-kozmetik": { icon: Sparkles, theme: "fuchsia" },
+  "hobi-oyuncak": { icon: Gamepad2, theme: "emerald" },
+  "oyuncu-ekipmanlari": { icon: Headphones, theme: "violet" },
+  "kitap-dergi-film": { icon: Book, theme: "sky" },
+  muzik: { icon: Music2, theme: "violet" },
+  antika: { icon: Gem, theme: "amber" },
+  "bahce-yapi-market": { icon: Hammer, theme: "lime" },
+  "teknik-elektronik": { icon: Cpu, theme: "slate" },
+  "ofis-kirtasiye": { icon: Pencil, theme: "cyan" },
   spor: { icon: Dumbbell, theme: "emerald" },
-  "muzik-enstrumanlari": { icon: Music2, theme: "violet" },
-  koleksiyon: { icon: Gem, theme: "amber" },
-  "taki-mucevher": { icon: Gem, theme: "fuchsia" },
-  "oyun-hobi": { icon: Gamepad2, theme: "emerald" },
+  diger: { icon: Boxes, theme: "slate" },
 
   // Yedek Parça, Aksesuar, Donanım & Tuning
   "otomotiv-ekipmanlari": { icon: Wrench, theme: "slate" },
   "motosiklet-ekipmanlari": { icon: Bike, theme: "slate" },
-  "deniz-araci-ekipmanlari": { icon: Anchor, theme: "cyan" },
+  "deniz-araclari-ekipmanlari": { icon: Anchor, theme: "cyan" },
 
   // İş Makineleri & Sanayi
   "is-makineleri": { icon: Tractor, theme: "amber" },
@@ -150,17 +169,35 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
   sanayi: { icon: Factory, theme: "slate" },
   "elektrik-enerji": { icon: Zap, theme: "amber" },
 
-  // Bağımsız üst kategoriler
+  // Bağımsız üst kategoriler ve alt kategorileri
   "ustalar-ve-hizmetler": { icon: Wrench, theme: "sky" },
+  "ic-tadilat-dekorasyon": { icon: PaintRoller, theme: "amber" },
+  nakliye: { icon: Truck, theme: "sky" },
+  "arac-servis-bakim": { icon: Wrench, theme: "slate" },
+
   "ozel-ders-verenler": { icon: GraduationCap, theme: "violet" },
+  "lise-universite": { icon: GraduationCap, theme: "violet" },
+  "ilkokul-ortaokul": { icon: Backpack, theme: "rose" },
+  "yabanci-dil": { icon: Languages, theme: "sky" },
+
   "is-ilanlari": { icon: Briefcase, theme: "indigo" },
+  egitim: { icon: GraduationCap, theme: "indigo" },
+  saglik: { icon: Stethoscope, theme: "rose" },
+  "guzellik-bakim": { icon: Sparkles, theme: "fuchsia" },
+  "it-yazilim": { icon: Code2, theme: "indigo" },
+  bilisim: { icon: Laptop, theme: "sky" },
+  "insan-kaynaklari": { icon: Users, theme: "emerald" },
+
   "yardimci-arayanlar": { icon: Users, theme: "emerald" },
 
   // Hayvanlar Alemi
+  "hayvan-aksesuar-ekipman": { icon: ShoppingBag, theme: "amber" },
+  "yem-mama": { icon: Bone, theme: "amber" },
   "evcil-hayvanlar": { icon: PawPrint, theme: "amber" },
-  "akvaryum-baliklari": { icon: Fish, theme: "cyan" },
-  "kumes-hayvanlari": { icon: Bird, theme: "lime" },
-  "buyukbas-kucukbas": { icon: Beef, theme: "rose" },
+  "ciftlik-hayvanlari": { icon: Beef, theme: "lime" },
+  buyukbas: { icon: Beef, theme: "lime" },
+  kucukbas: { icon: ShieldPlus, theme: "emerald" },
+  "deniz-canlilari": { icon: Fish, theme: "cyan" },
 
   // Vasıta / Emlak (ARAC_EMLAK_AKTIF açılana kadar ilan girişine kapalı ama
   // yine de tanımlı tutulur)
@@ -169,7 +206,6 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
   motosiklet: { icon: Bike, theme: "rose" },
   "minivan-panelvan": { icon: Truck, theme: "sky" },
   "ticari-araclar": { icon: Truck, theme: "slate" },
-  "kiralik-araclar": { icon: Car, theme: "violet" },
   "deniz-araclari": { icon: Anchor, theme: "cyan" },
   "hasarli-araclar": { icon: Car, theme: "amber" },
   "elektrikli-araclar": { icon: Zap, theme: "lime" },

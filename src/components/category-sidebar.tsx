@@ -29,17 +29,35 @@ export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
       {categories.map((cat) => {
         const total = cat._count.listings + cat.children.reduce((sum, c) => sum + c._count.listings, 0);
         const { icon: Icon } = getCategoryVisual(cat.slug);
+        const comingSoon = !vasitaEmlakActive && COMING_SOON_SLUGS.includes(cat.slug);
 
-        if (!vasitaEmlakActive && COMING_SOON_SLUGS.includes(cat.slug)) {
+        // Emlak/Vasıta henüz aktif değil ama sahibinden tarzı dolgun görünüm
+        // için alt kategorileri de (tıklanamaz/soluk olarak) gösterilir.
+        if (comingSoon) {
           return (
-            <ComingSoonTrigger
-              key={cat.id}
-              className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-[13px] font-semibold text-slate-400"
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="flex-1">{cat.name}</span>
-              <ComingSoonBadge />
-            </ComingSoonTrigger>
+            <details key={cat.id} className="group" open>
+              <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-md px-2 py-1.5 text-left [&::-webkit-details-marker]:hidden">
+                <Icon className="h-4 w-4 shrink-0 text-slate-300" />
+                <ComingSoonTrigger className="flex-1 text-left text-[13px] font-semibold text-slate-400">
+                  {cat.name}
+                </ComingSoonTrigger>
+                <ComingSoonBadge />
+                <ChevronDownIcon className="h-3.5 w-3.5 shrink-0 text-slate-300 transition-transform duration-200 group-open:rotate-180" />
+              </summary>
+              {cat.children.length > 0 && (
+                <div className="mt-0.5 space-y-0 border-l border-slate-100 pl-2.5">
+                  {cat.children.map((child) => {
+                    const { icon: ChildIcon } = getCategoryVisual(child.slug);
+                    return (
+                      <span key={child.id} className="flex items-center gap-2 px-2 py-1 text-[12px] text-slate-300">
+                        <ChildIcon className="h-3.5 w-3.5 shrink-0" />
+                        {child.name}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </details>
           );
         }
 
@@ -60,11 +78,8 @@ export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
           );
         }
 
-        const isOpen =
-          cat.slug === activeSlug || cat.children.some((c) => c.slug === activeSlug);
-
         return (
-          <details key={cat.id} className="group" open={isOpen}>
+          <details key={cat.id} className="group" open>
             <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
               <Icon className="h-4 w-4 shrink-0 text-slate-400" />
               <Link href={`/?kategori=${cat.slug}`} className="flex-1 text-[13px] font-semibold text-foreground">
@@ -76,17 +91,19 @@ export async function CategorySidebar({ activeSlug }: { activeSlug?: string }) {
             <div className="mt-0.5 space-y-0 border-l border-slate-100 pl-2.5">
               {cat.children.map((child) => {
                 const active = child.slug === activeSlug;
+                const { icon: ChildIcon } = getCategoryVisual(child.slug);
                 return (
                   <Link
                     key={child.id}
                     href={`/?kategori=${child.slug}`}
-                    className={`flex items-center justify-between rounded-md px-2 py-1 text-[12px] transition-colors ${
+                    className={`flex items-center gap-2 rounded-md px-2 py-1 text-[12px] transition-colors ${
                       active
                         ? "bg-accent-light font-semibold text-brand"
                         : "text-slate-600 hover:bg-slate-50"
                     }`}
                   >
-                    <span>{child.name}</span>
+                    <ChildIcon className={`h-3.5 w-3.5 shrink-0 ${active ? "text-brand" : "text-slate-400"}`} />
+                    <span className="flex-1">{child.name}</span>
                     <span className="text-[11px] text-slate-400">({child._count.listings})</span>
                   </Link>
                 );
