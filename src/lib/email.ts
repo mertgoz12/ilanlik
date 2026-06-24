@@ -13,12 +13,9 @@ function getClient(): Resend {
   return cachedClient;
 }
 
-// Domain (ilanlio.com) Resend'de doğrulanana kadar EMAIL_FROM env değişkeni
-// Resend'in kendi test adresine (onboarding@resend.dev) işaret eder - bu
-// adresle SADECE Resend hesabının sahibinin kendi e-postasına mail
-// gönderilebilir. Domain doğrulanınca EMAIL_FROM="İlanlio <noreply@ilanlio.com>"
-// olarak güncellenip tüm kullanıcılara gönderim açılır.
-const DEFAULT_FROM = "İlanlio <onboarding@resend.dev>";
+// Domain (ilanlio.com) Resend'de doğrulandı - varsayılan gönderen adresi
+// gerçek domain üzerinden.
+const DEFAULT_FROM = "İlanlio <noreply@ilanlio.com>";
 
 export type SendEmailInput = {
   to: string;
