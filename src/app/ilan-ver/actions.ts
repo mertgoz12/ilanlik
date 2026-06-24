@@ -32,6 +32,9 @@ const DAMAGE_PART_STATUS_VALUES = new Set(DAMAGE_PART_STATUSES.map((s) => s.valu
 // Oturum çerezi, en son veritabanı sıfırlama/seed işleminden önce oluşturulmuş
 // olabilir; bu durumda session.id artık User tablosunda yok ve
 // prisma.listing.create() foreign key hatasıyla patlar. Önceden doğrula.
+// E-postası doğrulanmamış kullanıcı da burada engellenir - arayüzde
+// ilan-ver/page.tsx formu zaten gizler, ama "sadece arayüzü gizlemek
+// yetmez" ilkesiyle gerçek yetki kontrolü burada tekrarlanır.
 async function requireValidUser() {
   const session = await getSession();
   if (!session) {
@@ -40,11 +43,14 @@ async function requireValidUser() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.id },
-    select: { id: true },
+    select: { id: true, emailVerified: true },
   });
   if (!user) {
     await destroySession();
     redirect("/giris?callbackUrl=/ilan-ver");
+  }
+  if (!user.emailVerified) {
+    redirect("/ilan-ver");
   }
 
   return session;

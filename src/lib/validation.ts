@@ -141,6 +141,19 @@ export const changePasswordSchema = z
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
+// Şifremi unuttum > Yeni şifre belirleme sayfası
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, "Şifre en az 6 karakter olmalı").max(100),
+    passwordConfirm: z.string(),
+  })
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "Şifreler eşleşmiyor",
+    path: ["passwordConfirm"],
+  });
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
 // İletişim sayfası > İletişim formu
 export const contactMessageSchema = z.object({
   name: z.string().trim().min(2, "Ad soyad en az 2 karakter olmalı").max(80),

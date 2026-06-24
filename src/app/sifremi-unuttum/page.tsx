@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { AuthLayout } from "@/components/auth-layout";
+import { ForgotPasswordForm } from "./forgot-password-form";
 
 export const metadata: Metadata = {
   title: "Şifremi Unuttum | İlanlio",
@@ -7,9 +8,11 @@ export const metadata: Metadata = {
 
 export default function SifremiUnuttumPage() {
   return (
-    <PlaceholderPage
+    <AuthLayout
       title="Şifremi Unuttum"
-      description="Şifre sıfırlama özelliği çok yakında aktif olacak. Bu sırada hesabınıza erişim için lütfen destek@ilanlio.com adresinden bizimle iletişime geçin."
-    />
+      subtitle="E-posta adresini gir, sana şifre sıfırlama bağlantısı gönderelim."
+    >
+      <ForgotPasswordForm />
+    </AuthLayout>
   );
 }

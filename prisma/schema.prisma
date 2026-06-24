@@ -32,6 +32,20 @@ model User {
   badge        String? // "galeri" | "kurumsal" | null
   warningCount Int     @default(0)
 
+  // E-posta sahipliği doğrulaması (isVerified'dan farklı - bu alan admin'in
+  // elle verdiği "güvenilir satıcı" rozeti değil, yalnızca e-postanın gerçek
+  // sahibi tarafından açıldığının kanıtıdır). Doğrulanmadan ilan verilemez
+  // (bkz. ilan-ver/page.tsx). Google ile girişte e-posta zaten Google
+  // tarafından doğrulandığı için otomatik true verilir.
+  emailVerified                   Boolean   @default(false)
+  emailVerificationToken          String?   @unique
+  emailVerificationTokenExpiresAt DateTime?
+  // "Tekrar gönder" butonunun spam'i önlemek için son gönderim zamanı.
+  emailVerificationLastSentAt     DateTime?
+
+  passwordResetToken          String?   @unique
+  passwordResetTokenExpiresAt DateTime?
+
   // true ise bu hesap seed/demo verisidir (bkz. prisma/seed.ts) - canlıya
   // geçmeden önce admin panelinden ("Demo Veri Yönetimi") tek tıkla
   // silinebilir. Gerçek kullanıcılarda her zaman false.

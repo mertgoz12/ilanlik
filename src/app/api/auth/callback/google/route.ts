@@ -35,6 +35,7 @@ async function findOrCreateGoogleUser(googleUser: {
       data: {
         googleId: googleUser.sub,
         isVerified: true,
+        emailVerified: true,
         avatarUrl: existingByEmail.avatarUrl ?? googleUser.picture ?? null,
       },
     });
@@ -52,6 +53,7 @@ async function findOrCreateGoogleUser(googleUser: {
         password: randomPassword,
         googleId: googleUser.sub,
         isVerified: true,
+        emailVerified: true,
         avatarUrl: googleUser.picture ?? null,
       },
     });

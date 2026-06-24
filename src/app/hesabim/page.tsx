@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatCard } from "@/components/admin/stat-card";
 import { RelativeTime } from "@/components/relative-time";
+import { VerificationBanner } from "@/components/verification-banner";
 import { CheckCircleIcon, ChartBarIcon, EyeIcon, HeartIcon, MessageIcon, PlusIcon } from "@/components/icons";
 
 type ActivityItem = {
@@ -73,6 +74,8 @@ export default async function AccountDashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader icon={ChartBarIcon} title="Özet" description={`Hoş geldin, ${session.name}.`} accent="indigo" />
+
+      {!session.emailVerified && <VerificationBanner />}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Yayında Olan İlan" value={activeListingsCount} icon={CheckCircleIcon} accent="emerald" />

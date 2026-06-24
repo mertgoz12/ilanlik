@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { createSession } from "@/lib/session";
 import { registerSchema } from "@/lib/validation";
+import { sendInitialVerificationEmail } from "@/lib/email-verification";
 
 // Sahibinden tarzı e-posta-önce akışın 1. adımı: kullanıcı sadece e-posta
 // girip "Devam Et"e bastığında, asıl forma (ad/şifre/KVKK) geçmeden önce
@@ -53,8 +54,16 @@ export async function registerAction(
       email: parsed.data.email,
       password: hashed,
       phone: parsed.data.phone || null,
+      emailVerified: false,
     },
   });
+
+  const emailResult = await sendInitialVerificationEmail(user);
+  if (!emailResult.ok) {
+    // Kayıt yine de tamamlanır - kullanıcı /hesabim/ayarlar veya ilan verme
+    // ekranındaki "tekrar gönder" butonuyla daha sonra deneyebilir.
+    console.error("Doğrulama e-postası gönderilemedi:", emailResult.error);
+  }
 
   await createSession({ id: user.id, email: user.email, name: user.name, role: user.role });
 
