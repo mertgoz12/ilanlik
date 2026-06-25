@@ -365,7 +365,7 @@ export default async function HomePage({
           </div>
 
           {showVitrin && (
-            <aside className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 xl:col-span-1 xl:grid-cols-1">
+            <aside className="grid grid-cols-1 content-start gap-4 self-start sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 xl:col-span-1 xl:grid-cols-1">
               <QuickPostCard />
               <SafetyTipsCard />
               <BlogTipsCard />
