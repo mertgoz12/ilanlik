@@ -353,6 +353,11 @@ export default async function ListingDetailPage({
             >
               {RULE_FIYAT_DURUMU_LABELS[ruleAnalysis.fiyat_analizi.fiyat_durumu]}
             </span>
+            {!isVehicle && listing.condition && (
+              <span className="ml-2 mt-3 inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-sm font-semibold text-slate-600">
+                {listing.condition}
+              </span>
+            )}
             <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-slate-100 pt-4 text-sm text-slate-500">
               <span className="flex items-center gap-1">
                 <LocationIcon className="h-4 w-4" />

@@ -95,6 +95,11 @@ model Listing {
   description String?
   price       Float
 
+  // Vasıta DIŞI (genel) ilanlar için durum bilgisi - "Sıfır" | "İkinci El".
+  // Vasıta'da bunun karşılığı zaten vehicleCondition alanıdır ("Klasik"
+  // seçeneği de içerir); aynı anlamı iki kez modellememek için ayrı tutulur.
+  condition String?
+
   // Vasıta'ya özel alanlar - diğer kategorilerde null
   brand        String?
   model        String?

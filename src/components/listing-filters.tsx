@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FUEL_TYPES } from "@/lib/car-data";
 import { isVasitaSlug } from "@/lib/categories";
+import { CONDITION_VALUES } from "@/lib/validation";
 import { FilterBrandModel } from "./filter-brand-model";
 import { LocationSelect } from "./location-select";
 import { SaveSearchButton } from "./save-search-button";
@@ -72,6 +73,27 @@ export function ListingFilters({
           )}
 
           <LocationSelect defaultIl={searchParams.il} defaultIlce={searchParams.ilce} />
+
+          {!isVehicleCategory && (
+            <div>
+              <label htmlFor="condition" className={labelClass}>
+                Durum
+              </label>
+              <select
+                id="condition"
+                name="condition"
+                defaultValue={searchParams.condition ?? ""}
+                className={selectClass}
+              >
+                <option value="">Tümü</option>
+                {CONDITION_VALUES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {isVehicleCategory && (
             <>

@@ -59,6 +59,7 @@ export type EditListingFormState = {
     title?: string[];
     description?: string[];
     price?: string[];
+    condition?: string[];
     il?: string[];
     ilce?: string[];
   };
@@ -76,6 +77,7 @@ export async function updateListingAction(
     title: formData.get("title"),
     description: formData.get("description"),
     price: formData.get("price"),
+    condition: formData.get("condition"),
     il: formData.get("il"),
     ilce: formData.get("ilce"),
   });
@@ -90,6 +92,7 @@ export async function updateListingAction(
       title: parsed.data.title,
       description: parsed.data.description || null,
       price: parsed.data.price,
+      condition: parsed.data.condition || null,
       il: parsed.data.il,
       ilce: parsed.data.ilce,
     },

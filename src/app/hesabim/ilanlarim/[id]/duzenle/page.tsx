@@ -19,6 +19,8 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
       title: true,
       description: true,
       price: true,
+      condition: true,
+      brand: true,
       il: true,
       ilce: true,
       images: { orderBy: { order: "asc" }, select: { id: true, url: true } },

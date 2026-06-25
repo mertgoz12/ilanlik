@@ -19,6 +19,7 @@ export async function buildListingWhere(sp: ListingSearchParams): Promise<Prisma
   if (sp.il) where.il = sp.il;
   if (sp.ilce) where.ilce = sp.ilce;
   if (sp.fuelType) where.fuelType = sp.fuelType;
+  if (sp.condition) where.condition = sp.condition;
 
   if (sp.minYear || sp.maxYear) {
     where.year = {

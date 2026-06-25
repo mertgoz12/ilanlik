@@ -2,9 +2,10 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { FormSection, errorClass, inputClass, labelClass } from "@/components/form-ui";
+import { FormSection, errorClass, inputClass, labelClass, selectClass } from "@/components/form-ui";
 import { LocationSelect } from "@/components/location-select";
 import { PencilIcon } from "@/components/icons";
+import { CONDITION_VALUES } from "@/lib/validation";
 import { updateListingAction, type EditListingFormState } from "../../actions";
 
 type EditListingFormProps = {
@@ -13,6 +14,8 @@ type EditListingFormProps = {
     title: string;
     description: string | null;
     price: number;
+    condition: string | null;
+    brand: string | null;
     il: string;
     ilce: string;
   };
@@ -53,6 +56,23 @@ export function EditListingForm({ listing }: EditListingFormProps) {
           />
           {state.fieldErrors?.price && <p className={errorClass}>{state.fieldErrors.price[0]}</p>}
         </div>
+
+        {listing.brand === null && (
+          <div>
+            <label htmlFor="condition" className={labelClass}>
+              Durum
+            </label>
+            <select id="condition" name="condition" defaultValue={listing.condition ?? ""} className={selectClass}>
+              <option value="">Belirtilmemiş</option>
+              {CONDITION_VALUES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            {state.fieldErrors?.condition && <p className={errorClass}>{state.fieldErrors.condition[0]}</p>}
+          </div>
+        )}
 
         <div>
           <label htmlFor="description" className={labelClass}>

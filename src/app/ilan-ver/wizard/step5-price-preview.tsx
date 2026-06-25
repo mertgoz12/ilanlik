@@ -37,6 +37,7 @@ export function Step5PricePreview({ wizard, onChange, photos, errors }: Step5Pro
     listingNo: "preview",
     title,
     description: wizard.description || null,
+    condition: null,
     price: priceNumber,
     brand: wizard.brand || null,
     model: wizard.model || null,

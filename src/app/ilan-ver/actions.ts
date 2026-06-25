@@ -373,6 +373,7 @@ export async function createSimpleListingAction(
     categoryId: formData.get("categoryId"),
     description: formData.get("description"),
     price: formData.get("price"),
+    condition: formData.get("condition"),
     il: formData.get("il"),
     ilce: formData.get("ilce"),
   };
@@ -400,6 +401,7 @@ export async function createSimpleListingAction(
       categoryId: data.categoryId,
       description: data.description || null,
       price: data.price,
+      condition: data.condition || null,
       il: data.il,
       ilce: data.ilce,
       userId: session.id,

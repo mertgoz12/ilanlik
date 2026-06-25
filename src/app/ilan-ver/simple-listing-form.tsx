@@ -5,7 +5,8 @@ import Link from "next/link";
 import { createSimpleListingAction, type SimpleListingFormState } from "./actions";
 import { ImagePicker } from "@/components/image-picker";
 import { LocationSelect } from "@/components/location-select";
-import { errorClass, FormSection, inputClass, labelClass } from "@/components/form-ui";
+import { errorClass, FormSection, inputClass, labelClass, selectClass } from "@/components/form-ui";
+import { CONDITION_VALUES } from "@/lib/validation";
 import { AlertIcon } from "@/components/icons";
 
 const initialState: SimpleListingFormState = {};
@@ -81,6 +82,21 @@ export function SimpleListingForm({ categoryId }: { categoryId: string }) {
             className={inputClass}
           />
           {state.fieldErrors?.price && <p className={errorClass}>{state.fieldErrors.price[0]}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="condition" className={labelClass}>
+            Durum
+          </label>
+          <select id="condition" name="condition" defaultValue="" className={selectClass}>
+            <option value="">Belirtilmemiş</option>
+            {CONDITION_VALUES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          {state.fieldErrors?.condition && <p className={errorClass}>{state.fieldErrors.condition[0]}</p>}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

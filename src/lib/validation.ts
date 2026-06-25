@@ -94,11 +94,16 @@ export const listingSchema = z.object({
 
 export type ListingInput = z.infer<typeof listingSchema>;
 
+// Vasıta dışı (genel) ilanlar için durum seçenekleri - bkz. prisma/schema.prisma
+// üzerindeki Listing.condition alanı notu.
+export const CONDITION_VALUES = ["Sıfır", "İkinci El"] as const;
+
 export const simpleListingSchema = z.object({
   title: z.string().trim().min(5, "Başlık en az 5 karakter olmalı").max(120),
   categoryId: z.string().trim().min(1, "Kategori seçin"),
   description: z.string().trim().max(4000).optional().or(z.literal("")),
   price: z.coerce.number().min(1, "Geçerli bir fiyat girin").max(1_000_000_000),
+  condition: z.enum(CONDITION_VALUES).optional().or(z.literal("")),
   il: z.string().trim().min(1, "İl seçin"),
   ilce: z.string().trim().min(1, "İlçe seçin"),
 });
@@ -111,6 +116,7 @@ export const editListingSchema = z.object({
   title: z.string().trim().min(5, "Başlık en az 5 karakter olmalı").max(120),
   description: z.string().trim().max(4000).optional().or(z.literal("")),
   price: z.coerce.number().min(1, "Geçerli bir fiyat girin").max(1_000_000_000),
+  condition: z.enum(CONDITION_VALUES).optional().or(z.literal("")),
   il: z.string().trim().min(1, "İl seçin"),
   ilce: z.string().trim().min(1, "İlçe seçin"),
 });
