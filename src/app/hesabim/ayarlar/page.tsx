@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/admin/page-header";
 import { FormSection } from "@/components/form-ui";
 import { CalendarIcon, CheckCircleIcon, TagIcon, XCircleIcon } from "@/components/icons";
+import { VerificationBanner } from "@/components/verification-banner";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
 import { NotificationPreferencesForm } from "./notification-preferences-form";
@@ -27,7 +28,7 @@ export default async function AccountSettingsPage() {
       il: true,
       ilce: true,
       avatarUrl: true,
-      isVerified: true,
+      emailVerified: true,
       badge: true,
       createdAt: true,
       notifyNewMessage: true,
@@ -41,6 +42,8 @@ export default async function AccountSettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader icon={Settings} title="Hesap Ayarları" description="Profil, güvenlik ve bildirim tercihleriniz." accent="slate" />
+
+      {!user.emailVerified && <VerificationBanner />}
 
       <ProfileForm
         name={user.name}
@@ -74,15 +77,15 @@ export default async function AccountSettingsPage() {
           <div className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
             <span
               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                user.isVerified ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400"
+                user.emailVerified ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400"
               }`}
             >
-              {user.isVerified ? <CheckCircleIcon className="h-4.5 w-4.5" /> : <XCircleIcon className="h-4.5 w-4.5" />}
+              {user.emailVerified ? <CheckCircleIcon className="h-4.5 w-4.5" /> : <XCircleIcon className="h-4.5 w-4.5" />}
             </span>
             <div>
-              <p className="text-xs text-slate-400">Doğrulama Durumu</p>
+              <p className="text-xs text-slate-400">E-posta Doğrulama</p>
               <p className="text-sm font-semibold text-foreground">
-                {user.isVerified ? "Doğrulanmış" : "Doğrulanmamış"}
+                {user.emailVerified ? "Doğrulanmış" : "Doğrulanmamış"}
               </p>
             </div>
           </div>
