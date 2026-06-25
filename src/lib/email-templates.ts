@@ -1,6 +1,7 @@
 const BRAND_NAVY = "#1b2a4a";
 const BRAND_AMBER = "#f5a623";
 const SITE_URL = "https://ilanlio.com";
+const LOGO_URL = "https://ilanlio.com/logo.png";
 
 // Tüm e-postaların paylaştığı ortak iskelet: lacivert üst şerit + logo,
 // beyaz kart içinde içerik, sarı CTA butonu, alt bilgi notu. Mail
@@ -30,9 +31,9 @@ export function renderEmailLayout(options: {
         <td align="center">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#ffffff;border-radius:16px;overflow:hidden;">
             <tr>
-              <td style="background-color:${BRAND_NAVY};padding:28px 32px;text-align:center;">
-                <span style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">
-                  ilan<span style="color:${BRAND_AMBER};">lio</span><span style="color:#94a3b8;font-weight:600;">.com</span>
+              <td style="background-color:${BRAND_NAVY};padding:24px 32px;text-align:center;">
+                <span style="display:inline-block;background-color:#ffffff;border-radius:8px;padding:8px 14px;line-height:0;">
+                  <img src="${LOGO_URL}" width="140" height="35" alt="İlanlio" style="display:block;border:0;outline:none;" />
                 </span>
               </td>
             </tr>
