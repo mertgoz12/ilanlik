@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Package } from "lucide-react";
 import type { Prisma } from "@/generated/prisma/client";
 import { requireUserPage } from "@/lib/account-auth";
 import { prisma } from "@/lib/prisma";
@@ -14,7 +15,6 @@ import { ActionButton, ConfirmActionButton } from "@/components/admin/action-but
 import { TrustBadge } from "@/components/trust-badge";
 import {
   AlertIcon,
-  CarIcon,
   CheckIcon,
   ClockIcon,
   ImageIcon,
@@ -112,7 +112,7 @@ export default async function MyListingsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={CarIcon}
+        icon={Package}
         title="İlan Yönetimi"
         description={`Toplam ${totalCount} ilanınız var.`}
         accent="blue"

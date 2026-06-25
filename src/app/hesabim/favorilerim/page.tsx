@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Heart } from "lucide-react";
 import { requireUserPage } from "@/lib/account-auth";
 import { prisma } from "@/lib/prisma";
 import { buildListingWhere, parseListingQuery } from "@/lib/listing-query";
@@ -9,7 +10,6 @@ import { ListingCard } from "@/components/listing-card";
 import {
   BellIcon,
   CheckIcon,
-  HeartIcon,
   SearchIcon,
   TrashIcon,
   UserIcon,
@@ -62,7 +62,7 @@ export default async function FavoritesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={HeartIcon}
+        icon={Heart}
         title="Favorilerim"
         description="Favori ilanlarınız, kaydettiğiniz aramalar ve takip ettiğiniz satıcılar."
         accent="red"
@@ -73,7 +73,7 @@ export default async function FavoritesPage() {
         {favorites.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-xl bg-white p-10 text-center text-sm text-slate-400 shadow-soft">
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-300">
-              <HeartIcon className="h-6 w-6" />
+              <Heart className="h-6 w-6" />
             </span>
             Henüz favori ilanınız yok. İlan kartlarındaki kalp simgesine tıklayarak ekleyebilirsiniz.
           </div>

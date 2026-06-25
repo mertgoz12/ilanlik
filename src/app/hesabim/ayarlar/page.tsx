@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
+import { Settings } from "lucide-react";
 import { requireUserPage } from "@/lib/account-auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/admin/page-header";
 import { FormSection } from "@/components/form-ui";
-import { CalendarIcon, CheckCircleIcon, GearIcon, TagIcon, XCircleIcon } from "@/components/icons";
+import { CalendarIcon, CheckCircleIcon, TagIcon, XCircleIcon } from "@/components/icons";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
 import { NotificationPreferencesForm } from "./notification-preferences-form";
@@ -39,7 +40,7 @@ export default async function AccountSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader icon={GearIcon} title="Hesap Ayarları" description="Profil, güvenlik ve bildirim tercihleriniz." />
+      <PageHeader icon={Settings} title="Hesap Ayarları" description="Profil, güvenlik ve bildirim tercihleriniz." accent="slate" />
 
       <ProfileForm
         name={user.name}

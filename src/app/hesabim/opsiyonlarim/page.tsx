@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Bookmark } from "lucide-react";
 import { requireUserPage } from "@/lib/account-auth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
@@ -40,7 +41,7 @@ export default async function MyOptionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={ClockIcon}
+        icon={Bookmark}
         title="Opsiyonladıklarım"
         description="Rezerve ettiğiniz ilanlar ve opsiyon geçmişiniz."
         accent="amber"

@@ -1,9 +1,10 @@
+import { MessageCircle } from "lucide-react";
 import { requireUserPage } from "@/lib/account-auth";
 import { getConversationDetail, getUserConversations, markConversationRead } from "@/lib/messages";
 import { PageHeader } from "@/components/admin/page-header";
 import { ConversationList } from "@/components/account/conversation-list";
 import { ConversationThread } from "@/components/account/conversation-thread";
-import { InboxIcon, MessageIcon } from "@/components/icons";
+import { InboxIcon } from "@/components/icons";
 
 export default async function MessagesPage({
   searchParams,
@@ -28,7 +29,7 @@ export default async function MessagesPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={MessageIcon}
+        icon={MessageCircle}
         title="Mesajlar"
         description="Alıcı ve satıcılarla olan görüşmeleriniz."
         accent="blue"
