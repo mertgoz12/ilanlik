@@ -16,12 +16,16 @@ const FROM_WHO_BY_BADGE: Record<string, string> = {
 export default async function IlanVerPage() {
   const selectable = selectableCategories();
   const session = await getSession();
+  // Vasıta kapalıyken (bkz. isVasitaEmlakActive) marka/model/jenerasyon/donanım
+  // seçimi hiç gösterilmez, bu yüzden binlerce satırlık kataloğu (bkz.
+  // vehicle-catalog.ts'teki yorum) her /ilan-ver ziyaretinde çekmek anlamsız
+  // bir ağ gecikmesi yaratıyordu - Vasıta açılana kadar tamamen atlanır.
   const [dbCategories, catalog, user] = await Promise.all([
     prisma.category.findMany({
       where: { slug: { in: selectable.map((c) => c.slug) } },
       select: { id: true, slug: true },
     }),
-    getVehicleCatalog(),
+    isVasitaEmlakActive() ? getVehicleCatalog() : Promise.resolve([]),
     session
       ? prisma.user.findUnique({ where: { id: session.id }, select: { badge: true, emailVerified: true } })
       : null,
