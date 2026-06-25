@@ -17,7 +17,6 @@ import {
   CarIcon,
   CheckIcon,
   ClockIcon,
-  EyeIcon,
   ImageIcon,
   InboxIcon,
   MessageIcon,
@@ -52,6 +51,7 @@ export default async function MyListingsPage({
       include: {
         images: { orderBy: { order: "asc" }, take: 1 },
         optionHolder: { select: { name: true } },
+        _count: { select: { images: true } },
       },
     }),
     prisma.listing.groupBy({ by: ["status"], where: { userId: session.id }, _count: { _all: true } }),
@@ -96,7 +96,10 @@ export default async function MyListingsPage({
       ...aiFlags.map((f) => f.aciklama),
     ];
     const isVehicle = listing.brand !== null && listing.damageStatus !== null;
-    const trustScore = isVehicle ? computeFallbackTrustScore(listing) : computeGenericFallbackTrustScore(listing);
+    const listingWithPhotoCount = { ...listing, photoCount: listing._count.images };
+    const trustScore = isVehicle
+      ? computeFallbackTrustScore(listingWithPhotoCount)
+      : computeGenericFallbackTrustScore(listingWithPhotoCount);
     return {
       listing,
       flagged: flagReasons.length > 0,
@@ -187,10 +190,6 @@ export default async function MyListingsPage({
                 </div>
                 <p className="mt-0.5 text-sm font-semibold text-foreground">{formatPrice(listing.price)}</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <EyeIcon className="h-3.5 w-3.5" />
-                    {listing.views} görüntülenme
-                  </span>
                   <span className="flex items-center gap-1">
                     <MessageIcon className="h-3.5 w-3.5" />
                     {messageCount} mesaj

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FUEL_TYPES } from "@/lib/car-data";
+import { isVasitaSlug } from "@/lib/categories";
 import { FilterBrandModel } from "./filter-brand-model";
 import { LocationSelect } from "./location-select";
 import { SaveSearchButton } from "./save-search-button";
@@ -28,6 +29,11 @@ export function ListingFilters({
   const queryString = new URLSearchParams(
     Object.entries(searchParams).filter(([key, value]) => Boolean(value) && key !== "page") as [string, string][],
   ).toString();
+  // Marka/Model/Yakıt Tipi/Yıl sadece Vasıta kategorisi gezilirken anlamlı -
+  // diğer (şu an aktif) kategorilerde bu alanlar hiç gösterilmez. Vasıta şu an
+  // "çok yakında" kapalı olduğundan bu dal pratikte hiç render edilmiyor, ama
+  // ileride ARAC_EMLAK_AKTIF açıldığında otomatik devreye girer.
+  const isVehicleCategory = !!searchParams.kategori && isVasitaSlug(searchParams.kategori);
 
   return (
     <form method="get" className="rounded-lg bg-white p-4 shadow-soft sm:p-5">
@@ -61,47 +67,53 @@ export function ListingFilters({
         </summary>
 
         <div className="mt-4 grid grid-cols-1 gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2 lg:grid-cols-4">
-          <FilterBrandModel defaultBrand={searchParams.brand} defaultModel={searchParams.model} />
+          {isVehicleCategory && (
+            <FilterBrandModel defaultBrand={searchParams.brand} defaultModel={searchParams.model} />
+          )}
 
           <LocationSelect defaultIl={searchParams.il} defaultIlce={searchParams.ilce} />
 
-          <div>
-            <label htmlFor="minYear" className={labelClass}>
-              Min. Yıl
-            </label>
-            <select
-              id="minYear"
-              name="minYear"
-              defaultValue={searchParams.minYear ?? ""}
-              className={selectClass}
-            >
-              <option value="">Tümü</option>
-              {YEARS.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
+          {isVehicleCategory && (
+            <>
+              <div>
+                <label htmlFor="minYear" className={labelClass}>
+                  Min. Yıl
+                </label>
+                <select
+                  id="minYear"
+                  name="minYear"
+                  defaultValue={searchParams.minYear ?? ""}
+                  className={selectClass}
+                >
+                  <option value="">Tümü</option>
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <div>
-            <label htmlFor="maxYear" className={labelClass}>
-              Maks. Yıl
-            </label>
-            <select
-              id="maxYear"
-              name="maxYear"
-              defaultValue={searchParams.maxYear ?? ""}
-              className={selectClass}
-            >
-              <option value="">Tümü</option>
-              {YEARS.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div>
+                <label htmlFor="maxYear" className={labelClass}>
+                  Maks. Yıl
+                </label>
+                <select
+                  id="maxYear"
+                  name="maxYear"
+                  defaultValue={searchParams.maxYear ?? ""}
+                  className={selectClass}
+                >
+                  <option value="">Tümü</option>
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
           <div>
             <label htmlFor="minPrice" className={labelClass}>
@@ -133,24 +145,26 @@ export function ListingFilters({
             />
           </div>
 
-          <div>
-            <label htmlFor="fuelType" className={labelClass}>
-              Yakıt Tipi
-            </label>
-            <select
-              id="fuelType"
-              name="fuelType"
-              defaultValue={searchParams.fuelType ?? ""}
-              className={selectClass}
-            >
-              <option value="">Tümü</option>
-              {FUEL_TYPES.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </div>
+          {isVehicleCategory && (
+            <div>
+              <label htmlFor="fuelType" className={labelClass}>
+                Yakıt Tipi
+              </label>
+              <select
+                id="fuelType"
+                name="fuelType"
+                defaultValue={searchParams.fuelType ?? ""}
+                className={selectClass}
+              >
+                <option value="">Tümü</option>
+                {FUEL_TYPES.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label htmlFor="sort" className={labelClass}>

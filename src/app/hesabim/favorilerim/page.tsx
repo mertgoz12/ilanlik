@@ -24,7 +24,15 @@ export default async function FavoritesPage() {
     prisma.favorite.findMany({
       where: { userId: session.id, listing: { status: "active" } },
       orderBy: { createdAt: "desc" },
-      include: { listing: { include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true } } },
+      include: {
+        listing: {
+          include: {
+            images: { orderBy: { order: "asc" }, take: 1 },
+            category: true,
+            _count: { select: { images: true } },
+          },
+        },
+      },
     }),
     prisma.savedSearch.findMany({ where: { userId: session.id }, orderBy: { createdAt: "desc" } }),
     prisma.sellerFollow.findMany({

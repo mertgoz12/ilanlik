@@ -80,6 +80,7 @@ export function Step5PricePreview({ wizard, onChange, photos, errors }: Step5Pro
     updatedAt: new Date(),
     category: { id: "preview", name: "Önizleme", slug: "preview", order: 0, parentId: null },
     images: imageUrls.map((url, i) => ({ id: `preview-${i}`, url, order: i, listingId: "preview" })),
+    _count: { images: imageUrls.length },
   };
 
   const specEntries: { label: string; value: string }[] = [

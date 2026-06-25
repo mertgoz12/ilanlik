@@ -137,7 +137,11 @@ export default async function HomePage({
       : prisma.listing.findMany({
           where,
           orderBy,
-          include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
+          include: {
+            images: { orderBy: { order: "asc" }, take: 1 },
+            category: true,
+            _count: { select: { images: true } },
+          },
           skip: (page - 1) * PAGE_SIZE,
           take: PAGE_SIZE,
         }),
@@ -147,7 +151,11 @@ export default async function HomePage({
           where: { status: "active", optionStatus: { not: "opsiyonlandi" }, ...excludeComingSoon },
           orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
           take: FEATURED_COUNT + RECENT_COUNT,
-          include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
+          include: {
+            images: { orderBy: { order: "asc" }, take: 1 },
+            category: true,
+            _count: { select: { images: true } },
+          },
         })
       : Promise.resolve([]),
     showVitrin
@@ -205,12 +213,19 @@ export default async function HomePage({
     description: string | null;
     damageInfo: string | null;
     tramerAmount: number | null;
+    bodyType?: string | null;
+    color?: string | null;
+    enginePower?: string | null;
+    engineVolume?: string | null;
+    drivetrain?: string | null;
+    _count: { images: number };
   }): RuleAnalysisResult {
+    const input = { ...listing, photoCount: listing._count.images };
     if (listing.brand !== null) {
-      const result = computeRuleAnalysis(listing, vehicleComparables, settings.deprecation);
+      const result = computeRuleAnalysis(input, vehicleComparables, settings.deprecation);
       if (result) return result;
     }
-    return computeGenericRuleAnalysis(listing, genericComparables);
+    return computeGenericRuleAnalysis(input, genericComparables);
   }
 
   const listingsHeading = categoryName ?? "Son Eklenen İlanlar";

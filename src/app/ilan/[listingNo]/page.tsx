@@ -28,7 +28,7 @@ import { VehicleTrimSpecs } from "@/components/vehicle-trim-specs";
 import { ListingCard } from "@/components/listing-card";
 import { ListingTabs, type ListingTab } from "@/components/listing-tabs";
 import { OptionPanel } from "@/components/option-panel";
-import { EyeIcon, LocationIcon } from "@/components/icons";
+import { LocationIcon } from "@/components/icons";
 
 const NOT_SPECIFIED = "Belirtilmemiş";
 
@@ -100,14 +100,11 @@ export default async function ListingDetailPage({
   // Basit görüntülenme sayacı: ilan gerçekten gösterilebilir durumdaysa
   // (yukarıdaki kontrolleri geçtiyse) her sayfa açılışında +1. Tekilleştirme
   // (aynı ziyaretçinin tekrar açması) bilinçli olarak yapılmıyor - basit
-  // tutulması istendi. Güncel değeri (henüz bayat olan `listing.views`
-  // yerine) doğrudan update'in döndürdüğü satırdan kullanıyoruz.
-  const viewsResult = await prisma.listing.update({
+  // tutulması istendi. Değer veritabanında tutulur ama arayüzde gösterilmez.
+  await prisma.listing.update({
     where: { id: listing.id },
     data: { views: { increment: 1 } },
-    select: { views: true },
   });
-  const views = viewsResult.views;
 
   const optionSettings = await getOptionSettings();
 
@@ -170,7 +167,11 @@ export default async function ListingDetailPage({
       },
       orderBy: { createdAt: "desc" },
       take: SIMILAR_COUNT,
-      include: { images: { orderBy: { order: "asc" }, take: 1 }, category: true },
+      include: {
+        images: { orderBy: { order: "asc" }, take: 1 },
+        category: true,
+        _count: { select: { images: true } },
+      },
     }),
     // KATMAN 1 (kural tabanlı fiyat aralığı) için emsal ilanlar - yapay zeka
     // kullanılmaz. Vasıta: aynı marka/model.
@@ -361,11 +362,6 @@ export default async function ListingDetailPage({
               <span>{formatDate(listing.createdAt)}</span>
               <span className="text-slate-300">·</span>
               <span>İlan No: {listing.listingNo}</span>
-              <span className="text-slate-300">·</span>
-              <span className="flex items-center gap-1">
-                <EyeIcon className="h-4 w-4" />
-                {views} görüntülenme
-              </span>
             </div>
           </section>
 

@@ -13,7 +13,7 @@ import {
 } from "@/lib/rule-analysis";
 import type { ListingWithImages } from "@/lib/types";
 import { FavoriteButton } from "./favorite-button";
-import { EyeIcon, LocationIcon } from "./icons";
+import { LocationIcon } from "./icons";
 import { TrustBadge } from "./trust-badge";
 
 type ListingCardProps = {
@@ -29,8 +29,8 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
   const trustScore =
     ruleAnalysis?.tutarlilik_analizi.guven_puani ??
     (isVehicle
-      ? computeFallbackTrustScore({ ...listing, photoCount: listing.images.length })
-      : computeGenericFallbackTrustScore({ ...listing, photoCount: listing.images.length }));
+      ? computeFallbackTrustScore({ ...listing, photoCount: listing._count.images })
+      : computeGenericFallbackTrustScore({ ...listing, photoCount: listing._count.images }));
   const fiyatDurumu = ruleAnalysis?.fiyat_analizi.fiyat_durumu;
   // Fotoğrafsız ilanlarda kart asla boş/beyaz durmasın diye kategoriye uygun
   // renkli bir rozet+ikon placeholder gösterilir (bkz. category-visuals.ts).
@@ -124,13 +124,7 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
         )}
 
         <div className="mt-auto flex flex-col gap-0.5 pt-0.5">
-          <div className="flex items-center justify-between gap-1">
-            <p className="text-base font-bold text-foreground sm:text-lg">{formatPrice(listing.price)}</p>
-            <span className="flex shrink-0 items-center gap-0.5 text-[10px] text-slate-400">
-              <EyeIcon className="h-3 w-3" />
-              {listing.views}
-            </span>
-          </div>
+          <p className="text-base font-bold text-foreground sm:text-lg">{formatPrice(listing.price)}</p>
           {fiyatDurumu && fiyatDurumu !== "yetersiz_veri" && (
             <span
               className={`inline-flex w-fit items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${RULE_FIYAT_DURUMU_STYLES[fiyatDurumu]}`}
