@@ -68,12 +68,52 @@ export const CATEGORY_TREE: CategoryNode[] = [
     slug: "ikinci-el-ve-sifir-alisveris",
     children: [
       { name: "Bilgisayar", slug: "bilgisayar" },
-      { name: "Cep Telefonu & Aksesuar", slug: "cep-telefonu" },
+      {
+        name: "Cep Telefonu & Aksesuar",
+        slug: "cep-telefonu",
+        children: [
+          { name: "Cep Telefonu", slug: "cep-telefonu-cihaz" },
+          { name: "Tablet", slug: "tablet" },
+          { name: "Akıllı Saat & Bileklik", slug: "akilli-saat-bileklik" },
+          { name: "Telefon Aksesuarları", slug: "telefon-aksesuarlari" },
+        ],
+      },
       { name: "Fotoğraf & Kamera", slug: "fotograf-kamera" },
-      { name: "Ev Dekorasyon", slug: "ev-dekorasyon" },
+      {
+        name: "Ev Dekorasyon",
+        slug: "ev-dekorasyon",
+        children: [
+          {
+            name: "Mobilya",
+            slug: "mobilya",
+            children: [
+              { name: "Koltuk & Kanepe", slug: "koltuk-kanepe" },
+              { name: "Masa & Sandalye", slug: "masa-sandalye" },
+              { name: "Yatak Odası", slug: "yatak-odasi" },
+              { name: "Dolap & Vestiyer", slug: "dolap-vestiyer" },
+              { name: "Diğer Mobilya", slug: "diger-mobilya" },
+            ],
+          },
+          { name: "Aydınlatma", slug: "aydinlatma" },
+          { name: "Halı & Kilim", slug: "hali-kilim" },
+          { name: "Ev Tekstili", slug: "ev-tekstili" },
+          { name: "Dekoratif Aksesuar & Süs Eşyası", slug: "dekoratif-aksesuar" },
+          { name: "Mutfak Gereçleri", slug: "mutfak-gerecleri" },
+        ],
+      },
       { name: "Ev Elektroniği", slug: "ev-elektronigi" },
       { name: "Elektrikli Ev Aletleri", slug: "elektrikli-ev-aletleri" },
-      { name: "Giyim & Aksesuar", slug: "giyim-aksesuar" },
+      {
+        name: "Giyim & Aksesuar",
+        slug: "giyim-aksesuar",
+        children: [
+          { name: "Kadın Giyim", slug: "kadin-giyim" },
+          { name: "Erkek Giyim", slug: "erkek-giyim" },
+          { name: "Ayakkabı", slug: "ayakkabi" },
+          { name: "Çanta", slug: "canta" },
+          { name: "Aksesuar", slug: "giyim-aksesuar-diger" },
+        ],
+      },
       { name: "Saat", slug: "saat" },
       { name: "Anne & Bebek", slug: "anne-bebek" },
       { name: "Kişisel Bakım & Kozmetik", slug: "kisisel-bakim-kozmetik" },
@@ -188,30 +228,45 @@ export type SelectableCategory = {
   slug: string;
   name: string;
   groupName: string;
+  /** Kökten bu yaprağa kadar tüm ad'lar (breadcrumb) - örn. ["İkinci El ve
+   * Sıfır Alışveriş", "Ev Dekorasyon", "Mobilya", "Koltuk & Kanepe"]. */
+  breadcrumb: string[];
   isVasita: boolean;
 };
 
-/** Flat list of categories that listings can be assigned to (subcategories,
- * or top-level categories that have no subcategories of their own). Vasıta
- * ve Emlak, ARAC_EMLAK_AKTIF açılana kadar bu listeden (ve dolayısıyla ilan
- * verme formundan) tamamen çıkarılır - "çok yakında" mesajı menüde ayrıca
- * gösterilir (bkz. CategorySidebar, Footer). */
+// Bir ilanın atanabileceği KESİN yaprak kategoriler (hiç alt kategorisi
+// olmayanlar) - ağaç kaç seviye derinse de aynı şekilde çalışır, sadece
+// önceki sürümdeki 2 seviye varsayımı kaldırıldı. Vasıta ve Emlak,
+// ARAC_EMLAK_AKTIF açılana kadar bu listeden (ve dolayısıyla ilan verme
+// formundan) tamamen çıkarılır - "çok yakında" mesajı menüde ayrıca
+// gösterilir (bkz. CategorySidebar, Footer).
+function collectLeaves(
+  node: CategoryNode,
+  ancestors: CategoryNode[],
+  isVasita: boolean,
+  result: SelectableCategory[],
+): void {
+  const path = [...ancestors, node];
+  if (!node.children || node.children.length === 0) {
+    result.push({
+      slug: node.slug,
+      name: node.name,
+      groupName: path[path.length - 2]?.name ?? node.name,
+      breadcrumb: path.map((n) => n.name),
+      isVasita,
+    });
+    return;
+  }
+  for (const child of node.children) {
+    collectLeaves(child, path, isVasita, result);
+  }
+}
+
 export function selectableCategories(): SelectableCategory[] {
   const result: SelectableCategory[] = [];
   for (const node of CATEGORY_TREE) {
     if (COMING_SOON_SLUGS.includes(node.slug) && !isVasitaEmlakActive()) continue;
-    if (node.children && node.children.length > 0) {
-      for (const child of node.children) {
-        result.push({
-          slug: child.slug,
-          name: child.name,
-          groupName: node.name,
-          isVasita: node.slug === VASITA_SLUG,
-        });
-      }
-    } else {
-      result.push({ slug: node.slug, name: node.name, groupName: node.name, isVasita: false });
-    }
+    collectLeaves(node, [], node.slug === VASITA_SLUG, result);
   }
   return result;
 }

@@ -1,13 +1,15 @@
+import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
 import { CATEGORY_TREE, type CategoryNode } from "../src/lib/categories";
 
 // src/lib/categories.ts'teki CATEGORY_TREE'yi (uygulamanın tek doğru kaynağı)
-// gerçek veritabanı Category tablosuyla senkronize eder. Yeni kategoriler
-// oluşturulur, mevcut olanların adı/sırası güncellenir. Ağaçta artık
-// bulunmayan ama GERÇEK ilanı olan bir alt kategori asla silinmez (sadece
-// konsola uyarı yazılır) - veri kaybı riskine girilmez.
-async function syncChildren(parentId: string, children: CategoryNode[]) {
-  const desiredSlugs = new Set(children.map((c) => c.slug));
+// gerçek veritabanı Category tablosuyla senkronize eder - ağaç kaç seviye
+// derinse de (kök -> alt -> alt -> alt ...) recursive olarak çalışır. Yeni
+// kategoriler oluşturulur, mevcut olanların adı/sırası/üst kategorisi
+// güncellenir. Ağaçta artık bulunmayan ama GERÇEK ilanı olan bir kategori
+// asla silinmez (sadece konsola uyarı yazılır) - veri kaybı riskine girilmez.
+async function syncLevel(parentId: string | null, nodes: CategoryNode[]) {
+  const desiredSlugs = new Set(nodes.map((n) => n.slug));
 
   const existing = await prisma.category.findMany({
     where: { parentId },
@@ -26,31 +28,21 @@ async function syncChildren(parentId: string, children: CategoryNode[]) {
     console.log(`silindi (ilansız): ${row.name} (${row.slug})`);
   }
 
-  for (let i = 0; i < children.length; i++) {
-    const child = children[i];
-    await prisma.category.upsert({
-      where: { slug: child.slug },
-      create: { name: child.name, slug: child.slug, parentId, order: i },
-      update: { name: child.name, order: i, parentId },
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    const row = await prisma.category.upsert({
+      where: { slug: node.slug },
+      create: { name: node.name, slug: node.slug, order: i, parentId },
+      update: { name: node.name, order: i, parentId },
     });
+    if (node.children && node.children.length > 0) {
+      await syncLevel(row.id, node.children);
+    }
   }
 }
 
 async function main() {
-  for (let i = 0; i < CATEGORY_TREE.length; i++) {
-    const node = CATEGORY_TREE[i];
-    const parent = await prisma.category.upsert({
-      where: { slug: node.slug },
-      create: { name: node.name, slug: node.slug, order: i },
-      update: { name: node.name, order: i },
-    });
-    console.log(`üst kategori: ${parent.name} (${parent.slug})`);
-
-    if (node.children && node.children.length > 0) {
-      await syncChildren(parent.id, node.children);
-    }
-  }
-
+  await syncLevel(null, CATEGORY_TREE);
   console.log("\nSenkronizasyon tamamlandı.");
   await prisma.$disconnect();
 }
