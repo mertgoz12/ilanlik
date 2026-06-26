@@ -1,14 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ListingWizard } from "./wizard/listing-wizard";
-import { SimpleListingForm } from "./simple-listing-form";
 import { CheckIcon, ChevronRightIcon } from "@/components/icons";
 import {
   CATEGORY_THEME_CLASSES,
   getCategoryVisual,
 } from "@/lib/category-visuals";
-import type { VehicleCatalogBrand } from "@/lib/vehicle-catalog";
 
 export type CategoryOption = {
   id: string;
@@ -67,7 +64,13 @@ function nodeAtPath(root: TreeNode, path: string[]): TreeNode {
   return node;
 }
 
-function CategoryIconBadge({ slug, size = "md" }: { slug: string; size?: "md" | "lg" }) {
+export function CategoryIconBadge({
+  slug,
+  size = "md",
+}: {
+  slug: string;
+  size?: "md" | "lg";
+}) {
   const { icon: Icon, theme } = getCategoryVisual(slug);
   const t = CATEGORY_THEME_CLASSES[theme];
   const box = size === "lg" ? "h-12 w-12 rounded-xl" : "h-11 w-11 rounded-xl";
@@ -83,17 +86,14 @@ function CategoryIconBadge({ slug, size = "md" }: { slug: string; size?: "md" | 
 
 export function CategoryPicker({
   categories,
-  catalog,
-  defaultFromWho,
+  onSelect,
 }: {
   categories: CategoryOption[];
-  catalog: VehicleCatalogBrand[];
-  defaultFromWho?: string;
+  onSelect: (category: CategoryOption) => void;
 }) {
   const tree = useMemo(() => buildTree(categories), [categories]);
   // path = seçili ara düğümlerin slug zinciri (köke göre).
   const [path, setPath] = useState<string[]>([]);
-  const [selected, setSelected] = useState<CategoryOption | null>(null);
 
   const current = nodeAtPath(tree, path);
 
@@ -102,7 +102,8 @@ export function CategoryPicker({
     if (node.children.length > 0) {
       setPath((p) => [...p, node.slug]);
     } else if (node.leaf) {
-      setSelected(categories.find((c) => c.id === node.leaf!.id) ?? null);
+      const cat = categories.find((c) => c.id === node.leaf!.id);
+      if (cat) onSelect(cat);
     }
   }
 
@@ -119,36 +120,15 @@ export function CategoryPicker({
     return items;
   }, [tree, path]);
 
-  if (selected) {
-    return (
-      <div className="space-y-6">
-        <SelectedCategoryCard selected={selected} onChange={() => setSelected(null)} />
-        {selected.isVasita ? (
-          <ListingWizard
-            categoryId={selected.id}
-            categoryName={selected.name}
-            catalog={catalog}
-            defaultFromWho={defaultFromWho}
-          />
-        ) : (
-          <SimpleListingForm categoryId={selected.id} />
-        )}
-      </div>
-    );
-  }
-
   return (
     <section className="overflow-hidden rounded-2xl bg-white shadow-soft">
-      {/* Başlık + breadcrumb */}
       <div className="border-b border-slate-100 bg-gradient-to-br from-brand-50/60 to-white px-5 py-4 sm:px-6">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-xs font-bold text-white">
-            1
-          </span>
-          <h2 className="font-display text-base font-bold text-brand sm:text-lg">
-            Kategori Seçin
-          </h2>
-        </div>
+        <h2 className="font-display text-base font-bold text-brand sm:text-lg">
+          Hangi kategoride ilan veriyorsunuz?
+        </h2>
+        <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+          Ürününüze en uygun kategoriyi seçin, doğru alıcıya ulaşın.
+        </p>
 
         <nav className="mt-3 flex flex-wrap items-center gap-1.5 text-sm">
           <button
@@ -186,7 +166,6 @@ export function CategoryPicker({
         </nav>
       </div>
 
-      {/* Kart grid */}
       <div
         key={path.join("/")}
         className="animate-fade-in-up grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 sm:gap-4 sm:p-6"
@@ -225,14 +204,15 @@ export function CategoryPicker({
   );
 }
 
-function SelectedCategoryCard({
+export function SelectedCategoryCard({
   selected,
   onChange,
 }: {
   selected: CategoryOption;
   onChange: () => void;
 }) {
-  const leafSlug = selected.breadcrumbSlugs[selected.breadcrumbSlugs.length - 1] ?? selected.slug;
+  const leafSlug =
+    selected.breadcrumbSlugs[selected.breadcrumbSlugs.length - 1] ?? selected.slug;
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-accent bg-accent-light/50 p-4 sm:p-5">
       <div className="flex min-w-0 items-center gap-3">

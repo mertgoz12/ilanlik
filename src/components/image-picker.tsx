@@ -20,10 +20,12 @@ export function ImagePicker() {
     <div>
       <label
         htmlFor="images"
-        className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition-colors hover:border-emerald-400 hover:bg-emerald-50/50"
+        className="group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition-colors hover:border-accent hover:bg-accent-light/40"
       >
-        <ImageIcon className="h-8 w-8 text-slate-400" />
-        <span className="text-sm font-medium text-slate-700">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-400 shadow-soft transition-colors group-hover:text-accent-dark">
+          <ImageIcon className="h-6 w-6" />
+        </span>
+        <span className="text-sm font-semibold text-slate-700">
           Fotoğraf eklemek için tıklayın
         </span>
         <span className="text-xs text-slate-400">
@@ -43,13 +45,19 @@ export function ImagePicker() {
       {previews.length > 0 && (
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
           {previews.map((src, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={src}
-              src={src}
-              alt={`Önizleme ${i + 1}`}
-              className="aspect-square w-full rounded-lg border border-slate-200 object-cover"
-            />
+            <span key={src} className="relative block">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={`Önizleme ${i + 1}`}
+                className="aspect-square w-full rounded-xl border border-slate-200 object-cover shadow-soft"
+              />
+              {i === 0 && (
+                <span className="absolute left-1.5 top-1.5 rounded-md bg-brand px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                  Kapak
+                </span>
+              )}
+            </span>
           ))}
         </div>
       )}

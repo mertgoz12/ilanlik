@@ -7,7 +7,7 @@ import { labelClass, selectClass } from "./form-ui";
 const LOCATIONS = locationData as { il: string; ilceler: string[] }[];
 
 const darkSelectClass =
-  "w-full appearance-none rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30";
+  "w-full appearance-none rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30";
 
 type LocationSelectProps = {
   defaultIl?: string;

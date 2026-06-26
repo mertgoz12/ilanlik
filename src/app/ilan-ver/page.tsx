@@ -4,7 +4,7 @@ import { getVehicleCatalog } from "@/lib/vehicle-catalog";
 import { isVasitaEmlakActive, selectableCategories } from "@/lib/categories";
 import { InfoIcon } from "@/components/icons";
 import { EmailVerificationGate } from "@/components/email-verification-gate";
-import { CategoryPicker } from "./category-picker";
+import { ListingFlow } from "./listing-flow";
 
 // Kullanıcının üyelik rozetine göre "Kimden" alanının varsayılan değeri
 // (kullanıcı isterse formda değiştirebilir).
@@ -62,7 +62,7 @@ export default async function IlanVerPage() {
       {user && !user.emailVerified ? (
         <EmailVerificationGate />
       ) : (
-        <CategoryPicker categories={categories} catalog={catalog} defaultFromWho={defaultFromWho} />
+        <ListingFlow categories={categories} catalog={catalog} defaultFromWho={defaultFromWho} />
       )}
     </div>
   );
