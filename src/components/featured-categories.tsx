@@ -19,13 +19,13 @@ const VASITA_CATEGORIES = [
 // İlk yayın sürümünde vitrin ikinci el/sıfır ürünlere odaklı - gerçek
 // kategori ağacındaki (categories.ts) isim/slug'larla eşleşir.
 const IKINCI_EL_CATEGORIES = [
+  { name: "Elektronik", slug: "elektronik" },
   { name: "Cep Telefonu", slug: "cep-telefonu" },
   { name: "Bilgisayar", slug: "bilgisayar" },
-  { name: "Ev Elektroniği", slug: "ev-elektronigi" },
-  { name: "Giyim & Aksesuar", slug: "giyim-aksesuar" },
-  { name: "Oyun & Hobi", slug: "oyun-hobi" },
-  { name: "Spor", slug: "spor" },
-  { name: "Ev Dekorasyon", slug: "ev-dekorasyon" },
+  { name: "Ev & Yaşam", slug: "ev-yasam" },
+  { name: "Moda & Giyim", slug: "giyim-aksesuar" },
+  { name: "Hobi & Eğlence", slug: "hobi-oyuncak" },
+  { name: "Spor & Outdoor", slug: "spor" },
   { name: "Yedek Parça", slug: "yedek-parca-aksesuar-donanim-tuning" },
 ];
 

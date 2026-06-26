@@ -31,8 +31,9 @@ function categoryLinks(): FooterLink[] {
   return [
     { label: "Vasıta", href: "/?kategori=vasita", comingSoon: !vasitaEmlakActive },
     { label: "Emlak", href: "/?kategori=emlak", comingSoon: !vasitaEmlakActive },
-    { label: "İkinci El", href: "/?kategori=ikinci-el-ve-sifir-alisveris" },
-    { label: "Parça & Aksesuar", href: "/?kategori=yedek-parca-aksesuar-donanim-tuning" },
+    { label: "Elektronik", href: "/?kategori=elektronik" },
+    { label: "Ev & Yaşam", href: "/?kategori=ev-yasam" },
+    { label: "Moda & Giyim", href: "/?kategori=giyim-aksesuar" },
   ];
 }
 
