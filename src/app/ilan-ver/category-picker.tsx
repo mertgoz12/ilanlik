@@ -3,8 +3,11 @@
 import { useMemo, useState } from "react";
 import { ListingWizard } from "./wizard/listing-wizard";
 import { SimpleListingForm } from "./simple-listing-form";
-import { FormSection } from "@/components/form-ui";
 import { CheckIcon, ChevronRightIcon } from "@/components/icons";
+import {
+  CATEGORY_THEME_CLASSES,
+  getCategoryVisual,
+} from "@/lib/category-visuals";
 import type { VehicleCatalogBrand } from "@/lib/vehicle-catalog";
 
 export type CategoryOption = {
@@ -12,34 +15,37 @@ export type CategoryOption = {
   slug: string;
   name: string;
   groupName: string;
-  /** Kökten bu yaprağa kadar tüm ad'lar - kademeli seçicide gezinme ve
-   * onay özeti bunun üzerinden çizilir (bkz. categories.ts breadcrumb). */
+  /** Kökten bu yaprağa kadar tüm ad'lar (bkz. categories.ts breadcrumb). */
   breadcrumb: string[];
+  /** breadcrumb ile aynı sırada her seviyenin slug'ı - ara düğüm ikonları. */
+  breadcrumbSlugs: string[];
   isVasita: boolean;
 };
 
 type LeafInfo = { id: string; slug: string; isVasita: boolean };
 
 // Düz yaprak listesinden (breadcrumb'lar üzerinden) gezinilebilir kategori
-// ağacını yeniden kurar. Ara düğümler yalnızca ad ile temsil edilir (gezinme
-// için yeterli); yalnızca yapraklar gerçek bir DB id'si taşır. Vasıta/Emlak
-// gibi "çok yakında" kategoriler zaten selectableCategories'te elendiği için
-// burada da hiç görünmez.
+// ağacını yeniden kurar. Her düğüm kendi slug'ını taşır (ikon/tema için);
+// yalnızca yapraklar gerçek bir DB id'si taşır. Vasıta/Emlak gibi "çok
+// yakında" kategoriler zaten selectableCategories'te elendiği için burada da
+// hiç görünmez.
 type TreeNode = {
   name: string;
+  slug: string;
   children: TreeNode[];
   leaf: LeafInfo | null;
 };
 
 function buildTree(categories: CategoryOption[]): TreeNode {
-  const root: TreeNode = { name: "", children: [], leaf: null };
+  const root: TreeNode = { name: "", slug: "", children: [], leaf: null };
   for (const c of categories) {
     let node = root;
     for (let i = 0; i < c.breadcrumb.length; i++) {
       const name = c.breadcrumb[i];
-      let child = node.children.find((n) => n.name === name);
+      const slug = c.breadcrumbSlugs[i];
+      let child = node.children.find((n) => n.slug === slug);
       if (!child) {
-        child = { name, children: [], leaf: null };
+        child = { name, slug, children: [], leaf: null };
         node.children.push(child);
       }
       if (i === c.breadcrumb.length - 1) {
@@ -53,12 +59,26 @@ function buildTree(categories: CategoryOption[]): TreeNode {
 
 function nodeAtPath(root: TreeNode, path: string[]): TreeNode {
   let node = root;
-  for (const name of path) {
-    const next = node.children.find((n) => n.name === name);
+  for (const slug of path) {
+    const next = node.children.find((n) => n.slug === slug);
     if (!next) break;
     node = next;
   }
   return node;
+}
+
+function CategoryIconBadge({ slug, size = "md" }: { slug: string; size?: "md" | "lg" }) {
+  const { icon: Icon, theme } = getCategoryVisual(slug);
+  const t = CATEGORY_THEME_CLASSES[theme];
+  const box = size === "lg" ? "h-12 w-12 rounded-xl" : "h-11 w-11 rounded-xl";
+  const ic = size === "lg" ? "h-6 w-6" : "h-5.5 w-5.5";
+  return (
+    <span
+      className={`flex shrink-0 items-center justify-center text-white shadow-soft ${box} ${t.badge}`}
+    >
+      <Icon className={ic} />
+    </span>
+  );
 }
 
 export function CategoryPicker({
@@ -71,6 +91,7 @@ export function CategoryPicker({
   defaultFromWho?: string;
 }) {
   const tree = useMemo(() => buildTree(categories), [categories]);
+  // path = seçili ara düğümlerin slug zinciri (köke göre).
   const [path, setPath] = useState<string[]>([]);
   const [selected, setSelected] = useState<CategoryOption | null>(null);
 
@@ -79,107 +100,30 @@ export function CategoryPicker({
   function handlePick(node: TreeNode) {
     // Alt kategorisi olan düğümde bir seviye in; yaprakta ise seçimi yap.
     if (node.children.length > 0) {
-      setPath((p) => [...p, node.name]);
+      setPath((p) => [...p, node.slug]);
     } else if (node.leaf) {
       setSelected(categories.find((c) => c.id === node.leaf!.id) ?? null);
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <FormSection
-        title="Kategori"
-        description="İlanınızı en doğru kategoriye yerleştirin. Adım adım ilerleyerek alt kategoriyi seçin."
-      >
-        {selected ? (
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <span className="flex flex-wrap items-center gap-1.5 text-sm text-slate-700">
-              <CheckIcon className="h-4 w-4 shrink-0 text-emerald-600" />
-              {selected.breadcrumb.map((name, i) => (
-                <span key={i} className="flex items-center gap-1.5">
-                  {i > 0 && <ChevronRightIcon className="h-3.5 w-3.5 text-slate-400" />}
-                  <span
-                    className={
-                      i === selected.breadcrumb.length - 1
-                        ? "font-semibold text-emerald-800"
-                        : "text-slate-500"
-                    }
-                  >
-                    {name}
-                  </span>
-                </span>
-              ))}
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelected(null)}
-              className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
-            >
-              Değiştir
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {path.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 text-sm">
-                <button
-                  type="button"
-                  onClick={() => setPath([])}
-                  className="font-medium text-emerald-700 transition-colors hover:underline"
-                >
-                  Tüm kategoriler
-                </button>
-                {path.map((name, i) => {
-                  const isLast = i === path.length - 1;
-                  return (
-                    <span key={i} className="flex items-center gap-1.5">
-                      <ChevronRightIcon className="h-3.5 w-3.5 text-slate-400" />
-                      <button
-                        type="button"
-                        onClick={() => setPath(path.slice(0, i + 1))}
-                        disabled={isLast}
-                        className={
-                          isLast
-                            ? "font-semibold text-slate-700"
-                            : "font-medium text-emerald-700 transition-colors hover:underline"
-                        }
-                      >
-                        {name}
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
+  // Üst breadcrumb için ara düğüm adlarını path slug'larından çöz.
+  const trail = useMemo(() => {
+    const items: { name: string; slug: string }[] = [];
+    let node = tree;
+    for (const slug of path) {
+      const next = node.children.find((n) => n.slug === slug);
+      if (!next) break;
+      items.push({ name: next.name, slug: next.slug });
+      node = next;
+    }
+    return items;
+  }, [tree, path]);
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {current.children.map((node) => {
-                const isLeaf = node.children.length === 0;
-                return (
-                  <button
-                    key={node.name}
-                    type="button"
-                    onClick={() => handlePick(node)}
-                    className="group flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3.5 text-left text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-emerald-400 hover:bg-emerald-50"
-                  >
-                    <span>{node.name}</span>
-                    {isLeaf ? (
-                      <span className="shrink-0 text-xs font-medium text-slate-400 transition-colors group-hover:text-emerald-600">
-                        Seç
-                      </span>
-                    ) : (
-                      <ChevronRightIcon className="h-4 w-4 shrink-0 text-slate-400 transition-colors group-hover:text-emerald-600" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </FormSection>
-
-      {selected ? (
-        selected.isVasita ? (
+  if (selected) {
+    return (
+      <div className="space-y-6">
+        <SelectedCategoryCard selected={selected} onChange={() => setSelected(null)} />
+        {selected.isVasita ? (
           <ListingWizard
             categoryId={selected.id}
             categoryName={selected.name}
@@ -188,12 +132,138 @@ export function CategoryPicker({
           />
         ) : (
           <SimpleListingForm categoryId={selected.id} />
-        )
-      ) : (
-        <p className="rounded-lg bg-white p-6 text-sm text-slate-500 shadow-soft">
-          Devam etmek için yukarıdan bir kategori seçin.
-        </p>
-      )}
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <section className="overflow-hidden rounded-2xl bg-white shadow-soft">
+      {/* Başlık + breadcrumb */}
+      <div className="border-b border-slate-100 bg-gradient-to-br from-brand-50/60 to-white px-5 py-4 sm:px-6">
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-xs font-bold text-white">
+            1
+          </span>
+          <h2 className="font-display text-base font-bold text-brand sm:text-lg">
+            Kategori Seçin
+          </h2>
+        </div>
+
+        <nav className="mt-3 flex flex-wrap items-center gap-1.5 text-sm">
+          <button
+            type="button"
+            onClick={() => setPath([])}
+            disabled={path.length === 0}
+            className={`rounded-full px-3 py-1 font-semibold transition-colors ${
+              path.length === 0
+                ? "bg-brand text-white"
+                : "bg-brand-50 text-brand hover:bg-brand-100"
+            }`}
+          >
+            Tüm Kategoriler
+          </button>
+          {trail.map((item, i) => {
+            const isLast = i === trail.length - 1;
+            return (
+              <span key={item.slug} className="flex items-center gap-1.5">
+                <ChevronRightIcon className="h-3.5 w-3.5 text-slate-300" />
+                <button
+                  type="button"
+                  onClick={() => setPath(path.slice(0, i + 1))}
+                  disabled={isLast}
+                  className={`rounded-full px-3 py-1 font-semibold transition-colors ${
+                    isLast
+                      ? "bg-accent-light text-accent-dark"
+                      : "bg-brand-50 text-brand hover:bg-brand-100"
+                  }`}
+                >
+                  {item.name}
+                </button>
+              </span>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Kart grid */}
+      <div
+        key={path.join("/")}
+        className="animate-fade-in-up grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 sm:gap-4 sm:p-6"
+      >
+        {current.children.map((node) => {
+          const isLeaf = node.children.length === 0;
+          return (
+            <button
+              key={node.slug}
+              type="button"
+              onClick={() => handlePick(node)}
+              className="group relative flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:shadow-soft-lg focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
+            >
+              <span className="transition-transform duration-200 group-hover:scale-110">
+                <CategoryIconBadge slug={node.slug} size="lg" />
+              </span>
+              <span className="text-[13px] font-semibold leading-tight text-foreground sm:text-sm">
+                {node.name}
+              </span>
+              {isLeaf ? (
+                <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-accent-dark opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  Seç
+                  <ChevronRightIcon className="h-3 w-3" />
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-slate-400">
+                  {node.children.length} alt kategori
+                  <ChevronRightIcon className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function SelectedCategoryCard({
+  selected,
+  onChange,
+}: {
+  selected: CategoryOption;
+  onChange: () => void;
+}) {
+  const leafSlug = selected.breadcrumbSlugs[selected.breadcrumbSlugs.length - 1] ?? selected.slug;
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-accent bg-accent-light/50 p-4 sm:p-5">
+      <div className="flex min-w-0 items-center gap-3">
+        <CategoryIconBadge slug={leafSlug} size="lg" />
+        <div className="min-w-0">
+          <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-accent-dark">
+            <CheckIcon className="h-3.5 w-3.5" />
+            Seçilen Kategori
+          </p>
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm">
+            {selected.breadcrumb.map((name, i) => {
+              const isLast = i === selected.breadcrumb.length - 1;
+              return (
+                <span key={i} className="flex items-center gap-1.5">
+                  {i > 0 && <ChevronRightIcon className="h-3 w-3 text-slate-400" />}
+                  <span className={isLast ? "font-bold text-brand" : "text-slate-500"}>
+                    {name}
+                  </span>
+                </span>
+              );
+            })}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onChange}
+        className="shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+      >
+        Değiştir
+      </button>
     </div>
   );
 }

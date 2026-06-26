@@ -433,9 +433,12 @@ export type SelectableCategory = {
   slug: string;
   name: string;
   groupName: string;
-  /** Kökten bu yaprağa kadar tüm ad'lar (breadcrumb) - örn. ["İkinci El ve
-   * Sıfır Alışveriş", "Ev Dekorasyon", "Mobilya", "Koltuk & Kanepe"]. */
+  /** Kökten bu yaprağa kadar tüm ad'lar (breadcrumb) - örn. ["Ev & Yaşam",
+   * "Mobilya", "Koltuk & Kanepe"]. */
   breadcrumb: string[];
+  /** breadcrumb ile aynı sırada, her seviyenin slug'ı - kademeli seçicide
+   * ara düğümlere de ikon/tema atayabilmek için (bkz. category-picker). */
+  breadcrumbSlugs: string[];
   isVasita: boolean;
 };
 
@@ -458,6 +461,7 @@ function collectLeaves(
       name: node.name,
       groupName: path[path.length - 2]?.name ?? node.name,
       breadcrumb: path.map((n) => n.name),
+      breadcrumbSlugs: path.map((n) => n.slug),
       isVasita,
     });
     return;
