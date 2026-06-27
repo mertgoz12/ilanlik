@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { createSimpleListingAction, type SimpleListingFormState } from "./actions";
-import { ImagePicker } from "@/components/image-picker";
+import { HiddenFileInput, SortableImagePicker } from "@/components/sortable-image-picker";
 import { LocationSelect } from "@/components/location-select";
 import { errorClass, inputClass, labelClass, selectClass } from "@/components/form-ui";
 import { CONDITION_VALUES } from "@/lib/validation";
@@ -68,6 +68,9 @@ export function SimpleListingForm({
 }) {
   const [state, formAction, pending] = useActionState(createSimpleListingAction, initialState);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+  // Fotoğraflar adımlar arası kaybolmasın diye form düzeyinde tutulur; gerçek
+  // gönderilen input (HiddenFileInput) bu sırayla senkron tutulur.
+  const [photos, setPhotos] = useState<File[]>([]);
 
   // Sunucu, görünmeyen bir adıma ait alanda hata döndürürse kullanıcıyı o
   // adıma geri götür ki hatayı görebilsin.
@@ -135,6 +138,8 @@ export function SimpleListingForm({
   return (
     <form action={formAction} onKeyDown={handleKeyDown} className="space-y-5">
       <input type="hidden" name="categoryId" value={categoryId} />
+      {/* Gerçek gönderilen "images" inputu - adımlar arası mount kalır. */}
+      <HiddenFileInput files={photos} />
 
       {state.error && (
         <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -236,7 +241,7 @@ export function SimpleListingForm({
           title="Fotoğraflar"
           description="Net ve aydınlık fotoğraflar ilanınızın daha hızlı satılmasını sağlar."
         >
-          <ImagePicker />
+          <SortableImagePicker files={photos} onFilesChange={setPhotos} idPrefix="ilan" />
         </StepCard>
 
         <div className="mt-5 flex items-center justify-between gap-3">
