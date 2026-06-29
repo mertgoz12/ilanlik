@@ -377,6 +377,9 @@ export default async function ListingDetailPage({
             phone={listing.user.phone}
             listingId={listing.id}
             listingNo={listing.listingNo}
+            listingTitle={listing.title}
+            listingPrice={listing.price}
+            listingImageUrl={listing.images[0]?.url ?? null}
             sellerId={listing.user.id}
             currentUserId={session?.id ?? null}
             isFollowing={isFollowing}
