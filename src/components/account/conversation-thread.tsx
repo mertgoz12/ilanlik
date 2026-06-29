@@ -1,13 +1,16 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
-import { ChevronLeftIcon, ImageIcon } from "@/components/icons";
+import { ChevronLeftIcon, ImageIcon, TagIcon } from "@/components/icons";
+import { OfferBubble } from "@/components/offer-bubble";
+import { OfferDialog } from "@/components/offer-dialog";
 import { RelativeTime } from "@/components/relative-time";
 import { useUnreadMessages } from "@/components/unread-messages-context";
 import { formatPrice } from "@/lib/format";
+import type { OfferView } from "@/lib/offers";
 import { sendMessageAction, type MessageFormState } from "@/app/hesabim/mesajlar/actions";
 import type { ConversationDetail } from "@/lib/messages";
 
@@ -25,6 +28,12 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
   const otherUser = conversation.buyerId === currentUserId ? conversation.seller : conversation.buyer;
   const listingImage = conversation.listing.images[0]?.url ?? null;
   const { markRead } = useUnreadMessages();
+
+  // Teklif/karşı teklif penceresi. defaultAmount, "Karşı/Yeni Teklif Ver"den
+  // gelen ön-doldurma tutarıdır.
+  const [offerComposer, setOfferComposer] = useState<{ open: boolean; defaultAmount?: number }>({
+    open: false,
+  });
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -83,6 +92,22 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
       <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-4">
         {conversation.messages.map((message) => {
           const isOwn = message.senderId === currentUserId;
+          // Teklif mesajı: metin baloncuğu yerine aksiyonlu teklif baloncuğu.
+          if (message.type === "offer" && message.offer) {
+            return (
+              <div
+                key={message.id}
+                className={`flex items-end gap-1.5 ${isOwn ? "flex-row-reverse justify-start" : "justify-start"}`}
+              >
+                <Avatar name={message.sender.name} src={message.sender.avatarUrl} size="xs" className="mb-0.5" />
+                <OfferBubble
+                  offer={message.offer as OfferView}
+                  currentUserId={currentUserId}
+                  onCounter={(amount) => setOfferComposer({ open: true, defaultAmount: amount })}
+                />
+              </div>
+            );
+          }
           return (
             <div
               key={message.id}
@@ -108,6 +133,16 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
 
       <form ref={formRef} action={formAction} className="border-t border-slate-100 p-3">
         <input type="hidden" name="conversationId" value={conversation.id} />
+        {conversation.listing.isNegotiable && (
+          <button
+            type="button"
+            onClick={() => setOfferComposer({ open: true })}
+            className="mb-2 inline-flex items-center gap-1.5 rounded-lg border border-accent bg-accent-light px-3 py-1.5 text-xs font-bold text-brand transition-colors hover:bg-accent/30"
+          >
+            <TagIcon className="h-3.5 w-3.5" />
+            Teklif Ver
+          </button>
+        )}
         {state.error && <p className="mb-2 text-xs font-medium text-red-600">{state.error}</p>}
         <div className="flex items-end gap-2">
           <textarea
@@ -129,6 +164,17 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
           Güvenliğiniz için telefon numarası veya dış bağlantı paylaşmayın; iletişimi platform üzerinden sürdürün.
         </p>
       </form>
+
+      {conversation.listing.isNegotiable && (
+        <OfferDialog
+          open={offerComposer.open}
+          onClose={() => setOfferComposer({ open: false })}
+          conversationId={conversation.id}
+          listingPrice={conversation.listing.price}
+          defaultAmount={offerComposer.defaultAmount}
+          title="Teklif Ver"
+        />
+      )}
     </div>
   );
 }

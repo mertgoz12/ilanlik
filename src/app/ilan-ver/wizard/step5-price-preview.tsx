@@ -57,6 +57,7 @@ export function Step5PricePreview({ wizard, onChange, photos, errors }: Step5Pro
     fromWho: wizard.fromWho || null,
     exchange: wizard.exchange || null,
     warranty: wizard.warranty || null,
+    isNegotiable: wizard.vehicleCondition === "İkinci El",
     vehicleTrimRawSpecs: null,
     damageStatus,
     damageInfo: JSON.stringify(wizard.damageInfo),

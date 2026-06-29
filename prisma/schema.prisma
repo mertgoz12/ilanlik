@@ -67,6 +67,7 @@ model User {
   buyerConversations  Conversation[] @relation("BuyerConversations")
   sellerConversations Conversation[] @relation("SellerConversations")
   messages            Message[]
+  offers              Offer[]        @relation("OfferCreator")
 
   // Opsiyonlama (rezervasyon) sistemi
   heldOptions      ListingOption[] @relation("ListingOptionBuyer")
@@ -140,6 +141,11 @@ model Listing {
   isFeatured Boolean @default(false)
   views      Int     @default(0)
 
+  // İkinci el ürünlerde "Teklif Ver" (pazarlık) sistemini açar. Satıcı ilan
+  // verirken işaretler; ikinci el ürünlerde varsayılan olarak açıktır. Açıkken
+  // ilan detayında alıcıya "Teklif Ver" butonu gösterilir (bkz. Offer modeli).
+  isNegotiable Boolean @default(false)
+
   // true ise bu ilan seed/demo verisidir (bkz. prisma/seed.ts). Demo ilanlar
   // status="pasif" ile yayından gizli tutulur (sadece admin panelinden
   // görülebilir); canlıya geçmeden önce admin "Demo Veri Yönetimi"nden tek
@@ -171,6 +177,7 @@ model Listing {
   listingReports ListingReport[]
   favoritedBy    Favorite[]
   conversations  Conversation[]
+  offers         Offer[]
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -338,6 +345,7 @@ model Conversation {
   sellerId  String
   seller    User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
   messages  Message[]
+  offers    Offer[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -356,7 +364,41 @@ model Message {
   readAt         DateTime?
   createdAt      DateTime     @default(now())
 
+  // "text" = normal mesaj; "offer" = bir teklif/karşı teklif baloncuğu (offerId
+  // dolu). Teklif baloncuğu, ilişkili Offer'ın güncel durumunu (bekliyor/kabul/
+  // red/karşı teklif) ve uygun butonları (kabul/reddet/yeni teklif) gösterir.
+  type    String  @default("text")
+  offerId String?
+  offer   Offer?  @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
   @@index([conversationId, createdAt])
+}
+
+// İkinci el ilan pazarlığı: alıcı-satıcı arasındaki her teklif/karşı teklif bir
+// satır olarak tutulur (geçmiş/zincir parentId ile). Bir konuşma içinde aynı
+// anda en fazla bir teklif "pending" olur; yeni teklif gelince önceki "countered"
+// olur. Her teklif bir "offer" tipi Message ile mesajlaşmada baloncuk gösterir.
+model Offer {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  listingId      String
+  listing        Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdById    String
+  createdBy      User         @relation("OfferCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  role           String // "buyer" | "seller" - teklifi verenin bu pazarlıktaki rolü
+  amount         Float
+  note           String?
+  status         String       @default("pending") // "pending" | "accepted" | "rejected" | "countered"
+  parentId       String?
+  parent         Offer?       @relation("OfferChain", fields: [parentId], references: [id], onDelete: SetNull)
+  counters       Offer[]      @relation("OfferChain")
+  messages       Message[]
+  createdAt      DateTime     @default(now())
+  resolvedAt     DateTime?
+
+  @@index([conversationId, createdAt])
+  @@index([status])
 }
 
 // İlan Verme Sihirbazı > Araç Bilgileri adımı için kademeli (cascading) araç

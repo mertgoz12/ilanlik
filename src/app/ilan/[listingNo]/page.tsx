@@ -383,6 +383,7 @@ export default async function ListingDetailPage({
             sellerId={listing.user.id}
             currentUserId={session?.id ?? null}
             isFollowing={isFollowing}
+            isNegotiable={listing.isNegotiable}
           />
 
           <OptionPanel

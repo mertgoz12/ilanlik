@@ -2,14 +2,19 @@
 
 import { useActionState, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { reportListingAction, type ReportListingState } from "@/app/ilan/[listingNo]/actions";
-import { openListingConversationAction } from "@/app/hesabim/mesajlar/actions";
+import {
+  openListingConversationAction,
+  type SubmitOfferState,
+} from "@/app/hesabim/mesajlar/actions";
 import { toggleSellerFollowAction } from "@/lib/social-actions";
 import { Avatar } from "./avatar";
 import { ListingChatWidget } from "./listing-chat-widget";
+import { OfferDialog } from "./offer-dialog";
 import { errorClass, inputClass } from "./form-ui";
-import { CheckIcon, FlagIcon, MessageIcon, PhoneIcon, UsersIcon } from "./icons";
+import { CheckIcon, FlagIcon, MessageIcon, PhoneIcon, TagIcon, UsersIcon } from "./icons";
 
 type SellerCardProps = {
   name: string;
@@ -24,6 +29,8 @@ type SellerCardProps = {
   sellerId: string;
   currentUserId: string | null;
   isFollowing?: boolean;
+  // İlan pazarlığa açık mı (ikinci el) — "Teklif Ver" butonu bununla görünür.
+  isNegotiable?: boolean;
 };
 
 const initialReportState: ReportListingState = {};
@@ -41,10 +48,13 @@ export function SellerCard({
   sellerId,
   currentUserId,
   isFollowing = false,
+  isNegotiable = false,
 }: SellerCardProps) {
+  const router = useRouter();
   const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
   const [following, setFollowing] = useState(isFollowing);
   const [, startFollowTransition] = useTransition();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -66,6 +76,39 @@ export function SellerCard({
         setFollowing((prev) => !prev);
       }
     });
+  }
+
+  // Teklif gönderilince oluşan/güncellenen konuşmaya götür (alıcı teklifini ve
+  // satıcının yanıtını orada takip eder).
+  function handleOfferSubmitted(state: SubmitOfferState) {
+    if (state.conversationId) router.push(`/hesabim/mesajlar?c=${state.conversationId}`);
+  }
+
+  // "Teklif Ver" butonu: yalnız pazarlığa açık ilanda ve kendi ilanı değilse.
+  // Giriş yoksa girişe yönlendirir; varsa teklif penceresini açar.
+  function OfferButton({ className = "" }: { className?: string }) {
+    if (!isNegotiable || isOwnListing) return null;
+    if (!currentUserId) {
+      return (
+        <Link
+          href={loginHref}
+          className={`flex w-full items-center justify-center gap-2 rounded-lg border border-accent bg-accent-light px-4 py-2.5 text-sm font-bold text-brand transition-colors hover:bg-accent/30 ${className}`}
+        >
+          <TagIcon className="h-4 w-4" />
+          Teklif Ver
+        </Link>
+      );
+    }
+    return (
+      <button
+        type="button"
+        onClick={() => setOfferOpen(true)}
+        className={`flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-brand shadow-soft transition-colors hover:bg-accent-dark hover:text-white ${className}`}
+      >
+        <TagIcon className="h-4 w-4" />
+        Teklif Ver
+      </button>
+    );
   }
 
   // Giriş yoksa: girişe yönlendir. Masaüstünde widget'ı aç, mobilde tam ekran
@@ -121,6 +164,7 @@ export function SellerCard({
         </div>
 
         <div className="mt-4 space-y-2">
+          {!isOwnListing && <OfferButton />}
           {!isOwnListing && <MessageButtons />}
 
           {!isOwnListing && currentUserId && (
@@ -210,7 +254,9 @@ export function SellerCard({
           geçmek gerekmesin diye, alt navigasyon çubuğunun (BottomNav, h-16)
           hemen üstüne sabitlenmiş kısayol çubuğu. */}
       {!isOwnListing && (
-        <div className="fixed inset-x-0 bottom-16 z-20 flex gap-2 border-t border-slate-200 bg-white p-3 shadow-soft-lg md:hidden">
+        <div className="fixed inset-x-0 bottom-16 z-20 flex flex-col gap-2 border-t border-slate-200 bg-white p-3 shadow-soft-lg md:hidden">
+          <OfferButton />
+          <div className="flex gap-2">
           {!currentUserId ? (
             <Link
               href={loginHref}
@@ -251,6 +297,7 @@ export function SellerCard({
                 Telefonu Göster
               </button>
             ))}
+          </div>
         </div>
       )}
 
@@ -266,7 +313,20 @@ export function SellerCard({
           sellerName={name}
           sellerAvatarUrl={avatarUrl}
           currentUserId={currentUserId}
+          isNegotiable={isNegotiable}
           onClose={() => setChatOpen(false)}
+        />
+      )}
+
+      {/* Teklif penceresi - ilk teklif (listingId ile); başarıyla gönderince
+          konuşmaya yönlendirir. */}
+      {!isOwnListing && currentUserId && isNegotiable && (
+        <OfferDialog
+          open={offerOpen}
+          onClose={() => setOfferOpen(false)}
+          listingId={listingId}
+          listingPrice={listingPrice}
+          onSubmitted={handleOfferSubmitted}
         />
       )}
     </>

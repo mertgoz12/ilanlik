@@ -63,6 +63,7 @@ export async function getConversationDetail(conversationId: string, userId: stri
           title: true,
           listingNo: true,
           price: true,
+          isNegotiable: true,
           images: { orderBy: { order: "asc" }, take: 1 },
         },
       },
@@ -70,7 +71,12 @@ export async function getConversationDetail(conversationId: string, userId: stri
       seller: { select: { id: true, name: true, avatarUrl: true } },
       messages: {
         orderBy: { createdAt: "asc" },
-        include: { sender: { select: { id: true, name: true, avatarUrl: true } } },
+        include: {
+          sender: { select: { id: true, name: true, avatarUrl: true } },
+          offer: {
+            select: { id: true, amount: true, status: true, role: true, createdById: true, note: true },
+          },
+        },
       },
     },
   });

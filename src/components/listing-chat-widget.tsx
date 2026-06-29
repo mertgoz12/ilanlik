@@ -4,11 +4,14 @@ import { useActionState, useCallback, useEffect, useRef, useState } from "react"
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "./avatar";
+import { OfferBubble } from "./offer-bubble";
+import { OfferDialog } from "./offer-dialog";
 import { RelativeTime } from "./relative-time";
-import { ChevronDownIcon, CloseIcon, ImageIcon, SendIcon } from "./icons";
+import { ChevronDownIcon, CloseIcon, ImageIcon, SendIcon, TagIcon } from "./icons";
 import { useUnreadMessages } from "./unread-messages-context";
 import { MAX_MESSAGE_LENGTH } from "@/lib/message-filters";
 import { formatPrice } from "@/lib/format";
+import type { OfferView } from "@/lib/offers";
 import {
   fetchListingThread,
   sendListingMessageAction,
@@ -28,6 +31,7 @@ type ListingChatWidgetProps = {
   sellerName: string;
   sellerAvatarUrl: string | null;
   currentUserId: string;
+  isNegotiable?: boolean;
   onClose: () => void;
 };
 
@@ -44,11 +48,15 @@ export function ListingChatWidget({
   sellerName,
   sellerAvatarUrl,
   currentUserId,
+  isNegotiable = false,
   onClose,
 }: ListingChatWidgetProps) {
   const [minimized, setMinimized] = useState(false);
   const [messages, setMessages] = useState<ChatWidgetMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [offerComposer, setOfferComposer] = useState<{ open: boolean; defaultAmount?: number }>({
+    open: false,
+  });
   const conversationIdRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -161,6 +169,26 @@ export function ListingChatWidget({
             ) : (
               messages.map((message) => {
                 const isOwn = message.senderId === currentUserId;
+                if (message.type === "offer" && message.offer) {
+                  return (
+                    <div
+                      key={message.id}
+                      className={`flex items-end gap-1.5 ${isOwn ? "flex-row-reverse" : ""}`}
+                    >
+                      <Avatar
+                        name={message.senderName}
+                        src={message.senderAvatarUrl}
+                        size="xs"
+                        className="mb-0.5 shrink-0"
+                      />
+                      <OfferBubble
+                        offer={message.offer as OfferView}
+                        currentUserId={currentUserId}
+                        onCounter={(amount) => setOfferComposer({ open: true, defaultAmount: amount })}
+                      />
+                    </div>
+                  );
+                }
                 return (
                   <div
                     key={message.id}
@@ -193,6 +221,16 @@ export function ListingChatWidget({
           {/* Yazma alanı */}
           <form ref={formRef} action={sendAction} className="border-t border-slate-100 p-2.5">
             <input type="hidden" name="listingId" value={listingId} />
+            {isNegotiable && (
+              <button
+                type="button"
+                onClick={() => setOfferComposer({ open: true })}
+                className="mb-1.5 inline-flex items-center gap-1.5 rounded-lg border border-accent bg-accent-light px-2.5 py-1 text-[11px] font-bold text-brand transition-colors hover:bg-accent/30"
+              >
+                <TagIcon className="h-3 w-3" />
+                Teklif Ver
+              </button>
+            )}
             {sendState.error && (
               <p className="mb-1.5 px-1 text-[11px] font-medium text-red-600">{sendState.error}</p>
             )}
@@ -220,6 +258,17 @@ export function ListingChatWidget({
             </p>
           </form>
         </>
+      )}
+
+      {isNegotiable && (
+        <OfferDialog
+          open={offerComposer.open}
+          onClose={() => setOfferComposer({ open: false })}
+          listingId={listingId}
+          listingPrice={listingPrice}
+          defaultAmount={offerComposer.defaultAmount}
+          onSubmitted={() => void refresh()}
+        />
       )}
     </div>
   );

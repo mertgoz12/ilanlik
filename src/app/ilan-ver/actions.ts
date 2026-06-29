@@ -262,6 +262,8 @@ export async function createListingAction(
       fromWho: data.fromWho || null,
       exchange: data.exchange || null,
       warranty: data.warranty || null,
+      // İkinci el araçlarda pazarlık (Teklif Ver) varsayılan açık.
+      isNegotiable: data.vehicleCondition === "İkinci El",
       vehicleTrimRawSpecs,
       description: data.description || null,
       damageStatus,
@@ -394,6 +396,10 @@ export async function createSimpleListingAction(
 
   const listingNo = await generateUniqueListingNo();
 
+  // "Pazarlığa açık" işareti: ikinci el ürünlerde varsayılan açık gelir
+  // (form checkbox'ı). Sıfır ürünlerde kullanıcı işaretlemediyse kapalı.
+  const isNegotiable = formData.get("isNegotiable") === "true";
+
   const listing = await prisma.listing.create({
     data: {
       listingNo,
@@ -402,6 +408,7 @@ export async function createSimpleListingAction(
       description: data.description || null,
       price: data.price,
       condition: data.condition || null,
+      isNegotiable,
       il: data.il,
       ilce: data.ilce,
       userId: session.id,

@@ -71,6 +71,10 @@ export function SimpleListingForm({
   // Fotoğraflar adımlar arası kaybolmasın diye form düzeyinde tutulur; gerçek
   // gönderilen input (HiddenFileInput) bu sırayla senkron tutulur.
   const [photos, setPhotos] = useState<File[]>([]);
+  // Durum + pazarlık ("Teklif Ver") tercihi. İkinci el seçilince pazarlık
+  // varsayılan açık, Sıfır seçilince kapanır (kullanıcı yine değiştirebilir).
+  const [condition, setCondition] = useState("");
+  const [negotiable, setNegotiable] = useState(false);
 
   // Sunucu, görünmeyen bir adıma ait alanda hata döndürürse kullanıcıyı o
   // adıma geri götür ki hatayı görebilsin.
@@ -195,7 +199,18 @@ export function SimpleListingForm({
               <label htmlFor="condition" className={labelClass}>
                 Durum
               </label>
-              <select id="condition" name="condition" defaultValue="" className={selectClass}>
+              <select
+                id="condition"
+                name="condition"
+                value={condition}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCondition(v);
+                  // İkinci el -> pazarlık varsayılan açık; Sıfır/boş -> kapalı.
+                  setNegotiable(v === "İkinci El");
+                }}
+                className={selectClass}
+              >
                 <option value="">Belirtilmemiş</option>
                 {CONDITION_VALUES.map((c) => (
                   <option key={c} value={c}>
@@ -208,6 +223,24 @@ export function SimpleListingForm({
               )}
             </div>
           </div>
+
+          {/* Pazarlık (Teklif Ver) tercihi */}
+          <input type="hidden" name="isNegotiable" value={negotiable ? "true" : "false"} />
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+            <input
+              type="checkbox"
+              checked={negotiable}
+              onChange={(e) => setNegotiable(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand focus:ring-brand"
+            />
+            <span className="text-sm">
+              <span className="font-semibold text-foreground">Pazarlığa açık (teklif alınır)</span>
+              <span className="mt-0.5 block text-xs text-slate-500">
+                Açıkken alıcılar ilan sayfanızdan size fiyat teklifi gönderebilir; teklifi kabul
+                edebilir, reddedebilir veya karşı teklif verebilirsiniz.
+              </span>
+            </span>
+          </label>
 
           <div>
             <label htmlFor="description" className={labelClass}>
