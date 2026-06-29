@@ -9,10 +9,10 @@ import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from "@/components/ic
 //    buraya yeni bir satır yazın.
 // ============================================================================
 
-const INSTAGRAM_URL = "https://www.instagram.com/KULLANICI_ADINIZ";
-const FACEBOOK_URL = "https://www.facebook.com/KULLANICI_ADINIZ";
-const X_URL = "https://x.com/KULLANICI_ADINIZ";
-const YOUTUBE_URL = "https://www.youtube.com/@KULLANICI_ADINIZ";
+const INSTAGRAM_URL = "https://www.instagram.com/ilanliocom";
+const FACEBOOK_URL = "https://www.facebook.com/ilanliocom";
+const X_URL = "https://x.com/ilanliocom";
+const YOUTUBE_URL = "https://www.youtube.com/@ilanliocom";
 
 export type SocialLink = {
   label: string;
