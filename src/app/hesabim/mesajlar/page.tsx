@@ -41,7 +41,7 @@ export default async function MessagesPage({
         >
           <ConversationList conversations={conversations} activeId={sp.c} currentUserId={session.id} />
         </div>
-        <div className={`${showList ? "hidden" : "flex"} flex-1 flex-col md:flex`}>
+        <div className={`${showList ? "hidden" : "flex"} min-w-0 flex-1 flex-col md:flex`}>
           {activeConversation ? (
             <ConversationThread conversation={activeConversation} currentUserId={session.id} />
           ) : (

@@ -46,7 +46,7 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
   }, [conversation.id]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-w-0 flex-1 flex-col">
       <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
         <Link href="/hesabim/mesajlar" className="text-slate-400 hover:text-slate-600 md:hidden">
           <ChevronLeftIcon className="h-5 w-5" />
