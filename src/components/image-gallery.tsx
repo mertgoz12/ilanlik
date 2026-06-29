@@ -209,19 +209,15 @@ export function ImageGallery({
 
   return (
     <div>
-      {/* Ana görsel - hover'da büyümez; tıklayınca tam ekran lightbox açılır. */}
+      {/* Ana görsel - hover'da büyümez, fotoğrafa tıklamak büyütmez. Tam ekran
+          yalnızca sağ üstteki "büyüt" butonuyla açılır. Mobilde dokunma yalnız
+          fotoğraf değiştirmek için (swipe) kullanılır. */}
       <div className="group relative aspect-[16/10] w-full touch-pan-y overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-soft">
-        <button
-          type="button"
-          onClick={() => {
-            if (mainSwipe.consumeWasSwipe()) return;
-            setLightboxOpen(true);
-          }}
+        <div
           onTouchStart={mainSwipe.onTouchStart}
           onTouchMove={mainSwipe.onTouchMove}
           onTouchEnd={mainSwipe.onTouchEnd}
-          className="absolute inset-0 h-full w-full cursor-zoom-in"
-          aria-label="Fotoğrafı tam ekran aç"
+          className="absolute inset-0 h-full w-full"
         >
           <Image
             key={images[active].url}
@@ -232,21 +228,22 @@ export function ImageGallery({
             className="object-cover"
             sizes="(min-width: 1024px) 60vw, 100vw"
           />
-        </button>
+        </div>
 
         {/* Sayaç */}
         <span className="pointer-events-none absolute left-3 top-3 rounded-lg bg-black/55 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
           {active + 1}/{count}
         </span>
 
-        {/* Tam ekran ikonu */}
+        {/* Tam ekran (büyüt) butonu - büyütmenin TEK yolu. */}
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
           aria-label="Tam ekran görüntüle"
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg bg-black/55 text-white backdrop-blur-sm transition-colors hover:bg-black/75"
+          className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg bg-black/60 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/80"
         >
           <ExpandIcon className="h-4 w-4" />
+          <span className="hidden sm:inline">Büyüt</span>
         </button>
 
         {count > 1 && (

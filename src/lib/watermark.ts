@@ -2,16 +2,14 @@ import sharp from "sharp";
 
 const WATERMARK_TEXT = "ilanlio.com";
 
-// Görselin tam boyutuna göre tek bir SVG katmanı üretir: ortada ~32 derece
-// çapraz, yarı saydam ana yazı + sağ alt köşede küçük, daha soluk bir tekrar.
-// Hem açık hem koyu fotoğraflarda okunsun diye yazının etrafında hafif bir
-// gölge (feDropShadow) kullanılır.
+// Görselin tam boyutuna göre tek bir SVG katmanı üretir: yalnızca ortada
+// ~32 derece çapraz, yarı saydam tek bir filigran yazısı. Hem açık hem koyu
+// fotoğraflarda okunsun diye yazının etrafında hafif bir gölge (feDropShadow)
+// kullanılır.
 function buildWatermarkSvg(width: number, height: number): string {
   const centerFontSize = Math.round(width * 0.085);
-  const cornerFontSize = Math.round(width * 0.026);
   const angle = -32;
   const shadowBlur = Math.max(1, Math.round(centerFontSize * 0.04));
-  const cornerMargin = Math.round(width * 0.02);
 
   return `
 <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
@@ -30,16 +28,6 @@ function buildWatermarkSvg(width: number, height: number): string {
     font-size="${centerFontSize}"
     fill="#ffffff"
     fill-opacity="0.3"
-    filter="url(#wmShadow)"
-  >${WATERMARK_TEXT}</text>
-  <text
-    x="${width - cornerMargin}" y="${height - cornerMargin}"
-    text-anchor="end"
-    font-family="Arial, Helvetica, sans-serif"
-    font-weight="600"
-    font-size="${cornerFontSize}"
-    fill="#ffffff"
-    fill-opacity="0.22"
     filter="url(#wmShadow)"
   >${WATERMARK_TEXT}</text>
 </svg>`;
