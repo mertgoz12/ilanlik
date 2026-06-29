@@ -85,14 +85,17 @@ export function Footer() {
             <h3 className="text-sm font-bold text-accent">Bizi Takip Edin</h3>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
-                <Link
+                <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-accent hover:text-brand"
+                  title={label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:scale-110 hover:bg-accent hover:text-brand"
                 >
                   <Icon className="h-4 w-4" />
-                </Link>
+                </a>
               ))}
             </div>
           </div>
