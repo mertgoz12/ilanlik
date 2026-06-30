@@ -3,10 +3,11 @@
 import { useActionState, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
-import { uploadHeroImageAction, type HeroSlideFormState } from "@/app/admin/banner/actions";
+import { uploadHeroMediaAction, type HeroSlideFormState } from "@/app/admin/banner/actions";
 import { useToast } from "@/components/admin/toast";
 import { errorClass, FormSection, inputClass, labelClass } from "@/components/form-ui";
 import { ImageIcon, SpinnerIcon, TagIcon } from "@/components/icons";
+import { isHeroVideo } from "@/lib/hero-media";
 
 export type HeroSlideFormInitial = {
   imageUrl: string;
@@ -29,21 +30,22 @@ export function HeroSlideForm({ action, initialSlide, submitLabel }: HeroSlideFo
   const [state, formAction, pending] = useActionState(action, initialState);
   const { showToast } = useToast();
 
-  const [imageUrl, setImageUrl] = useState(initialSlide?.imageUrl ?? "");
+  const [mediaUrl, setMediaUrl] = useState(initialSlide?.imageUrl ?? "");
   const [uploading, setUploading] = useState(false);
   const [isActive, setIsActive] = useState(initialSlide?.isActive ?? true);
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const showVideo = isHeroVideo(mediaUrl);
 
-  async function handleImageFile(file: File) {
+  async function handleMediaFile(file: File) {
     setUploading(true);
     const formData = new FormData();
-    formData.set("image", file);
+    formData.set("media", file);
     try {
-      const result = await uploadHeroImageAction(formData);
-      if (result.url) setImageUrl(result.url);
-      else showToast({ variant: "error", message: result.error ?? "Görsel yüklenemedi." });
+      const result = await uploadHeroMediaAction(formData);
+      if (result.url) setMediaUrl(result.url);
+      else showToast({ variant: "error", message: result.error ?? "Dosya yüklenemedi." });
     } catch {
-      showToast({ variant: "error", message: "Görsel yüklenemedi." });
+      showToast({ variant: "error", message: "Dosya yüklenemedi." });
     } finally {
       setUploading(false);
     }
@@ -51,7 +53,7 @@ export function HeroSlideForm({ action, initialSlide, submitLabel }: HeroSlideFo
 
   return (
     <form action={formAction} className="space-y-6">
-      <input type="hidden" name="imageUrl" value={imageUrl} />
+      <input type="hidden" name="imageUrl" value={mediaUrl} />
       <input type="hidden" name="isActive" value={isActive ? "true" : "false"} />
 
       {state.error && (
@@ -60,14 +62,32 @@ export function HeroSlideForm({ action, initialSlide, submitLabel }: HeroSlideFo
 
       <FormSection title="Slayt İçeriği" icon={TagIcon} accent="violet">
         <div>
-          <label className={labelClass}>Arka Plan Görseli</label>
-          {imageUrl ? (
+          <label className={labelClass}>Arka Plan Görseli / Videosu</label>
+          {mediaUrl ? (
             <div className="group relative aspect-[16/6] w-full max-w-2xl overflow-hidden rounded-lg bg-slate-100">
-              <Image src={imageUrl} alt="" fill className="object-cover" sizes="672px" />
+              {showVideo ? (
+                <video
+                  src={mediaUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={mediaUrl}
+                  alt=""
+                  fill
+                  unoptimized={mediaUrl.toLowerCase().includes(".gif")}
+                  className="object-cover"
+                  sizes="672px"
+                />
+              )}
               <button
                 type="button"
-                onClick={() => setImageUrl("")}
-                aria-label="Görseli kaldır"
+                onClick={() => setMediaUrl("")}
+                aria-label="Medyayı kaldır"
                 className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-600 shadow-soft hover:text-red-600"
               >
                 <X className="h-4 w-4" />
@@ -76,26 +96,31 @@ export function HeroSlideForm({ action, initialSlide, submitLabel }: HeroSlideFo
           ) : (
             <button
               type="button"
-              onClick={() => imageInputRef.current?.click()}
+              onClick={() => mediaInputRef.current?.click()}
               disabled={uploading}
               className="flex aspect-[16/6] w-full max-w-2xl flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {uploading ? <SpinnerIcon className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
-              {uploading ? "Yükleniyor..." : "Banner Görseli Yükle"}
-              <span className="text-xs font-normal text-slate-400">Geniş (yatay) görseller önerilir · JPG, PNG, WEBP · maks. 8MB</span>
+              {uploading ? "Yükleniyor..." : "Banner Görseli / Videosu Yükle"}
+              <span className="text-center text-xs font-normal text-slate-400">
+                Geniş (yatay) önerilir · Görsel JPG, PNG, WEBP, GIF (maks. 8MB) · Video MP4, WEBM (maks. 20MB)
+              </span>
             </button>
           )}
           <input
-            ref={imageInputRef}
+            ref={mediaInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
             className="sr-only"
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) handleImageFile(file);
+              if (file) handleMediaFile(file);
               e.target.value = "";
             }}
           />
+          <p className="mt-1.5 text-xs text-slate-400">
+            Video ve GIF&apos;ler ana sayfada sessiz, otomatik oynar ve sürekli baştan başlar.
+          </p>
           {state.fieldErrors?.imageUrl && <p className={errorClass}>{state.fieldErrors.imageUrl[0]}</p>}
         </div>
 
@@ -174,7 +199,7 @@ export function HeroSlideForm({ action, initialSlide, submitLabel }: HeroSlideFo
 
       <button
         type="submit"
-        disabled={pending || !imageUrl}
+        disabled={pending || !mediaUrl}
         className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending && <SpinnerIcon className="h-4 w-4 animate-spin" />}

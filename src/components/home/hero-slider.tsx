@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
+import { isHeroGif, isHeroVideo } from "@/lib/hero-media";
 
 export type HeroSlideView = {
   id: string;
@@ -34,6 +35,36 @@ function SlideButton({ text, link }: { text: string; link: string }) {
     <Link href={link} className={className}>
       {text}
     </Link>
+  );
+}
+
+// Slayt arka planı: video sessiz+döngülü otomatik oynar, GIF animasyonu
+// korunsun diye `unoptimized` ile gösterilir, diğer görseller optimize edilir.
+function SlideMedia({ slide, priority }: { slide: HeroSlideView; priority: boolean }) {
+  if (isHeroVideo(slide.imageUrl)) {
+    return (
+      <video
+        src={slide.imageUrl}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        aria-label={slide.title}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+    );
+  }
+  return (
+    <Image
+      src={slide.imageUrl}
+      alt={slide.title}
+      fill
+      priority={priority}
+      unoptimized={isHeroGif(slide.imageUrl)}
+      sizes="(max-width: 1024px) 100vw, 900px"
+      className="object-cover"
+    />
   );
 }
 
@@ -85,14 +116,7 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
       >
         {slides.map((slide) => (
           <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
-            <Image
-              src={slide.imageUrl}
-              alt={slide.title}
-              fill
-              priority={slide.id === slides[0].id}
-              sizes="(max-width: 1024px) 100vw, 900px"
-              className="object-cover"
-            />
+            <SlideMedia slide={slide} priority={slide.id === slides[0].id} />
             {/* Metin okunabilirliği için soldan koyulaşan degrade */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-center gap-2 p-5 sm:gap-3 sm:p-8 md:p-12">

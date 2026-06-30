@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, Eye, EyeOff } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { isHeroGif, isHeroVideo } from "@/lib/hero-media";
 import { ActionButton, ConfirmActionButton } from "@/components/admin/action-button";
 import { PageHeader } from "@/components/admin/page-header";
 import { ImageIcon, InboxIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
@@ -83,12 +84,21 @@ export default async function AdminBannerPage() {
                 </div>
 
                 <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                  {slide.imageUrl ? (
-                    <Image src={slide.imageUrl} alt="" fill sizes="96px" className="object-cover" />
-                  ) : (
+                  {!slide.imageUrl ? (
                     <div className="flex h-full w-full items-center justify-center text-slate-300">
                       <ImageIcon className="h-4 w-4" />
                     </div>
+                  ) : isHeroVideo(slide.imageUrl) ? (
+                    <video src={slide.imageUrl} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+                  ) : (
+                    <Image
+                      src={slide.imageUrl}
+                      alt=""
+                      fill
+                      sizes="96px"
+                      unoptimized={isHeroGif(slide.imageUrl)}
+                      className="object-cover"
+                    />
                   )}
                 </div>
 

@@ -5,10 +5,10 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
-import { deleteHeroImageBlob, uploadHeroImage } from "@/lib/hero-photos";
+import { deleteHeroMediaBlob, uploadHeroMedia } from "@/lib/hero-photos";
 
 const slideSchema = z.object({
-  imageUrl: z.string().trim().min(1, "Görsel yüklemelisiniz."),
+  imageUrl: z.string().trim().min(1, "Görsel veya video yüklemelisiniz."),
   title: z.string().trim().min(2, "Başlık en az 2 karakter olmalı.").max(120),
   subtitle: z.string().trim().max(200).optional(),
   buttonText: z.string().trim().max(40).optional(),
@@ -101,9 +101,9 @@ export async function updateSlideAction(
     },
   });
 
-  // Görsel değiştiyse eski Blob dosyası yetim kalmasın diye silinir.
+  // Medya değiştiyse eski Blob dosyası yetim kalmasın diye silinir.
   if (existing.imageUrl && existing.imageUrl !== parsed.data.imageUrl) {
-    await deleteHeroImageBlob(existing.imageUrl);
+    await deleteHeroMediaBlob(existing.imageUrl);
   }
 
   revalidateHeroPaths();
@@ -113,7 +113,7 @@ export async function updateSlideAction(
 export async function deleteSlideAction(slideId: string) {
   await requireAdmin();
   const slide = await prisma.heroSlide.delete({ where: { id: slideId } });
-  if (slide.imageUrl) await deleteHeroImageBlob(slide.imageUrl);
+  if (slide.imageUrl) await deleteHeroMediaBlob(slide.imageUrl);
   revalidateHeroPaths();
 }
 
@@ -146,11 +146,11 @@ export async function moveSlideAction(slideId: string, direction: "up" | "down")
   revalidateHeroPaths();
 }
 
-export async function uploadHeroImageAction(formData: FormData): Promise<{ url?: string; error?: string }> {
+export async function uploadHeroMediaAction(formData: FormData): Promise<{ url?: string; error?: string }> {
   await requireAdmin();
-  const file = formData.get("image");
+  const file = formData.get("media");
   if (!(file instanceof File) || file.size === 0) return { error: "Dosya seçilmedi." };
-  const result = await uploadHeroImage(file);
+  const result = await uploadHeroMedia(file);
   if (!result.ok) return { error: result.error };
   return { url: result.url };
 }
