@@ -22,7 +22,7 @@ const SWIPE_THRESHOLD = 50; // px
 // açılır - böylece dış linkler yeni sekmede güvenle açılabilir.
 function SlideButton({ text, link }: { text: string; link: string }) {
   const className =
-    "inline-flex items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-brand shadow-soft-lg transition-colors hover:bg-accent-dark hover:text-white sm:px-6 sm:py-3 sm:text-base";
+    "inline-flex items-center justify-center rounded-lg bg-accent px-4 py-1.5 text-xs font-bold text-brand shadow-soft transition-colors hover:bg-accent-dark hover:text-white sm:px-5 sm:py-2 sm:text-sm";
   const isExternal = /^https?:\/\//i.test(link);
   if (isExternal) {
     return (
@@ -102,34 +102,37 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl bg-slate-200 shadow-soft"
+      className="relative overflow-hidden rounded-xl bg-brand shadow-soft ring-1 ring-slate-200/60"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       aria-roledescription="carousel"
     >
-      {/* Kayan ray: tüm slaytlar yan yana, index kadar kaydırılır */}
+      {/* Kayan ray: tüm slaytlar yan yana, index kadar kaydırılır. İnce, yatay
+          şerit yüksekliği - sayfayı boğmasın, asıl içerik (kategori/ilanlar)
+          baskın kalsın. */}
       <div
-        className="flex h-44 transition-transform duration-500 ease-out sm:h-60 md:h-72 lg:h-80"
+        className="flex h-32 transition-transform duration-500 ease-out sm:h-36 md:h-40"
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
         {slides.map((slide) => (
           <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
             <SlideMedia slide={slide} priority={slide.id === slides[0].id} />
-            {/* Metin okunabilirliği için soldan koyulaşan degrade */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-center gap-2 p-5 sm:gap-3 sm:p-8 md:p-12">
-              <h2 className="max-w-lg text-xl font-extrabold leading-tight tracking-tight text-white drop-shadow sm:text-3xl md:text-4xl">
+            {/* Marka lacivertinden soldan sağa açılan yumuşak degrade - metin
+                okunaklı kalsın, görünüm sakin/zarif olsun (sert siyah değil). */}
+            <div className="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/55 to-brand/10" />
+            <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 sm:px-8 md:px-10">
+              <h2 className="max-w-md text-base font-bold leading-snug tracking-tight text-white drop-shadow-sm sm:text-lg md:text-2xl">
                 {slide.title}
               </h2>
               {slide.subtitle && (
-                <p className="max-w-md text-sm text-white/85 drop-shadow sm:text-base md:text-lg">
+                <p className="max-w-sm text-xs text-white/85 sm:text-sm">
                   {slide.subtitle}
                 </p>
               )}
               {slide.buttonText && slide.buttonLink && (
-                <div className="mt-1 sm:mt-2">
+                <div className="mt-1">
                   <SlideButton text={slide.buttonText} link={slide.buttonLink} />
                 </div>
               )}
@@ -145,21 +148,21 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
             type="button"
             onClick={prev}
             aria-label="Önceki slayt"
-            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-brand shadow-soft transition-colors hover:bg-white sm:left-3 sm:h-10 sm:w-10"
+            className="absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-brand shadow-soft transition-colors hover:bg-white sm:h-8 sm:w-8"
           >
-            <ChevronLeftIcon className="h-5 w-5" />
+            <ChevronLeftIcon className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={next}
             aria-label="Sonraki slayt"
-            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-brand shadow-soft transition-colors hover:bg-white sm:right-3 sm:h-10 sm:w-10"
+            className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-brand shadow-soft transition-colors hover:bg-white sm:h-8 sm:w-8"
           >
-            <ChevronRightIcon className="h-5 w-5" />
+            <ChevronRightIcon className="h-4 w-4" />
           </button>
 
           {/* Nokta göstergeleri */}
-          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2">
+          <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1.5">
             {slides.map((slide, i) => (
               <button
                 key={slide.id}
@@ -167,8 +170,8 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
                 onClick={() => goTo(i)}
                 aria-label={`${i + 1}. slayda git`}
                 aria-current={i === index}
-                className={`h-2 rounded-full transition-all ${
-                  i === index ? "w-6 bg-white" : "w-2 bg-white/55 hover:bg-white/80"
+                className={`h-1.5 rounded-full transition-all ${
+                  i === index ? "w-5 bg-white" : "w-1.5 bg-white/55 hover:bg-white/80"
                 }`}
               />
             ))}

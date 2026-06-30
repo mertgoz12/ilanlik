@@ -240,6 +240,14 @@ export default async function HomePage({
   return (
     <div>
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+        {/* Üst banner şeridi: tüm içerik genişliğini (sol kategori menüsünden
+            sağ "Hızlı İlan Ver" kutusuna kadar) kaplayan ince yatay şerit. */}
+        {showVitrin && heroSlides.length > 0 && (
+          <div className="mb-4">
+            <HeroSlider slides={heroSlides} />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)] xl:grid-cols-[224px_minmax(0,1fr)_256px]">
           <SidebarShell>
             <CategorySidebar activeSlug={sp.kategori} />
@@ -248,12 +256,6 @@ export default async function HomePage({
           <div className="min-w-0">
             {showVitrin ? (
               <>
-                {heroSlides.length > 0 && (
-                  <div className="mb-4">
-                    <HeroSlider slides={heroSlides} />
-                  </div>
-                )}
-
                 <TrustBanner />
 
                 {featuredListings.length > 0 && (
