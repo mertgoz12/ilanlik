@@ -10,8 +10,10 @@ import { MobileSearchProvider } from "@/components/mobile-search-context";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { PwaRegister } from "@/components/pwa-register";
 import { UnreadMessagesProvider } from "@/components/unread-messages-context";
+import { NotificationsProvider } from "@/components/notifications-context";
 import { getSession } from "@/lib/session";
 import { getUnreadMessageCount } from "@/lib/messages";
+import { getUnreadNotificationCount } from "@/lib/notifications";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -90,7 +92,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getSession();
-  const unreadCount = session ? await getUnreadMessageCount(session.id) : 0;
+  const [unreadCount, notificationCount] = session
+    ? await Promise.all([getUnreadMessageCount(session.id), getUnreadNotificationCount(session.id)])
+    : [0, 0];
 
   return (
     <html lang="tr" className={`${inter.variable} ${sora.variable} h-full antialiased`}>
@@ -99,6 +103,7 @@ export default async function RootLayout({
       </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <UnreadMessagesProvider initialCount={unreadCount}>
+          <NotificationsProvider initialCount={notificationCount}>
           <MobileSearchProvider>
             <AnnouncementBar />
             <Navbar />
@@ -109,6 +114,7 @@ export default async function RootLayout({
             <BottomNav isLoggedIn={!!session} />
             <PwaRegister />
           </MobileSearchProvider>
+          </NotificationsProvider>
         </UnreadMessagesProvider>
       </body>
     </html>

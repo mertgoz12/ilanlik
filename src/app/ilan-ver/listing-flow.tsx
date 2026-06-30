@@ -64,7 +64,12 @@ export function ListingFlow({
       ) : (
         <div className="space-y-5">
           <SelectedCategoryCard selected={selected} onChange={() => setStep(1)} />
-          <SimpleListingForm categoryId={selected.id} step={step} onStep={setStep} />
+          <SimpleListingForm
+            categoryId={selected.id}
+            categoryName={selected.name}
+            step={step}
+            onStep={setStep}
+          />
         </div>
       )}
     </div>

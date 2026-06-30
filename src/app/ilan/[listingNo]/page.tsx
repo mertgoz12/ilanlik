@@ -85,9 +85,17 @@ export default async function ListingDetailPage({
     },
   });
 
-  if (!listing || listing.status !== "active") notFound();
+  if (!listing) notFound();
 
   const session = await getSession();
+
+  // Yayında (active) olmayan ilanlar normalde "yokmuş" gibi davranır; ancak
+  // onay akışında admin (onay/red için) ve ilan sahibi (kendi taslağını/red
+  // edilen ilanını görebilmek için) önizleyebilmelidir.
+  if (listing.status !== "active") {
+    const canPreview = session?.role === "admin" || session?.id === listing.userId;
+    if (!canPreview) notFound();
+  }
 
   // Opsiyonlu bir ilan sadece opsiyonlayan alıcı, satıcı ve admin tarafından
   // görülebilir - diğerleri için ilan "yokmuş" gibi davranılır.

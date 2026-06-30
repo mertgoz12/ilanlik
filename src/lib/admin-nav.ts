@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import {
   CarIcon,
   ChartBarIcon,
+  CheckCircleIcon,
   ClockIcon,
   FlagIcon,
   FolderIcon,
@@ -23,6 +24,7 @@ export type AdminNavItem = {
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { href: "/admin", label: "Özet", icon: ChartBarIcon, accent: "slate" },
   { href: "/admin/ilanlar", label: "İlan Yönetimi", icon: CarIcon, accent: "blue" },
+  { href: "/admin/onay-bekleyenler", label: "Onay Bekleyen İlanlar", icon: CheckCircleIcon, accent: "amber" },
   { href: "/admin/opsiyonlar", label: "Opsiyonlama Yönetimi", icon: ClockIcon, accent: "amber" },
   { href: "/admin/moderasyon", label: "Moderasyon Kuyruğu", icon: FlagIcon, accent: "amber" },
   { href: "/admin/kullanicilar", label: "Kullanıcı Yönetimi", icon: UserIcon, accent: "indigo" },

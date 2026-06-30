@@ -4,10 +4,11 @@ const STEPS = [
   { n: 1, label: "Kategori" },
   { n: 2, label: "Detaylar" },
   { n: 3, label: "Fotoğraflar" },
-  { n: 4, label: "Konum & Yayınla" },
+  { n: 4, label: "Konum" },
+  { n: 5, label: "Önizleme" },
 ] as const;
 
-// /ilan-ver akışının üst ilerleme göstergesi. current = aktif adım (1-4);
+// /ilan-ver akışının üst ilerleme göstergesi. current = aktif adım (1-5);
 // önceki adımlar tamamlanmış (tik) olarak işaretlenir.
 export function StepProgress({ current }: { current: number }) {
   return (

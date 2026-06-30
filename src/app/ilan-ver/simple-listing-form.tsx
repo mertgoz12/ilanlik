@@ -1,16 +1,18 @@
 "use client";
 
-import { useActionState, useEffect, useState, type KeyboardEvent } from "react";
-import Link from "next/link";
+import { useActionState, useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { createSimpleListingAction, type SimpleListingFormState } from "./actions";
 import { HiddenFileInput, SortableImagePicker } from "@/components/sortable-image-picker";
 import { LocationSelect } from "@/components/location-select";
 import { errorClass, inputClass, labelClass, selectClass } from "@/components/form-ui";
 import { CONDITION_VALUES } from "@/lib/validation";
+import { ListingPreview, type ListingPreviewData } from "./listing-preview";
+import { SubmittedScreen } from "./submitted-screen";
 import {
   AlertIcon,
   CheckIcon,
   ChevronRightIcon,
+  EyeIcon,
   ImageIcon,
   LocationIcon,
   TagIcon,
@@ -19,10 +21,11 @@ import {
 const initialState: SimpleListingFormState = {};
 
 // Adım numaraları StepProgress ile aynı: 2 Detaylar, 3 Fotoğraflar,
-// 4 Konum & Yayınla (1 = kategori seçimi, ListingFlow'da).
+// 4 Konum, 5 Önizleme (1 = kategori seçimi, ListingFlow'da).
 const STEP_DETAILS = 2;
 const STEP_PHOTOS = 3;
 const STEP_LOCATION = 4;
+const STEP_PREVIEW = 5;
 
 function StepCard({
   icon: Icon,
@@ -59,10 +62,12 @@ const secondaryButton =
 
 export function SimpleListingForm({
   categoryId,
+  categoryName,
   step,
   onStep,
 }: {
   categoryId: string;
+  categoryName: string;
   step: number;
   onStep: (step: number) => void;
 }) {
@@ -75,6 +80,21 @@ export function SimpleListingForm({
   // varsayılan açık, Sıfır seçilince kapanır (kullanıcı yine değiştirebilir).
   const [condition, setCondition] = useState("");
   const [negotiable, setNegotiable] = useState(false);
+  // Önizleme adımında gösterilecek anlık görüntü: form alanları (uncontrolled
+  // olduğundan) önizlemeye geçerken DOM'dan okunup buraya alınır.
+  const [preview, setPreview] = useState<{
+    title: string;
+    price: number;
+    description: string;
+    il: string;
+    ilce: string;
+  } | null>(null);
+
+  // Önizleme galerisi için yerel fotoğraf URL'leri (yükleme yapmadan gösterim).
+  const imageUrls = useMemo(() => photos.map((file) => URL.createObjectURL(file)), [photos]);
+  useEffect(() => {
+    return () => imageUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [imageUrls]);
 
   // Sunucu, görünmeyen bir adıma ait alanda hata döndürürse kullanıcıyı o
   // adıma geri götür ki hatayı görebilsin.
@@ -95,10 +115,26 @@ export function SimpleListingForm({
     return Object.keys(errs).length === 0;
   }
 
+  function capturePreview(form: HTMLFormElement) {
+    const getVal = (name: string) =>
+      (form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? "";
+    setPreview({
+      title: getVal("title").trim(),
+      price: Number(getVal("price")) || 0,
+      description: getVal("description").trim(),
+      il: getVal("il"),
+      ilce: getVal("ilce"),
+    });
+  }
+
   function handleNext(e: React.MouseEvent<HTMLButtonElement>, next: number) {
     if (step === STEP_DETAILS) {
       const form = e.currentTarget.form;
       if (form && !validateDetails(form)) return;
+    }
+    if (next === STEP_PREVIEW) {
+      const form = e.currentTarget.form;
+      if (form) capturePreview(form);
     }
     onStep(next);
   }
@@ -112,31 +148,8 @@ export function SimpleListingForm({
     }
   }
 
-  if (state.priceWarning) {
-    return (
-      <div className="rounded-2xl border-2 border-accent bg-accent-light/50 p-6">
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-brand">
-            <AlertIcon className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="font-semibold text-brand">
-              Girdiğiniz fiyat piyasa analizine göre yüksek görünüyor
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              İlanınız yayınlandı ancak incelemeye alındı. Ekibimiz fiyatınızı kısa süre içinde
-              gözden geçirecek.
-            </p>
-          </div>
-        </div>
-        <Link
-          href={`/ilan/${state.listingNo}`}
-          className="mt-5 inline-flex items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-700"
-        >
-          İlanı Görüntüle
-        </Link>
-      </div>
-    );
+  if (state.submitted) {
+    return <SubmittedScreen />;
   }
 
   return (
@@ -306,17 +319,52 @@ export function SimpleListingForm({
           <button type="button" onClick={() => onStep(STEP_PHOTOS)} className={secondaryButton}>
             Geri
           </button>
+          <button type="button" onClick={(e) => handleNext(e, STEP_PREVIEW)} className={primaryButton}>
+            <EyeIcon className="h-4 w-4" />
+            Önizle
+          </button>
+        </div>
+      </div>
+
+      {/* 5 - Önizleme & Onaya Gönder */}
+      <div className={step === STEP_PREVIEW ? "" : "hidden"}>
+        <StepCard
+          icon={EyeIcon}
+          title="Önizleme"
+          description="İlanınızı yayınlamadan önce son kez gözden geçirin."
+        >
+          {preview && (
+            <ListingPreview
+              data={{
+                title: preview.title,
+                price: preview.price,
+                description: preview.description,
+                il: preview.il,
+                ilce: preview.ilce,
+                categoryName,
+                condition: condition || null,
+                isNegotiable: negotiable,
+                imageUrls,
+              }}
+            />
+          )}
+        </StepCard>
+
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <button type="button" onClick={() => onStep(STEP_LOCATION)} className={secondaryButton}>
+            Geri / Düzenle
+          </button>
           <button
             type="submit"
             disabled={pending}
             className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-accent px-7 py-3 text-sm font-bold text-brand shadow-soft transition-colors hover:bg-accent-dark hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
             {pending ? (
-              "İlan yayınlanıyor..."
+              "Gönderiliyor..."
             ) : (
               <>
                 <CheckIcon className="h-4 w-4" />
-                İlanı Yayınla
+                Onaya Gönder
               </>
             )}
           </button>

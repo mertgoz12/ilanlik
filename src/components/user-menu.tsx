@@ -6,6 +6,7 @@ import { ChevronDown, LogOut } from "lucide-react";
 import { ACCOUNT_NAV_ITEMS } from "@/lib/account-nav";
 import { Avatar } from "@/components/avatar";
 import { useUnreadMessages } from "@/components/unread-messages-context";
+import { useNotifications } from "@/components/notifications-context";
 
 type UserMenuProps = {
   name: string;
@@ -17,6 +18,9 @@ export function UserMenu({ name, avatarUrl, logoutAction }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { count: unreadCount } = useUnreadMessages();
+  const { count: notifCount } = useNotifications();
+  // Avatar üzerindeki rozet: okunmamış mesaj + okunmamış bildirim toplamı.
+  const totalBadge = unreadCount + notifCount;
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -36,9 +40,9 @@ export function UserMenu({ name, avatarUrl, logoutAction }: UserMenuProps) {
       >
         <span className="relative shrink-0">
           <Avatar name={name} src={avatarUrl} size="xs" />
-          {unreadCount > 0 && (
+          {totalBadge > 0 && (
             <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-              {unreadCount > 9 ? "9+" : unreadCount}
+              {totalBadge > 9 ? "9+" : totalBadge}
             </span>
           )}
         </span>
@@ -69,6 +73,11 @@ export function UserMenu({ name, avatarUrl, logoutAction }: UserMenuProps) {
                   {item.href === "/hesabim/mesajlar" && unreadCount > 0 && (
                     <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
                       {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                  {item.href === "/hesabim/bildirimler" && notifCount > 0 && (
+                    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+                      {notifCount > 9 ? "9+" : notifCount}
                     </span>
                   )}
                 </Link>

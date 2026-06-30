@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/admin/page-header";
 import { labelClass, selectClass } from "@/components/form-ui";
 import { AlertIcon, CarIcon, CheckIcon, EyeIcon, ImageIcon, InboxIcon, RestoreIcon, TrashIcon } from "@/components/icons";
 import { deleteListingAction, restoreListingAction, setListingStatusAction } from "./actions";
+import { approveListingAction } from "../onay-bekleyenler/actions";
 
 const PAGE_SIZE = 20;
 const STATUS_VALUES: ListingStatus[] = ["active", "pending_review", "pasif", "silindi"];
@@ -58,11 +59,7 @@ export default async function AdminListingsPage({
 
   const enriched = listings.map((listing) => {
     const aiFlags = getAiModerationFlags(listing.aiAnalysis);
-    const priceFlag = listing.status === "pending_review";
-    const flagReasons = [
-      ...(priceFlag ? ["Fahiş fiyat: önerilen üst limit aşıldı"] : []),
-      ...aiFlags.map((f) => f.aciklama),
-    ];
+    const flagReasons = aiFlags.map((f) => f.aciklama);
     return { listing, flagged: flagReasons.length > 0, flagReasons };
   });
 
@@ -243,7 +240,7 @@ export default async function AdminListingsPage({
                           {listing.status === "pending_review" ? (
                             <>
                               <ActionButton
-                                action={setListingStatusAction.bind(null, listing.id, "active")}
+                                action={approveListingAction.bind(null, listing.id)}
                                 icon={<CheckIcon className="h-3.5 w-3.5" />}
                                 successMessage={`"${listing.title}" ilanı onaylandı ve yayına alındı.`}
                                 errorMessage="İlan onaylanamadı. Lütfen tekrar deneyin."
@@ -251,14 +248,12 @@ export default async function AdminListingsPage({
                               >
                                 Onayla
                               </ActionButton>
-                              <ActionButton
-                                action={setListingStatusAction.bind(null, listing.id, "pasif")}
-                                successMessage={`"${listing.title}" ilanı reddedildi.`}
-                                errorMessage="İlan reddedilemedi. Lütfen tekrar deneyin."
+                              <Link
+                                href="/admin/onay-bekleyenler"
                                 className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
                               >
-                                Reddet
-                              </ActionButton>
+                                İncele / Reddet
+                              </Link>
                             </>
                           ) : listing.status === "active" ? (
                             <ActionButton

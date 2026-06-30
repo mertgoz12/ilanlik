@@ -1,16 +1,17 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type MouseEvent } from "react";
-import Link from "next/link";
 import { createListingAction, type ListingFormState } from "../actions";
-import { AlertIcon, CheckIcon, CloseIcon } from "@/components/icons";
+import { AlertIcon, CheckIcon, CloseIcon, EyeIcon } from "@/components/icons";
 import { HiddenFileInput } from "@/components/sortable-image-picker";
+import { SubmittedScreen } from "../submitted-screen";
 import { ProgressIndicator } from "./progress-indicator";
 import { Step1VehicleInfo } from "./step1-vehicle-info";
 import { Step2Damage } from "./step2-damage";
 import { Step3Equipment } from "./step3-equipment";
 import { Step4PhotosDescription } from "./step4-photos-description";
 import { Step5PricePreview } from "./step5-price-preview";
+import { Step6Preview } from "./step6-preview";
 import { DEFAULT_WIZARD_STATE, clearDraft, loadDraft, saveDraft, type WizardState } from "./wizard-types";
 import type { VehicleCatalogBrand } from "@/lib/vehicle-catalog";
 import { validateStep1, validateStep4, validateStep5 } from "./wizard-validation";
@@ -110,13 +111,20 @@ export function ListingWizard({
   }
 
   function goNext() {
-    const stepErrors = step === 1 ? validateStep1(wizard) : step === 4 ? validateStep4(wizard) : {};
+    const stepErrors =
+      step === 1
+        ? validateStep1(wizard)
+        : step === 4
+          ? validateStep4(wizard)
+          : step === 5
+            ? validateStep5(wizard)
+            : {};
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
     }
     setErrors({});
-    setStep((s) => Math.min(5, s + 1));
+    setStep((s) => Math.min(6, s + 1));
   }
 
   function goPrev() {
@@ -125,10 +133,13 @@ export function ListingWizard({
   }
 
   function handleSubmitClick(e: MouseEvent<HTMLButtonElement>) {
+    // Fiyat/konum adım 5'te (5->6 geçişinde) zaten doğrulandı; yine de güvenlik
+    // için son kez kontrol et, hata varsa kullanıcıyı o adıma geri götür.
     const stepErrors = validateStep5(wizard);
     if (Object.keys(stepErrors).length > 0) {
       e.preventDefault();
       setErrors(stepErrors);
+      setStep(5);
       return;
     }
     clearDraft();
@@ -153,24 +164,8 @@ export function ListingWizard({
         </div>
       )}
 
-      {state.priceWarning ? (
-        <div className="space-y-4 rounded-lg border border-amber-200 bg-amber-50 p-6">
-          <div className="flex items-start gap-3">
-            <AlertIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-            <div>
-              <p className="font-semibold text-amber-800">
-                Girdiğiniz fiyat piyasa analizine göre yüksek görünüyor
-              </p>
-              <p className="mt-1 text-sm text-amber-700">
-                İlanınız yayınlandı ancak incelemeye alındı. Ekibimiz fiyatınızı kısa süre içinde
-                gözden geçirecek.
-              </p>
-            </div>
-          </div>
-          <Link href={`/ilan/${state.listingNo}`} className={primaryButtonClass}>
-            İlanı Görüntüle
-          </Link>
-        </div>
+      {state.submitted ? (
+        <SubmittedScreen />
       ) : (
         <>
           <ProgressIndicator current={step} />
@@ -202,18 +197,24 @@ export function ListingWizard({
           />
         )}
         {step === 5 && <Step5PricePreview wizard={wizard} onChange={handleChange} photos={photos} errors={errors} />}
+        {step === 6 && <Step6Preview wizard={wizard} categoryName={categoryName} photos={photos} />}
 
         <div className="flex items-center justify-between gap-3">
           <button type="button" onClick={goPrev} disabled={step === 1} className={secondaryButtonClass}>
-            Geri
+            {step === 6 ? "Geri / Düzenle" : "Geri"}
           </button>
           {step < 5 ? (
             <button type="button" onClick={goNext} className={primaryButtonClass}>
               İleri
             </button>
+          ) : step === 5 ? (
+            <button type="button" onClick={goNext} className={primaryButtonClass}>
+              <EyeIcon className="mr-1.5 h-4 w-4" />
+              Önizle
+            </button>
           ) : (
             <button type="submit" disabled={pending} onClick={handleSubmitClick} className={primaryButtonClass}>
-              {pending ? "İlan yayınlanıyor..." : "İlanı Yayınla"}
+              {pending ? "Gönderiliyor..." : "Onaya Gönder"}
             </button>
           )}
         </div>

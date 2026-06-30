@@ -1,6 +1,6 @@
 import { CheckIcon } from "@/components/icons";
 
-export const STEP_LABELS = ["Araç Bilgileri", "Parça Durumu", "Donanım", "Fotoğraf ve Açıklama", "Fiyat ve Önizleme"];
+export const STEP_LABELS = ["Araç Bilgileri", "Parça Durumu", "Donanım", "Fotoğraf ve Açıklama", "Fiyat ve Konum", "Önizleme"];
 
 export function ProgressIndicator({ current }: { current: number }) {
   return (

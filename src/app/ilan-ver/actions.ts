@@ -116,6 +116,9 @@ function parseEquipment(raw: FormDataEntryValue | null): string[] {
 export type ListingFormState = {
   error?: string;
   fieldErrors?: Partial<Record<keyof ListingInput, string[]>>;
+  // İlan başarıyla oluşturulup onaya gönderildiğinde true olur (form "incelemeye
+  // gönderildi" ekranını gösterir). İlan ANINDA yayınlanmaz; admin onayı bekler.
+  submitted?: boolean;
   priceWarning?: boolean;
   listingNo?: string;
 };
@@ -123,6 +126,7 @@ export type ListingFormState = {
 export type SimpleListingFormState = {
   error?: string;
   fieldErrors?: Partial<Record<keyof SimpleListingInput, string[]>>;
+  submitted?: boolean;
   priceWarning?: boolean;
   listingNo?: string;
 };
@@ -318,9 +322,12 @@ export async function createListingAction(
 
   const priceWarning = ruleAnalysis?.fiyat_analizi.fiyat_durumu === "asiri_yuksek";
 
+  // TÜM yeni ilanlar admin onayı bekler: ANINDA yayınlanmaz, "pending_review"
+  // (İnceleniyor) olarak kaydedilir. Kural/yapay zeka analizi yine çalışır ama
+  // son yayın kararı admin onayına bağlıdır (bkz. /admin/onay-bekleyenler).
   await prisma.listing.update({
     where: { id: listing.id },
-    data: { status: priceWarning ? "pending_review" : "active" },
+    data: { status: "pending_review" },
   });
 
   // KATMAN 2 — YAPAY ZEKA: opsiyonel, varsayılan KAPALI. Otomatik çalışması için
@@ -357,11 +364,7 @@ export async function createListingAction(
     }
   }
 
-  if (priceWarning) {
-    return { priceWarning: true, listingNo: listing.listingNo };
-  }
-
-  redirect(`/ilan/${listing.listingNo}`);
+  return { submitted: true, priceWarning, listingNo: listing.listingNo };
 }
 
 export async function createSimpleListingAction(
@@ -440,9 +443,10 @@ export async function createSimpleListingAction(
 
   const priceWarning = ruleAnalysis.fiyat_analizi.fiyat_durumu === "asiri_yuksek";
 
+  // TÜM yeni ilanlar admin onayı bekler (bkz. createListingAction).
   await prisma.listing.update({
     where: { id: listing.id },
-    data: { status: priceWarning ? "pending_review" : "active" },
+    data: { status: "pending_review" },
   });
 
   // KATMAN 2 — YAPAY ZEKA: opsiyonel, varsayılan KAPALI (bkz. createListingAction).
@@ -466,9 +470,5 @@ export async function createSimpleListingAction(
     }
   }
 
-  if (priceWarning) {
-    return { priceWarning: true, listingNo: listing.listingNo };
-  }
-
-  redirect(`/ilan/${listing.listingNo}`);
+  return { submitted: true, priceWarning, listingNo: listing.listingNo };
 }

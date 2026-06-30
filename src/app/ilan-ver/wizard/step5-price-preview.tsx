@@ -69,6 +69,8 @@ export function Step5PricePreview({ wizard, onChange, photos, errors }: Step5Pro
     views: 0,
     isDemo: false,
     status: "active",
+    rejectionReason: null,
+    reviewedAt: null,
     aiAnalysis: null,
     aiReportStatus: null,
     flagResolvedAt: null,

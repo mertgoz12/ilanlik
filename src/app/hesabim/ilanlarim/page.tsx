@@ -26,7 +26,7 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { endOptionAction } from "@/app/ilan/[listingNo]/actions";
-import { deleteListingAction, publishListingAction, unpublishListingAction } from "./actions";
+import { deleteListingAction, publishListingAction, resubmitListingAction, unpublishListingAction } from "./actions";
 
 type TabKey = "tumu" | "yayinda" | "yayinda-degil";
 
@@ -42,7 +42,7 @@ export default async function MyListingsPage({
 
   const where: Prisma.ListingWhereInput = { userId: session.id };
   if (tab === "yayinda") where.status = "active";
-  if (tab === "yayinda-degil") where.status = { in: ["pasif", "pending_review", "silindi"] };
+  if (tab === "yayinda-degil") where.status = { in: ["pasif", "pending_review", "rejected", "silindi"] };
 
   const [listings, statusCounts, conversations] = await Promise.all([
     prisma.listing.findMany({
@@ -75,6 +75,7 @@ export default async function MyListingsPage({
   const inactiveCount =
     (countsByStatus.get("pasif") ?? 0) +
     (countsByStatus.get("pending_review") ?? 0) +
+    (countsByStatus.get("rejected") ?? 0) +
     (countsByStatus.get("silindi") ?? 0);
 
   const tabs: { key: TabKey; label: string; count: number; href: string }[] = [
@@ -89,12 +90,11 @@ export default async function MyListingsPage({
   ];
 
   const enriched = listings.map((listing) => {
+    // Not: artık tüm yeni ilanlar admin onayı için "pending_review" olur; bu
+    // durum tek başına bir sorun (fahiş fiyat vb.) anlamına gelmez. Uyarı
+    // satırları yalnızca yapay zeka bayraklarından gelir.
     const aiFlags = getAiModerationFlags(listing.aiAnalysis);
-    const priceFlag = listing.status === "pending_review";
-    const flagReasons = [
-      ...(priceFlag ? ["Fahiş fiyat: önerilen üst limit aşıldı, inceleme bekleniyor"] : []),
-      ...aiFlags.map((f) => f.aciklama),
-    ];
+    const flagReasons = aiFlags.map((f) => f.aciklama);
     const isVehicle = listing.brand !== null && listing.damageStatus !== null;
     const listingWithPhotoCount = { ...listing, photoCount: listing._count.images };
     const trustScore = isVehicle
@@ -204,10 +204,21 @@ export default async function MyListingsPage({
                     {listing.optionEndAt && <span>· {formatRemainingTime(listing.optionEndAt)}</span>}
                   </p>
                 )}
-                {flagged && (
+                {flagged && status !== "rejected" && (
                   <p className="mt-1.5 flex items-start gap-1 text-xs font-medium text-amber-700">
                     <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                     <span className="line-clamp-2">{flagReasons.join(" · ")}</span>
+                  </p>
+                )}
+                {status === "rejected" && listing.rejectionReason && (
+                  <p className="mt-1.5 flex items-start gap-1 rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-600">
+                    <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span>
+                      <span className="font-semibold">Red sebebi:</span> {listing.rejectionReason}
+                      <span className="mt-0.5 block font-normal text-red-500">
+                        Düzenleyip kaydedince ilan otomatik olarak tekrar onaya gönderilir.
+                      </span>
+                    </span>
                   </p>
                 )}
               </div>
@@ -254,10 +265,20 @@ export default async function MyListingsPage({
                       >
                         Yayınla
                       </ActionButton>
+                    ) : status === "rejected" ? (
+                      <ActionButton
+                        action={resubmitListingAction.bind(null, listing.id)}
+                        icon={<CheckIcon className="h-3.5 w-3.5" />}
+                        successMessage={`"${listing.title}" tekrar onaya gönderildi.`}
+                        errorMessage="İlan tekrar gönderilemedi. Lütfen tekrar deneyin."
+                        className="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500"
+                      >
+                        Tekrar Onaya Gönder
+                      </ActionButton>
                     ) : (
                       <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700">
                         <ClockIcon className="h-3.5 w-3.5" />
-                        İncelemede
+                        İnceleniyor
                       </span>
                     )}
 

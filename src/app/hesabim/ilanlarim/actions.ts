@@ -46,6 +46,21 @@ export async function unpublishListingAction(listingId: string) {
   revalidateListingPaths(listing.listingNo);
 }
 
+// Reddedilen bir ilanı düzeltmeden olduğu gibi tekrar admin onayına gönderir.
+// (Düzenleme akışı da rejected -> pending_review yapar, bkz. updateListingAction.)
+export async function resubmitListingAction(listingId: string) {
+  const session = await requireUser();
+  const listing = await getOwnedListing(listingId, session.id);
+  if (listing.status !== "rejected") {
+    throw new Error("Yalnızca reddedilen ilanlar tekrar onaya gönderilebilir.");
+  }
+  await prisma.listing.update({
+    where: { id: listingId },
+    data: { status: "pending_review", rejectionReason: null, reviewedAt: null },
+  });
+  revalidateListingPaths(listing.listingNo);
+}
+
 export async function deleteListingAction(listingId: string) {
   const session = await requireUser();
   const listing = await getOwnedListing(listingId, session.id);
@@ -95,6 +110,10 @@ export async function updateListingAction(
       condition: parsed.data.condition || null,
       il: parsed.data.il,
       ilce: parsed.data.ilce,
+      // Reddedilen bir ilan düzenlenince otomatik olarak tekrar onaya gider.
+      ...(listing.status === "rejected"
+        ? { status: "pending_review", rejectionReason: null, reviewedAt: null }
+        : {}),
     },
   });
 

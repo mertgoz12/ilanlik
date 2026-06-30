@@ -73,7 +73,26 @@ model User {
   heldOptions      ListingOption[] @relation("ListingOptionBuyer")
   optionedListings Listing[]       @relation("ListingOptionHolder")
 
-  blogPosts BlogPost[]
+  blogPosts     BlogPost[]
+  notifications Notification[]
+}
+
+// Site içi bildirim (navbar zil/sayaç + Hesabım > Bildirimler). Şu an
+// ilan onay akışında kullanılır: ilan onaylanınca/reddedilince kullanıcıya
+// bir satır eklenir. readAt null ise okunmamıştır (sayaçta görünür).
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // "listing_approved" | "listing_rejected"
+  title     String
+  body      String
+  link      String? // tıklanınca gidilecek yol (örn. /ilan/1313717965)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }
 
 model Category {
@@ -152,11 +171,16 @@ model Listing {
   // tıkla kalıcı olarak silebilir. Gerçek ilanlarda her zaman false.
   isDemo Boolean @default(false)
 
-  // Yapay zeka ekspertiz analizi
-  status         String    @default("active") // "active" | "pending_review" | "pasif"
-  aiAnalysis     String? // JSON: AI analiz sonucu (fiyat_analizi, ekspertiz_raporu, tutarlilik_analizi)
-  aiReportStatus String? // null | "tamamlandi" | "odeme_bekliyor" | "odendi" - "ucretli" fiyatlandırma modunda kullanılır
-  flagResolvedAt DateTime? // admin moderasyon kuyruğundaki yapay zeka bayrağını incelediğinde set edilir
+  // Yapay zeka ekspertiz analizi + yayın onay akışı.
+  // status: yeni ilanlar "pending_review" (admin onayı bekler) olarak açılır;
+  // admin onaylayınca "active", reddedince "rejected" olur. Kullanıcı pasife
+  // alınca "pasif", admin/silme akışında "silindi".
+  status          String    @default("active") // "active" | "pending_review" | "rejected" | "pasif" | "silindi"
+  aiAnalysis      String? // JSON: AI analiz sonucu (fiyat_analizi, ekspertiz_raporu, tutarlilik_analizi)
+  aiReportStatus  String? // null | "tamamlandi" | "odeme_bekliyor" | "odendi" - "ucretli" fiyatlandırma modunda kullanılır
+  flagResolvedAt  DateTime? // admin moderasyon kuyruğundaki yapay zeka bayrağını incelediğinde set edilir
+  rejectionReason String? // admin ilanı reddederse yazdığı sebep (kullanıcıya gösterilir)
+  reviewedAt      DateTime? // admin onay/red kararını verdiği an
 
   // Opsiyonlama (rezervasyon) sistemi - status alanından BAĞIMSIZ bir eksen:
   // ilan "active" kalır, sadece geçici olarak opsiyonlandığında genel

@@ -3,6 +3,46 @@ const BRAND_AMBER = "#f5a623";
 const SITE_URL = "https://ilanlio.com";
 const LOGO_URL = "https://ilanlio.com/logo.png";
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// İlan admin tarafından onaylanıp yayına alındığında gönderilen e-posta.
+export function renderListingApprovedEmail(options: { listingTitle: string; listingNo: string }): string {
+  const { listingTitle, listingNo } = options;
+  return renderEmailLayout({
+    previewText: `İlanınız onaylandı ve yayında: ${listingTitle}`,
+    heading: "🎉 İlanınız onaylandı ve yayında!",
+    bodyHtml: `
+      <p style="margin:0 0 12px;"><strong>${escapeHtml(listingTitle)}</strong> ilanınız ekibimiz tarafından incelendi ve yayına alındı.</p>
+      <p style="margin:0;">Artık alıcılar ilanınızı görüntüleyebilir ve sizinle iletişime geçebilir.</p>`,
+    ctaLabel: "İlanı Görüntüle",
+    ctaUrl: `${SITE_URL}/ilan/${listingNo}`,
+    footnote: "Bu bildirimi İlanlio hesap ayarlarınızdan kapatabilirsiniz.",
+  });
+}
+
+// İlan admin tarafından reddedildiğinde gönderilen e-posta (red sebebiyle).
+export function renderListingRejectedEmail(options: { listingTitle: string; reason: string }): string {
+  const { listingTitle, reason } = options;
+  return renderEmailLayout({
+    previewText: `İlanınız yayınlanamadı: ${listingTitle}`,
+    heading: "İlanınız yayınlanamadı",
+    bodyHtml: `
+      <p style="margin:0 0 12px;"><strong>${escapeHtml(listingTitle)}</strong> ilanınız incelendi ancak yayına alınmadı.</p>
+      <p style="margin:0 0 8px;"><strong>Sebep:</strong></p>
+      <div style="padding:12px 16px;background-color:#fef2f2;border-left:3px solid #ef4444;border-radius:6px;color:#991b1b;font-size:14px;line-height:21px;">${escapeHtml(reason)}</div>
+      <p style="margin:14px 0 0;">İlanınızı düzenleyip tekrar onaya gönderebilirsiniz.</p>`,
+    ctaLabel: "İlanlarıma Git",
+    ctaUrl: `${SITE_URL}/hesabim/ilanlarim`,
+    footnote: "Bu bildirimi İlanlio hesap ayarlarınızdan kapatabilirsiniz.",
+  });
+}
+
 // Tüm e-postaların paylaştığı ortak iskelet: lacivert üst şerit + logo,
 // beyaz kart içinde içerik, sarı CTA butonu, alt bilgi notu. Mail
 // istemcileri (Gmail/Outlook) modern CSS desteklemediği için tablo tabanlı,
