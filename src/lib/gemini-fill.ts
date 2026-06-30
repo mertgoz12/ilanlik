@@ -12,9 +12,11 @@ import { selectableCategories } from "./categories";
 // kullanır. API çağrısı yalnızca sunucu tarafında yapılır; GEMINI_API_KEY asla
 // client'a sızdırılmaz.
 
-// Ücretsiz katmanı olan, görseli destekleyen en hafif/ucuz model varsayılan
-// alınır; gerekirse .env'den GEMINI_MODEL ile değiştirilebilir.
-const DEFAULT_MODEL = "gemini-1.5-flash";
+// Ücretsiz katmanı olan, görseli destekleyen hafif/ucuz model varsayılan
+// alınır; gerekirse .env'den GEMINI_MODEL ile değiştirilebilir. Not:
+// gemini-1.5-* modelleri yeni API anahtarları için kaldırıldı (404 döner),
+// bu yüzden güncel kuşak 2.5-flash kullanılır.
+const DEFAULT_MODEL = "gemini-2.5-flash";
 const MAX_ATTEMPTS = 2;
 
 export type GeminiFillImage = {
