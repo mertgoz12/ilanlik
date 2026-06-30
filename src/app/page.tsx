@@ -5,6 +5,7 @@ import { FeaturedCategories } from "@/components/featured-categories";
 import { PopularCategoriesPanel } from "@/components/popular-categories-panel";
 import { TrustStrip } from "@/components/trust-strip";
 import { TrustBanner } from "@/components/home/trust-banner";
+import { HeroSlider } from "@/components/home/hero-slider";
 import { QuickPostCard } from "@/components/home/quick-post-card";
 import { SafetyTipsCard } from "@/components/home/safety-tips-card";
 import { BlogTipsCard } from "@/components/home/blog-tips-card";
@@ -131,6 +132,7 @@ export default async function HomePage({
     featuredCount,
     vehicleComparablePool,
     genericComparablePool,
+    heroSlides,
   ] = await Promise.all([
     categoryComingSoon
       ? Promise.resolve([])
@@ -170,6 +172,11 @@ export default async function HomePage({
       where: { brand: null, status: "active" },
       select: { id: true, categoryId: true, title: true, price: true },
     }),
+    // Ana sayfa üst slider'ı - yalnızca vitrin görünümünde ve sadece aktif
+    // slaytlar (admin panelinden yönetilir, bkz. /admin/banner).
+    showVitrin
+      ? prisma.heroSlide.findMany({ where: { isActive: true }, orderBy: { order: "asc" } })
+      : Promise.resolve([]),
   ]);
 
   // Yeterince öne çıkarılmış ilan varsa "Öne Çıkan İlanlar" ayrı gösterilir;
@@ -241,6 +248,12 @@ export default async function HomePage({
           <div className="min-w-0">
             {showVitrin ? (
               <>
+                {heroSlides.length > 0 && (
+                  <div className="mb-4">
+                    <HeroSlider slides={heroSlides} />
+                  </div>
+                )}
+
                 <TrustBanner />
 
                 {featuredListings.length > 0 && (

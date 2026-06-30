@@ -1,0 +1,156 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
+
+export type HeroSlideView = {
+  id: string;
+  imageUrl: string;
+  title: string;
+  subtitle: string | null;
+  buttonText: string | null;
+  buttonLink: string | null;
+};
+
+const AUTOPLAY_MS = 5000;
+const SWIPE_THRESHOLD = 50; // px
+
+// Site içi yollar Next <Link> ile, harici (http...) bağlantılar düz <a> ile
+// açılır - böylece dış linkler yeni sekmede güvenle açılabilir.
+function SlideButton({ text, link }: { text: string; link: string }) {
+  const className =
+    "inline-flex items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-brand shadow-soft-lg transition-colors hover:bg-accent-dark hover:text-white sm:px-6 sm:py-3 sm:text-base";
+  const isExternal = /^https?:\/\//i.test(link);
+  if (isExternal) {
+    return (
+      <a href={link} target="_blank" rel="noopener noreferrer" className={className}>
+        {text}
+      </a>
+    );
+  }
+  return (
+    <Link href={link} className={className}>
+      {text}
+    </Link>
+  );
+}
+
+export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const count = slides.length;
+
+  const goTo = useCallback((i: number) => setIndex(((i % count) + count) % count), [count]);
+  const next = useCallback(() => goTo(index + 1), [goTo, index]);
+  const prev = useCallback(() => goTo(index - 1), [goTo, index]);
+
+  // Otomatik geçiş - tek slayt varsa veya duraklatıldıysa çalışmaz.
+  useEffect(() => {
+    if (count <= 1 || paused) return;
+    const timer = setInterval(() => setIndex((i) => (i + 1) % count), AUTOPLAY_MS);
+    return () => clearInterval(timer);
+  }, [count, paused]);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    setPaused(true);
+  }
+  function handleTouchEnd(e: React.TouchEvent) {
+    const start = touchStartX.current;
+    touchStartX.current = null;
+    setPaused(false);
+    if (start === null) return;
+    const delta = e.changedTouches[0].clientX - start;
+    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+    if (delta < 0) next();
+    else prev();
+  }
+
+  return (
+    <section
+      className="relative overflow-hidden rounded-2xl bg-slate-200 shadow-soft"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      aria-roledescription="carousel"
+    >
+      {/* Kayan ray: tüm slaytlar yan yana, index kadar kaydırılır */}
+      <div
+        className="flex h-44 transition-transform duration-500 ease-out sm:h-60 md:h-72 lg:h-80"
+        style={{ transform: `translateX(-${index * 100}%)` }}
+      >
+        {slides.map((slide) => (
+          <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
+            <Image
+              src={slide.imageUrl}
+              alt={slide.title}
+              fill
+              priority={slide.id === slides[0].id}
+              sizes="(max-width: 1024px) 100vw, 900px"
+              className="object-cover"
+            />
+            {/* Metin okunabilirliği için soldan koyulaşan degrade */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-center gap-2 p-5 sm:gap-3 sm:p-8 md:p-12">
+              <h2 className="max-w-lg text-xl font-extrabold leading-tight tracking-tight text-white drop-shadow sm:text-3xl md:text-4xl">
+                {slide.title}
+              </h2>
+              {slide.subtitle && (
+                <p className="max-w-md text-sm text-white/85 drop-shadow sm:text-base md:text-lg">
+                  {slide.subtitle}
+                </p>
+              )}
+              {slide.buttonText && slide.buttonLink && (
+                <div className="mt-1 sm:mt-2">
+                  <SlideButton text={slide.buttonText} link={slide.buttonLink} />
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* İleri/geri okları - birden çok slayt varsa */}
+      {count > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={prev}
+            aria-label="Önceki slayt"
+            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-brand shadow-soft transition-colors hover:bg-white sm:left-3 sm:h-10 sm:w-10"
+          >
+            <ChevronLeftIcon className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={next}
+            aria-label="Sonraki slayt"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-brand shadow-soft transition-colors hover:bg-white sm:right-3 sm:h-10 sm:w-10"
+          >
+            <ChevronRightIcon className="h-5 w-5" />
+          </button>
+
+          {/* Nokta göstergeleri */}
+          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2">
+            {slides.map((slide, i) => (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`${i + 1}. slayda git`}
+                aria-current={i === index}
+                className={`h-2 rounded-full transition-all ${
+                  i === index ? "w-6 bg-white" : "w-2 bg-white/55 hover:bg-white/80"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}

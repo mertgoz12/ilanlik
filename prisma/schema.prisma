@@ -508,3 +508,23 @@ model BlogPost {
   @@index([status, publishedAt])
   @@index([category])
 }
+
+// Ana sayfa üst kısmındaki otomatik kayan banner/slider slaytları. Tamamen
+// admin panelinden (/admin/banner) yönetilir: ekle/düzenle/sil/sırala ve
+// aktif/pasif yap. Görseller Vercel Blob'a yüklenir (bkz. src/lib/hero-photos.ts).
+// Ana sayfa yalnızca isActive=true slaytları order'a göre sıralı gösterir;
+// hiç aktif slayt yoksa slider alanı tamamen gizlenir (bkz. HomeSlider).
+model HeroSlide {
+  id         String   @id @default(cuid())
+  imageUrl   String
+  title      String
+  subtitle   String? // opsiyonel alt metin
+  buttonText String? // opsiyonel buton etiketi (örn. "Hemen İlan Ver")
+  buttonLink String? // butonun yönlendireceği yol (örn. /ilan-ver)
+  order      Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive, order])
+}
