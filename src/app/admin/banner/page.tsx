@@ -104,7 +104,9 @@ export default async function AdminBannerPage() {
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate font-medium text-foreground">{slide.title}</p>
+                    <p className={`truncate font-medium ${slide.title ? "text-foreground" : "italic text-slate-400"}`}>
+                      {slide.title || "Başlıksız (yalnızca görsel)"}
+                    </p>
                     <span
                       className={`inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
                         slide.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-500"
@@ -144,7 +146,7 @@ export default async function AdminBannerPage() {
                   action={deleteSlideAction.bind(null, slide.id)}
                   icon={<TrashIcon className="h-3.5 w-3.5" />}
                   confirmTitle="Slaytı sil"
-                  confirmMessage={`"${slide.title}" slaytını silmek istediğinize emin misiniz?`}
+                  confirmMessage={`${slide.title ? `"${slide.title}" slaytını` : "Bu slaytı"} silmek istediğinize emin misiniz?`}
                   confirmLabel="Evet, sil"
                   successMessage="Slayt silindi."
                   errorMessage="Slayt silinemedi. Lütfen tekrar deneyin."

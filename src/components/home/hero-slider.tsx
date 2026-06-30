@@ -50,7 +50,7 @@ function SlideMedia({ slide, priority }: { slide: HeroSlideView; priority: boole
         muted
         playsInline
         preload="metadata"
-        aria-label={slide.title}
+        aria-label={slide.title || "Banner"}
         className="absolute inset-0 h-full w-full object-cover"
       />
     );
@@ -119,24 +119,32 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
         {slides.map((slide) => (
           <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
             <SlideMedia slide={slide} priority={slide.id === slides[0].id} />
-            {/* Marka lacivertinden soldan sağa açılan yumuşak degrade - metin
-                okunaklı kalsın, görünüm sakin/zarif olsun (sert siyah değil). */}
-            <div className="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/55 to-brand/10" />
-            <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 sm:px-8 md:px-10">
-              <h2 className="max-w-md text-base font-bold leading-snug tracking-tight text-white drop-shadow-sm sm:text-lg md:text-2xl">
-                {slide.title}
-              </h2>
-              {slide.subtitle && (
-                <p className="max-w-sm text-xs text-white/85 sm:text-sm">
-                  {slide.subtitle}
-                </p>
-              )}
-              {slide.buttonText && slide.buttonLink && (
-                <div className="mt-1">
-                  <SlideButton text={slide.buttonText} link={slide.buttonLink} />
+            {/* Üzerinde yazı/buton varsa metin katmanı; yoksa degrade de
+                binmesin, görsel/video tertemiz tek başına gözüksün. */}
+            {(slide.title || slide.subtitle || (slide.buttonText && slide.buttonLink)) && (
+              <>
+                {/* Marka lacivertinden soldan sağa açılan yumuşak degrade -
+                    metin okunaklı kalsın, görünüm sakin/zarif olsun. */}
+                <div className="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/55 to-brand/10" />
+                <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 sm:px-8 md:px-10">
+                  {slide.title && (
+                    <h2 className="max-w-md text-base font-bold leading-snug tracking-tight text-white drop-shadow-sm sm:text-lg md:text-2xl">
+                      {slide.title}
+                    </h2>
+                  )}
+                  {slide.subtitle && (
+                    <p className="max-w-sm text-xs text-white/85 sm:text-sm">
+                      {slide.subtitle}
+                    </p>
+                  )}
+                  {slide.buttonText && slide.buttonLink && (
+                    <div className="mt-1">
+                      <SlideButton text={slide.buttonText} link={slide.buttonLink} />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         ))}
       </div>

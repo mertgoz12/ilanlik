@@ -9,7 +9,9 @@ import { deleteHeroMediaBlob, uploadHeroMedia } from "@/lib/hero-photos";
 
 const slideSchema = z.object({
   imageUrl: z.string().trim().min(1, "Görsel veya video yüklemelisiniz."),
-  title: z.string().trim().min(2, "Başlık en az 2 karakter olmalı.").max(120),
+  // Başlık opsiyonel: bazen yalnızca görsel/video konabilir (üzerine yazı
+  // binmesin). Boşsa "" saklanır, ana sayfada başlık/metin gösterilmez.
+  title: z.string().trim().max(120).optional(),
   subtitle: z.string().trim().max(200).optional(),
   buttonText: z.string().trim().max(40).optional(),
   buttonLink: z.string().trim().max(300).optional(),
@@ -24,7 +26,7 @@ export type HeroSlideFormState = {
 function parseForm(formData: FormData) {
   return slideSchema.safeParse({
     imageUrl: formData.get("imageUrl") ?? "",
-    title: formData.get("title"),
+    title: formData.get("title") || undefined,
     subtitle: formData.get("subtitle") || undefined,
     buttonText: formData.get("buttonText") || undefined,
     buttonLink: formData.get("buttonLink") || undefined,
@@ -62,7 +64,7 @@ export async function createSlideAction(
   await prisma.heroSlide.create({
     data: {
       imageUrl: parsed.data.imageUrl,
-      title: parsed.data.title,
+      title: parsed.data.title ?? "",
       subtitle: parsed.data.subtitle ?? null,
       buttonText: parsed.data.buttonText ?? null,
       buttonLink: parsed.data.buttonLink ?? null,
@@ -93,7 +95,7 @@ export async function updateSlideAction(
     where: { id: slideId },
     data: {
       imageUrl: parsed.data.imageUrl,
-      title: parsed.data.title,
+      title: parsed.data.title ?? "",
       subtitle: parsed.data.subtitle ?? null,
       buttonText: parsed.data.buttonText ?? null,
       buttonLink: parsed.data.buttonLink ?? null,

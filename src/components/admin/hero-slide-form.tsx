@@ -126,14 +126,13 @@ export function HeroSlideForm({ action, initialSlide, submitLabel }: HeroSlideFo
 
         <div>
           <label className={labelClass} htmlFor="title">
-            Başlık
+            Başlık <span className="font-normal text-slate-400">(opsiyonel)</span>
           </label>
           <input
             id="title"
             name="title"
-            required
             defaultValue={initialSlide?.title}
-            placeholder="Örn: Aracını Saniyeler İçinde İlana Çevir"
+            placeholder="Boş bırakılırsa görselin üzerinde yazı çıkmaz"
             className={inputClass}
           />
           {state.fieldErrors?.title && <p className={errorClass}>{state.fieldErrors.title[0]}</p>}
