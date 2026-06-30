@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState, type KeyboardEvent } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { createSimpleListingAction, type SimpleListingFormState } from "./actions";
+import { suggestListingFromPhotosAction } from "./ai-fill-action";
+import type { GeminiFillSuggestion } from "@/lib/gemini-fill";
 import { HiddenFileInput, SortableImagePicker } from "@/components/sortable-image-picker";
 import { LocationSelect } from "@/components/location-select";
 import { errorClass, inputClass, labelClass, selectClass } from "@/components/form-ui";
@@ -15,6 +17,8 @@ import {
   EyeIcon,
   ImageIcon,
   LocationIcon,
+  SparkleIcon,
+  SpinnerIcon,
   TagIcon,
 } from "@/components/icons";
 
@@ -73,6 +77,7 @@ export function SimpleListingForm({
 }) {
   const [state, formAction, pending] = useActionState(createSimpleListingAction, initialState);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
   // Fotoğraflar adımlar arası kaybolmasın diye form düzeyinde tutulur; gerçek
   // gönderilen input (HiddenFileInput) bu sırayla senkron tutulur.
   const [photos, setPhotos] = useState<File[]>([]);
@@ -80,6 +85,16 @@ export function SimpleListingForm({
   // varsayılan açık, Sıfır seçilince kapanır (kullanıcı yine değiştirebilir).
   const [condition, setCondition] = useState("");
   const [negotiable, setNegotiable] = useState(false);
+  // OPSİYONEL "Yapay Zeka ile Doldur" (Gemini) durumu. aiResult set olduğunda
+  // detay adımında bir özet/uyarı şeridi gösterilir; öneriler forma doldurulur
+  // ama kullanıcı her alanı serbestçe düzenleyebilir.
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiResult, setAiResult] = useState<{
+    suggestion: GeminiFillSuggestion;
+    categoryId: string | null;
+    categoryName: string | null;
+  } | null>(null);
   // Önizleme adımında gösterilecek anlık görüntü: form alanları (uncontrolled
   // olduğundan) önizlemeye geçerken DOM'dan okunup buraya alınır.
   const [preview, setPreview] = useState<{
@@ -113,6 +128,59 @@ export function SimpleListingForm({
     if (!price || Number(price) <= 0) errs.price = "Geçerli bir fiyat girin.";
     setLocalErrors(errs);
     return Object.keys(errs).length === 0;
+  }
+
+  // OPSİYONEL yapay zeka doldurma: yüklenen fotoğrafları sunucuya gönderir,
+  // dönen önerileri (uncontrolled) form alanlarına yazar ve kullanıcıyı kontrol
+  // etmesi için detay adımına götürür. Limit/hata olursa yalnızca uyarı gösterir,
+  // form bozulmaz; kullanıcı her zaman elle doldurmaya devam edebilir.
+  async function handleAiFill() {
+    if (photos.length === 0) {
+      setAiError("Önce en az bir fotoğraf yükleyin.");
+      return;
+    }
+    setAiError(null);
+    setAiLoading(true);
+    try {
+      const fd = new FormData();
+      photos.forEach((file) => fd.append("images", file));
+      fd.set("categoryName", categoryName);
+      const result = await suggestListingFromPhotosAction(fd);
+      if (!result.ok) {
+        setAiError(result.error);
+        return;
+      }
+
+      const s = result.suggestion;
+      const form = formRef.current;
+      if (form) {
+        const setField = (name: string, value: string) => {
+          const el = form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
+          if (el) el.value = value;
+        };
+        if (s.title) setField("title", s.title);
+        if (s.description) setField("description", s.description);
+        // Fiyat: tahmini aralığın ortası önerilir (yoksa tek uç). Kesin değil,
+        // şeritte "tahmin" uyarısı gösterilir; kullanıcı mutlaka kontrol etmeli.
+        const mid =
+          s.priceMin && s.priceMax
+            ? Math.round((s.priceMin + s.priceMax) / 2)
+            : s.priceMin ?? s.priceMax;
+        if (mid) setField("price", String(mid));
+      }
+      if (s.condition) {
+        setCondition(s.condition);
+        setNegotiable(s.condition === "İkinci El");
+      }
+
+      setAiResult({ suggestion: s, categoryId: result.categoryId, categoryName: result.categoryName });
+      setLocalErrors({});
+      onStep(STEP_DETAILS);
+    } catch {
+      setAiError("Yapay zeka şu an yanıt veremedi. Lütfen bilgileri elle doldurun.");
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   function capturePreview(form: HTMLFormElement) {
@@ -153,7 +221,7 @@ export function SimpleListingForm({
   }
 
   return (
-    <form action={formAction} onKeyDown={handleKeyDown} className="space-y-5">
+    <form ref={formRef} action={formAction} onKeyDown={handleKeyDown} className="space-y-5">
       <input type="hidden" name="categoryId" value={categoryId} />
       {/* Gerçek gönderilen "images" inputu - adımlar arası mount kalır. */}
       <HiddenFileInput files={photos} />
@@ -167,6 +235,78 @@ export function SimpleListingForm({
 
       {/* 2 - Detaylar */}
       <div className={step === STEP_DETAILS ? "" : "hidden"}>
+        {aiResult && (
+          <div className="mb-4 rounded-2xl border border-accent/40 bg-accent-light/60 p-4 text-sm text-brand shadow-soft">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2">
+                <SparkleIcon className="mt-0.5 h-4 w-4 shrink-0 text-accent-dark" />
+                <div>
+                  <p className="font-semibold">Yapay zeka önerileri forma dolduruldu.</p>
+                  <p className="mt-0.5 text-xs text-brand/80">
+                    Lütfen her alanı kontrol edip gerekirse düzenleyin. Öneriler tahmin
+                    içerebilir; son karar size aittir.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAiResult(null)}
+                aria-label="Kapat"
+                className="shrink-0 rounded-md p-1 text-brand/50 transition-colors hover:bg-white/60 hover:text-brand"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-3 space-y-1.5 text-xs">
+              {aiResult.categoryName && (
+                <p>
+                  <span className="font-semibold">Önerilen kategori:</span> {aiResult.categoryName}
+                  {aiResult.categoryName !== categoryName && (
+                    <span className="text-brand/70">
+                      {" "}
+                      — değiştirmek için yukarıdan kategoriyi düzenleyebilirsiniz.
+                    </span>
+                  )}
+                </p>
+              )}
+              {(aiResult.suggestion.brand || aiResult.suggestion.model) && (
+                <p>
+                  <span className="font-semibold">Marka / Model:</span>{" "}
+                  {[aiResult.suggestion.brand, aiResult.suggestion.model].filter(Boolean).join(" ")}
+                </p>
+              )}
+              {(aiResult.suggestion.priceMin || aiResult.suggestion.priceMax) && (
+                <p>
+                  <span className="font-semibold">Tahmini fiyat aralığı:</span>{" "}
+                  {aiResult.suggestion.priceMin?.toLocaleString("tr-TR") ?? "?"} –{" "}
+                  {aiResult.suggestion.priceMax?.toLocaleString("tr-TR") ?? "?"} ₺{" "}
+                  <span className="font-medium text-amber-700">(tahmin, kontrol edin)</span>
+                </p>
+              )}
+              {aiResult.suggestion.features.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  <span className="font-semibold">Özellikler:</span>
+                  {aiResult.suggestion.features.map((f) => (
+                    <span
+                      key={f}
+                      className="rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-medium text-brand"
+                    >
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {aiResult.suggestion.note && (
+                <p className="flex items-start gap-1.5 pt-0.5 text-amber-700">
+                  <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  {aiResult.suggestion.note}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         <StepCard
           icon={TagIcon}
           title="İlan Detayları"
@@ -288,6 +428,55 @@ export function SimpleListingForm({
           description="Net ve aydınlık fotoğraflar ilanınızın daha hızlı satılmasını sağlar."
         >
           <SortableImagePicker files={photos} onFilesChange={setPhotos} idPrefix="ilan" />
+
+          {/* OPSİYONEL yapay zeka doldurma. Tamamen kullanıcının isteğine bağlı:
+              basmazsa hiçbir yapay zeka çağrısı yapılmaz, ilanı elle doldurur. */}
+          <div className="rounded-xl border border-accent/30 bg-accent-light/50 p-4">
+            <div className="flex items-start gap-2.5">
+              <SparkleIcon className="mt-0.5 h-5 w-5 shrink-0 text-accent-dark" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-brand">Yapay zeka ilanı sizin için doldursun</p>
+                <p className="mt-0.5 text-xs text-slate-600">
+                  Fotoğraflarınızı inceleyip başlık, kategori, açıklama ve tahmini fiyat
+                  önerir. İsteğe bağlıdır; öneriler forma dolar, dilediğiniz gibi düzenlersiniz.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAiFill}
+              disabled={aiLoading || photos.length === 0}
+              className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-soft transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {aiLoading ? (
+                <>
+                  <SpinnerIcon className="h-4 w-4 animate-spin" />
+                  Fotoğraflar inceleniyor...
+                </>
+              ) : (
+                <>
+                  <SparkleIcon className="h-4 w-4" />
+                  {aiResult ? "Yeniden Doldur" : "Yapay Zeka ile Doldur"}
+                </>
+              )}
+            </button>
+            {photos.length === 0 && (
+              <p className="mt-2 text-xs text-slate-500">Önce en az bir fotoğraf yükleyin.</p>
+            )}
+            {aiError && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
+                <AlertIcon className="h-3.5 w-3.5 shrink-0" />
+                {aiError}
+              </p>
+            )}
+            {aiResult && !aiError && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700">
+                <CheckIcon className="h-3.5 w-3.5 shrink-0" />
+                Öneriler dolduruldu. &quot;Geri&quot; ile detay adımına dönüp kontrol edebilirsiniz.
+              </p>
+            )}
+          </div>
         </StepCard>
 
         <div className="mt-5 flex items-center justify-between gap-3">

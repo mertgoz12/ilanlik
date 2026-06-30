@@ -264,6 +264,23 @@ model AiReportLog {
   @@index([createdAt])
 }
 
+// "Fotoğraftan yapay zeka ile ilan doldurma" (Google Gemini) özelliğinin
+// maliyet/kötüye kullanım kontrolü için her başarılı doldurma çağrısını
+// kaydeder (kullanıcı/IP başına ve sistem genelinde günlük limit bu tabloya
+// göre yapılır, bkz. gemini-fill-limits.ts). Anthropic güven puanı analizinden
+// (AiReportLog) ve onun limitlerinden tamamen AYRIDIR. İlan henüz oluşmadan
+// (taslak aşamasında) çalıştığı için bir Listing'e bağlı değildir.
+model GeminiFillLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([ip, createdAt])
+  @@index([createdAt])
+}
+
 // Kullanıcıların ilanları bildirmesi: moderasyon kuyruğunun (admin/moderasyon)
 // "kullanıcı şikayeti" kaynağı.
 model ListingReport {
