@@ -24,10 +24,13 @@ import {
 
 const initialState: SimpleListingFormState = {};
 
-// Adım numaraları StepProgress ile aynı: 2 Detaylar, 3 Fotoğraflar,
-// 4 Konum, 5 Önizleme (1 = kategori seçimi, ListingFlow'da).
-const STEP_DETAILS = 2;
-const STEP_PHOTOS = 3;
+// Adım numaraları StepProgress ile aynı: 2 Fotoğraflar, 3 Detaylar,
+// 4 Konum, 5 Önizleme (1 = kategori seçimi, ListingFlow'da). Fotoğraf adımı
+// bilerek detaylardan ÖNCE gelir: kullanıcı önce fotoğraf yükleyip (isterse)
+// yapay zekayla doldurabilsin, sonra dolu detay adımına ilerlesin; doldurma
+// için geri dönmek zorunda kalmasın.
+const STEP_PHOTOS = 2;
+const STEP_DETAILS = 3;
 const STEP_LOCATION = 4;
 const STEP_PREVIEW = 5;
 
@@ -233,7 +236,7 @@ export function SimpleListingForm({
         </div>
       )}
 
-      {/* 2 - Detaylar */}
+      {/* 3 - Detaylar (fotoğraftan SONRA) */}
       <div className={step === STEP_DETAILS ? "" : "hidden"}>
         {aiResult && (
           <div className="mb-4 rounded-2xl border border-accent/40 bg-accent-light/60 p-4 text-sm text-brand shadow-soft">
@@ -412,15 +415,18 @@ export function SimpleListingForm({
           </div>
         </StepCard>
 
-        <div className="mt-5 flex justify-end">
-          <button type="button" onClick={(e) => handleNext(e, STEP_PHOTOS)} className={primaryButton}>
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <button type="button" onClick={() => onStep(STEP_PHOTOS)} className={secondaryButton}>
+            Geri
+          </button>
+          <button type="button" onClick={(e) => handleNext(e, STEP_LOCATION)} className={primaryButton}>
             Devam Et
             <ChevronRightIcon className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* 3 - Fotoğraflar */}
+      {/* 2 - Fotoğraflar (detaylardan ÖNCE) */}
       <div className={step === STEP_PHOTOS ? "" : "hidden"}>
         <StepCard
           icon={ImageIcon}
@@ -473,17 +479,14 @@ export function SimpleListingForm({
             {aiResult && !aiError && (
               <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700">
                 <CheckIcon className="h-3.5 w-3.5 shrink-0" />
-                Öneriler dolduruldu. &quot;Geri&quot; ile detay adımına dönüp kontrol edebilirsiniz.
+                Öneriler dolduruldu — sonraki adımda kontrol edip düzenleyebilirsiniz.
               </p>
             )}
           </div>
         </StepCard>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <button type="button" onClick={() => onStep(STEP_DETAILS)} className={secondaryButton}>
-            Geri
-          </button>
-          <button type="button" onClick={(e) => handleNext(e, STEP_LOCATION)} className={primaryButton}>
+        <div className="mt-5 flex justify-end">
+          <button type="button" onClick={() => onStep(STEP_DETAILS)} className={primaryButton}>
             Devam Et
             <ChevronRightIcon className="h-4 w-4" />
           </button>
@@ -505,7 +508,7 @@ export function SimpleListingForm({
         </StepCard>
 
         <div className="mt-5 flex items-center justify-between gap-3">
-          <button type="button" onClick={() => onStep(STEP_PHOTOS)} className={secondaryButton}>
+          <button type="button" onClick={() => onStep(STEP_DETAILS)} className={secondaryButton}>
             Geri
           </button>
           <button type="button" onClick={(e) => handleNext(e, STEP_PREVIEW)} className={primaryButton}>

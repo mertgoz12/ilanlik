@@ -2,8 +2,8 @@ import { CheckIcon } from "@/components/icons";
 
 const STEPS = [
   { n: 1, label: "Kategori" },
-  { n: 2, label: "Detaylar" },
-  { n: 3, label: "Fotoğraflar" },
+  { n: 2, label: "Fotoğraflar" },
+  { n: 3, label: "Detaylar" },
   { n: 4, label: "Konum" },
   { n: 5, label: "Önizleme" },
 ] as const;
