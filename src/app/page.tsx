@@ -241,9 +241,11 @@ export default async function HomePage({
     <div>
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
         {/* Üst banner şeridi: tüm içerik genişliğini (sol kategori menüsünden
-            sağ "Hızlı İlan Ver" kutusuna kadar) kaplayan ince yatay şerit. */}
+            sağ "Hızlı İlan Ver" kutusuna kadar) kaplayan ince yatay şerit.
+            Mobilde gizli (hidden md:block) - dar ekranda düzeni bozuyordu;
+            yalnızca tablet/masaüstünde gösterilir. */}
         {showVitrin && heroSlides.length > 0 && (
-          <div className="mb-4">
+          <div className="mb-4 hidden md:block">
             <HeroSlider slides={heroSlides} />
           </div>
         )}
