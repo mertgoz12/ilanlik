@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
-import { ChevronLeftIcon, ImageIcon, TagIcon } from "@/components/icons";
+import { CheckIcon, ChevronLeftIcon, ImageIcon, TagIcon } from "@/components/icons";
 import { OfferBubble } from "@/components/offer-bubble";
 import { OfferDialog } from "@/components/offer-dialog";
 import { RelativeTime } from "@/components/relative-time";
@@ -34,6 +34,10 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
   const [offerComposer, setOfferComposer] = useState<{ open: boolean; defaultAmount?: number }>({
     open: false,
   });
+
+  // Kabul edilmiş teklif varsa pazarlık sonuçlanmıştır; "Teklif Ver" gizlenir
+  // (sunucu da yeni teklifi reddeder, bkz. submitOfferAction).
+  const hasAcceptedOffer = conversation.messages.some((m) => m.offer?.status === "accepted");
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -133,7 +137,12 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
 
       <form ref={formRef} action={formAction} className="border-t border-slate-100 p-3">
         <input type="hidden" name="conversationId" value={conversation.id} />
-        {conversation.listing.isNegotiable && (
+        {conversation.listing.isNegotiable && hasAcceptedOffer ? (
+          <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700">
+            <CheckIcon className="h-3.5 w-3.5" />
+            Teklif kabul edildi
+          </p>
+        ) : conversation.listing.isNegotiable ? (
           <button
             type="button"
             onClick={() => setOfferComposer({ open: true })}
@@ -142,7 +151,7 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
             <TagIcon className="h-3.5 w-3.5" />
             Teklif Ver
           </button>
-        )}
+        ) : null}
         {state.error && <p className="mb-2 text-xs font-medium text-red-600">{state.error}</p>}
         <div className="flex items-end gap-2">
           <textarea

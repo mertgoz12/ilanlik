@@ -337,6 +337,16 @@ export async function submitOfferAction(
     conversationId = conversation.id;
   }
 
+  // Bu pazarlıkta kabul edilmiş bir teklif varsa anlaşma sonuçlanmıştır;
+  // ne alıcı yeni teklif ne de satıcı karşı teklif verebilir.
+  const acceptedOffer = await prisma.offer.findFirst({
+    where: { conversationId, status: "accepted" },
+    select: { id: true },
+  });
+  if (acceptedOffer) {
+    return { error: "Bu pazarlıkta kabul edilmiş bir teklif var; yeni teklif veremezsiniz." };
+  }
+
   // Önceki bekleyen teklifi "countered" yap (zincir kur).
   const prior = await prisma.offer.findFirst({
     where: { conversationId, status: "pending" },
@@ -411,6 +421,15 @@ export async function respondOfferAction(
   }
   if (offer.createdById === session.id) return { error: "Kendi teklifinizi yanıtlayamazsınız." };
   if (offer.status !== "pending") return { error: "Bu teklif artık geçerli değil." };
+
+  // Aynı pazarlıkta zaten kabul edilmiş bir teklif varsa ikinci bir kabul olmaz.
+  if (decision === "accept") {
+    const alreadyAccepted = await prisma.offer.findFirst({
+      where: { conversationId: conv.id, status: "accepted" },
+      select: { id: true },
+    });
+    if (alreadyAccepted) return { error: "Bu pazarlıkta zaten kabul edilmiş bir teklif var." };
+  }
 
   const newStatus = decision === "accept" ? "accepted" : "rejected";
   await prisma.offer.update({

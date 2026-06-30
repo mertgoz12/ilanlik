@@ -7,7 +7,7 @@ import { Avatar } from "./avatar";
 import { OfferBubble } from "./offer-bubble";
 import { OfferDialog } from "./offer-dialog";
 import { RelativeTime } from "./relative-time";
-import { ChevronDownIcon, CloseIcon, ImageIcon, SendIcon, TagIcon } from "./icons";
+import { CheckIcon, ChevronDownIcon, CloseIcon, ImageIcon, SendIcon, TagIcon } from "./icons";
 import { useUnreadMessages } from "./unread-messages-context";
 import { MAX_MESSAGE_LENGTH } from "@/lib/message-filters";
 import { formatPrice } from "@/lib/format";
@@ -109,6 +109,10 @@ export function ListingChatWidget({
       formRef.current?.requestSubmit();
     }
   }
+
+  // Kabul edilmiş bir teklif varsa pazarlık sonuçlanmıştır; "Teklif Ver"
+  // butonu gizlenir (sunucu da yeni teklifi reddeder, ikinci savunma katmanı).
+  const hasAcceptedOffer = messages.some((m) => m.offer?.status === "accepted");
 
   return (
     <div className="fixed bottom-4 right-4 z-50 hidden w-[22rem] overflow-hidden rounded-2xl bg-white shadow-soft-lg ring-1 ring-slate-200 md:block">
@@ -221,7 +225,12 @@ export function ListingChatWidget({
           {/* Yazma alanı */}
           <form ref={formRef} action={sendAction} className="border-t border-slate-100 p-2.5">
             <input type="hidden" name="listingId" value={listingId} />
-            {isNegotiable && (
+            {isNegotiable && hasAcceptedOffer ? (
+              <p className="mb-1.5 inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-700">
+                <CheckIcon className="h-3 w-3" />
+                Teklif kabul edildi
+              </p>
+            ) : isNegotiable ? (
               <button
                 type="button"
                 onClick={() => setOfferComposer({ open: true })}
@@ -230,7 +239,7 @@ export function ListingChatWidget({
                 <TagIcon className="h-3 w-3" />
                 Teklif Ver
               </button>
-            )}
+            ) : null}
             {sendState.error && (
               <p className="mb-1.5 px-1 text-[11px] font-medium text-red-600">{sendState.error}</p>
             )}
