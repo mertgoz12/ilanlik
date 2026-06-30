@@ -28,13 +28,18 @@ export function SubmittedScreen() {
         >
           İlanlarıma Git
         </Link>
-        <Link
+        {/* Düz <a>: aynı route'a (/ilan-ver) tam sayfa yenilemesiyle gidip
+            formun tüm istemci state'ini (submitted durumu, seçili kategori,
+            doldurulmuş alanlar) sıfırlar; böylece kullanıcı boş bir formla
+            yeni ilan girebilir. Next.js <Link> yumuşak geçiş yaptığından
+            state korunur ve form tekrar doldurulamazdı. */}
+        <a
           href="/ilan-ver"
           className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:w-auto"
         >
           <PlusIcon className="h-4 w-4" />
           Yeni İlan Ver
-        </Link>
+        </a>
       </div>
     </div>
   );
