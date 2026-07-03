@@ -170,6 +170,26 @@ details > summary::-webkit-details-marker {
   animation: scan-line 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+/* Öne Çıkan İlanlar şeridi: kartlar sağa doğru sürekli/otomatik kayar
+   (marquee). İçerik iki özdeş kopya halinde render edilir; -50% <-> 0 arası
+   kayma dikişsiz döngü verir. Üzerine gelince durur. Bkz. page.tsx. */
+@keyframes marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee-right {
+  animation: marquee-right 45s linear infinite;
+}
+
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;

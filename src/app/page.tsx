@@ -328,16 +328,22 @@ export default async function HomePage({
                         Tümünü Gör ›
                       </Link>
                     </div>
-                    {/* Yatay kayan slayt: kartlar tek sıra halinde yana kaydırılır. */}
-                    <div className="mt-4 -mx-1 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1 scrollbar-hide">
-                      {Array.from({ length: FEATURED_PLACEHOLDER_COUNT }).map((_, i) => (
-                        <div key={`featured-placeholder-${i}`} className="w-[144px] shrink-0 snap-start sm:w-[156px]">
-                          <ListingPlaceholderCard
-                            categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
-                            premium
-                          />
-                        </div>
-                      ))}
+                    {/* Otomatik kayan şerit (marquee): kartlar sağa doğru sürekli
+                        akar, fare üzerine gelince durur. Dikişsiz döngü için aynı
+                        dizi iki kez render edilir (bkz. globals.css marquee-right). */}
+                    <div className="mt-4 overflow-hidden">
+                      <div className="animate-marquee-right flex w-max">
+                        {[0, 1].map((copy) =>
+                          Array.from({ length: FEATURED_PLACEHOLDER_COUNT }).map((_, i) => (
+                            <div key={`featured-marquee-${copy}-${i}`} className="mr-2.5 w-[168px] shrink-0 sm:w-[184px]">
+                              <ListingPlaceholderCard
+                                categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
+                                premium
+                              />
+                            </div>
+                          )),
+                        )}
+                      </div>
                     </div>
                   </section>
                 )}
