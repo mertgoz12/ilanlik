@@ -24,6 +24,7 @@ import { Pagination } from "@/components/pagination";
 import { CategorySidebar } from "@/components/category-sidebar";
 import { SidebarShell } from "@/components/sidebar-shell";
 import { ComingSoonBadge } from "@/components/coming-soon";
+import { Crown } from "lucide-react";
 import { SearchIcon, ClockIcon } from "@/components/icons";
 import { getSession } from "@/lib/session";
 import {
@@ -58,6 +59,10 @@ const CATEGORY_PLACEHOLDER_TARGET = 12;
 // çeşitlilik için aşağıdaki kategori temaları (ikon/renk) sırayla döndürülür;
 // her kart o kategoride ilan vermeye yönlendirir.
 const HOME_PLACEHOLDER_COUNT = 54;
+// Sayfanın en üstündeki premium "Öne Çıkan İlanlar" vitrinindeki placeholder
+// kart sayısı. Gerçek öne çıkan ilan yeterli değilken (bkz. showSeparateFeatured)
+// bu prestijli/dikkat çekici blok "İlan Bekleniyor" kartlarıyla doldurulur.
+const FEATURED_PLACEHOLDER_COUNT = 12;
 const HOME_PLACEHOLDER_SLUGS = [
   "cep-telefonu",
   "dizustu-bilgisayar",
@@ -311,6 +316,42 @@ export default async function HomePage({
           <div className="min-w-0">
             {showVitrin ? (
               <>
+                {/* Sayfanın en üstündeki en dikkat çekici alan: premium "Öne
+                    Çıkan İlanlar" vitrini. Gerçek öne çıkan ilan yeterli değilken
+                    (bkz. showSeparateFeatured) prestijli "İlan Bekleniyor"
+                    kartlarıyla dolar - burada SAHTE ilan yok, sadece placeholder. */}
+                {!showSeparateFeatured && (
+                  <section className="mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-brand via-brand-700 to-brand-900 p-4 shadow-soft-lg ring-1 ring-accent/40 sm:p-5">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-dark text-white shadow-soft">
+                        <Crown className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-bold tracking-tight text-white">
+                            Öne Çıkan İlanlar
+                          </h2>
+                          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-900">
+                            Premium
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-brand-100">
+                          En çok görüntülenen, vitrindeki ayrıcalıklı alan. İlanını buraya taşı, öne çık.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
+                      {Array.from({ length: FEATURED_PLACEHOLDER_COUNT }).map((_, i) => (
+                        <ListingPlaceholderCard
+                          key={`featured-placeholder-${i}`}
+                          categorySlug={HOME_PLACEHOLDER_SLUGS[i % HOME_PLACEHOLDER_SLUGS.length]}
+                          premium
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
                 <TrustBanner />
 
                 {featuredListings.length > 0 && (
