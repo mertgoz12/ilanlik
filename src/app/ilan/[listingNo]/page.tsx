@@ -279,6 +279,10 @@ export default async function ListingDetailPage({
             ) : (
               <p className="text-sm text-slate-500">Satıcı bir açıklama eklememiş.</p>
             )}
+            {/* Açıklamanın altında gösterilen "test" etiketi - yalnızca görsel,
+                veritabanındaki ilan içeriğini değiştirmez. Bu sayfa zaten sadece
+                aktif ilanlar için render edilir (bkz. status kontrolü yukarıda). */}
+            <p className="mt-3 text-sm text-slate-600">test</p>
           </div>
         </div>
       ),
