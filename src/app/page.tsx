@@ -18,7 +18,7 @@ import { SignupPromoCard } from "@/components/home/signup-promo-card";
 // import { StatsCard } from "@/components/home/stats-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
-import { ListingPlaceholderCard } from "@/components/listing-placeholder-card";
+import { ListingPlaceholderCard, PLACEHOLDER_CATEGORY_SLUGS } from "@/components/listing-placeholder-card";
 import { ListingFilters } from "@/components/listing-filters";
 import { Pagination } from "@/components/pagination";
 import { CategorySidebar } from "@/components/category-sidebar";
@@ -63,26 +63,6 @@ const HOME_PLACEHOLDER_COUNT = 54;
 // kart sayısı. Gerçek öne çıkan ilan yeterli değilken (bkz. showSeparateFeatured)
 // bu prestijli/dikkat çekici blok "İlan Bekleniyor" kartlarıyla doldurulur.
 const FEATURED_PLACEHOLDER_COUNT = 12;
-const HOME_PLACEHOLDER_SLUGS = [
-  "cep-telefonu",
-  "dizustu-bilgisayar",
-  "koltuk-kanepe",
-  "spor-ayakkabi",
-  "bisiklet",
-  "gitar",
-  "buzdolabi",
-  "oyun-konsolu",
-  "canta",
-  "saat",
-  "kulaklik",
-  "kahve-makinesi",
-  "televizyon",
-  "fotograf-makinesi",
-  "klima",
-  "camasir-makinesi",
-  "kadin-giyim",
-  "erkek-giyim",
-];
 // "Öne Çıkan İlanlar" başlığı ayrı bir bölüm olarak ancak bu kadar (veya
 // daha fazla) öne çıkarılmış ilan varsa gösterilir; aksi halde sayfa az
 // ilanla yarım/boş durmasın diye tüm ilanlar tek "Yeni Eklenen İlanlar"
@@ -322,31 +302,41 @@ export default async function HomePage({
                     kartlarıyla dolar - burada SAHTE ilan yok, sadece placeholder. */}
                 {!showSeparateFeatured && (
                   <section className="mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-brand via-brand-700 to-brand-900 p-4 shadow-soft-lg ring-1 ring-accent/40 sm:p-5">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-dark text-white shadow-soft">
-                        <Crown className="h-5 w-5" />
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h2 className="text-lg font-bold tracking-tight text-white">
-                            Öne Çıkan İlanlar
-                          </h2>
-                          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-900">
-                            Premium
-                          </span>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-x-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-dark text-white shadow-soft">
+                          <Crown className="h-5 w-5" />
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-bold tracking-tight text-white">
+                              Öne Çıkan İlanlar
+                            </h2>
+                            <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-900">
+                              Premium
+                            </span>
+                          </div>
+                          <p className="mt-0.5 hidden text-xs text-brand-100 sm:block">
+                            En çok görüntülenen, vitrindeki ayrıcalıklı alan. İlanını buraya taşı, öne çık.
+                          </p>
                         </div>
-                        <p className="mt-0.5 text-xs text-brand-100">
-                          En çok görüntülenen, vitrindeki ayrıcalıklı alan. İlanını buraya taşı, öne çık.
-                        </p>
                       </div>
+                      <Link
+                        href="/one-cikan-ilanlar"
+                        className="shrink-0 text-xs font-semibold text-accent transition-colors hover:text-white sm:text-sm"
+                      >
+                        Tümünü Gör ›
+                      </Link>
                     </div>
-                    <div className="mt-4 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
+                    {/* Yatay kayan slayt: kartlar tek sıra halinde yana kaydırılır. */}
+                    <div className="mt-4 -mx-1 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1 scrollbar-hide">
                       {Array.from({ length: FEATURED_PLACEHOLDER_COUNT }).map((_, i) => (
-                        <ListingPlaceholderCard
-                          key={`featured-placeholder-${i}`}
-                          categorySlug={HOME_PLACEHOLDER_SLUGS[i % HOME_PLACEHOLDER_SLUGS.length]}
-                          premium
-                        />
+                        <div key={`featured-placeholder-${i}`} className="w-[144px] shrink-0 snap-start sm:w-[156px]">
+                          <ListingPlaceholderCard
+                            categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
+                            premium
+                          />
+                        </div>
                       ))}
                     </div>
                   </section>
@@ -406,7 +396,7 @@ export default async function HomePage({
                       {Array.from({ length: HOME_PLACEHOLDER_COUNT }).map((_, i) => (
                         <ListingPlaceholderCard
                           key={`home-placeholder-${i}`}
-                          categorySlug={HOME_PLACEHOLDER_SLUGS[i % HOME_PLACEHOLDER_SLUGS.length]}
+                          categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
                         />
                       ))}
                     </div>

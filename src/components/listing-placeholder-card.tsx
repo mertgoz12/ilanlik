@@ -3,6 +3,30 @@ import { Crown } from "lucide-react";
 import { ClockIcon } from "@/components/icons";
 import { CATEGORY_THEME_CLASSES, getCategoryVisual } from "@/lib/category-visuals";
 
+// Placeholder ("İlan Bekleniyor") ızgaralarında görsel çeşitlilik için sırayla
+// döndürülen kategori temaları (ikon/renk). Ana sayfa vitrini, premium "Öne
+// Çıkan İlanlar" slider'ı ve /one-cikan-ilanlar sayfası ortak kullanır.
+export const PLACEHOLDER_CATEGORY_SLUGS = [
+  "cep-telefonu",
+  "dizustu-bilgisayar",
+  "koltuk-kanepe",
+  "spor-ayakkabi",
+  "bisiklet",
+  "gitar",
+  "buzdolabi",
+  "oyun-konsolu",
+  "canta",
+  "saat",
+  "kulaklik",
+  "kahve-makinesi",
+  "televizyon",
+  "fotograf-makinesi",
+  "klima",
+  "camasir-makinesi",
+  "kadin-giyim",
+  "erkek-giyim",
+];
+
 // Kategori/vitrin ızgaralarında gerçek ilan sayısı azken boş alanı dolduran
 // "İlan Bekleniyor" placeholder kartı. DÜRÜSTLÜK KURALI: bu kartta SAHTE ürün
 // adı, fiyat veya fotoğraf YOKTUR - sadece bulanık tema, tarama animasyonu ve
