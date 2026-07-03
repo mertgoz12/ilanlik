@@ -13,7 +13,14 @@ const FROM_WHO_BY_BADGE: Record<string, string> = {
   kurumsal: "Yetkili Bayiden",
 };
 
-export default async function IlanVerPage() {
+export default async function IlanVerPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  // Kategori sayfasındaki "İlan Bekleniyor" kartından gelinince kategori
+  // önceden seçili açılır (bkz. listing-placeholder-card.tsx).
+  const { kategori: initialCategorySlug } = await searchParams;
   const selectable = selectableCategories();
   const session = await getSession();
   // Vasıta kapalıyken (bkz. isVasitaEmlakActive) marka/model/jenerasyon/donanım
@@ -62,7 +69,12 @@ export default async function IlanVerPage() {
       {user && !user.emailVerified ? (
         <EmailVerificationGate />
       ) : (
-        <ListingFlow categories={categories} catalog={catalog} defaultFromWho={defaultFromWho} />
+        <ListingFlow
+          categories={categories}
+          catalog={catalog}
+          defaultFromWho={defaultFromWho}
+          initialCategorySlug={initialCategorySlug ?? null}
+        />
       )}
     </div>
   );

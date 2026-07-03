@@ -18,6 +18,7 @@ import { SignupPromoCard } from "@/components/home/signup-promo-card";
 // import { StatsCard } from "@/components/home/stats-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
+import { ListingPlaceholderCard } from "@/components/listing-placeholder-card";
 import { ListingFilters } from "@/components/listing-filters";
 import { Pagination } from "@/components/pagination";
 import { CategorySidebar } from "@/components/category-sidebar";
@@ -47,6 +48,11 @@ import {
 const PAGE_SIZE = 12;
 const FEATURED_COUNT = 12;
 const RECENT_COUNT = 12;
+// Bir kategori sayfasında ızgarayı görsel olarak dolu tutmak için hedeflenen
+// toplam kart sayısı. Gerçek ilan sayısı bunun altındaysa aradaki fark kadar
+// "İlan Bekleniyor" placeholder kartı eklenir; kategori bu sayıya ulaşınca
+// (gerçek ilan doldukça) placeholder gösterilmez (bkz. listing-placeholder-card.tsx).
+const CATEGORY_PLACEHOLDER_TARGET = 12;
 // "Öne Çıkan İlanlar" başlığı ayrı bir bölüm olarak ancak bu kadar (veya
 // daha fazla) öne çıkarılmış ilan varsa gösterilir; aksi halde sayfa az
 // ilanla yarım/boş durmasın diye tüm ilanlar tek "Yeni Eklenen İlanlar"
@@ -190,6 +196,28 @@ export default async function HomePage({
     : listingPool.slice(0, RECENT_COUNT);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // "İlan Bekleniyor" placeholder kartları: yalnızca DÜZ kategori gezinmesinde
+  // (arama/filtre yokken) gösterilir - filtrelenmiş "0 sonuç" ekranını sahte
+  // doluluğa boğmamak için. Yalnızca ilk sayfada ve kategori toplamı hedefin
+  // altındayken; fark kadar placeholder eklenir (dinamik: ilan doldukça azalır).
+  const isPlainCategoryBrowse =
+    !!sp.kategori &&
+    !categoryComingSoon &&
+    !sp.q &&
+    !sp.brand &&
+    !sp.model &&
+    !sp.il &&
+    !sp.ilce &&
+    !sp.fuelType &&
+    !sp.minYear &&
+    !sp.maxYear &&
+    !sp.minPrice &&
+    !sp.maxPrice;
+  const placeholderCount =
+    isPlainCategoryBrowse && page === 1 && total < CATEGORY_PLACEHOLDER_TARGET
+      ? CATEGORY_PLACEHOLDER_TARGET - listings.length
+      : 0;
 
   const session = await getSession();
   const allListingIds = [...listings, ...featuredListings, ...recentListings].map((l) => l.id);
@@ -347,7 +375,7 @@ export default async function HomePage({
                   </div>
                 </div>
 
-                {listings.length === 0 ? (
+                {listings.length === 0 && placeholderCount === 0 ? (
                   <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white py-16 text-center shadow-soft">
                     <SearchIcon className="h-10 w-10 text-slate-300" />
                     <p className="mt-4 text-sm font-medium text-slate-600">
@@ -370,6 +398,9 @@ export default async function HomePage({
                         currentUserId={session?.id ?? null}
                         isFavorited={favoritedIds.has(listing.id)}
                       />
+                    ))}
+                    {Array.from({ length: placeholderCount }).map((_, i) => (
+                      <ListingPlaceholderCard key={`placeholder-${i}`} categorySlug={sp.kategori!} />
                     ))}
                   </div>
                 )}

@@ -18,13 +18,20 @@ export function ListingFlow({
   categories,
   catalog,
   defaultFromWho,
+  initialCategorySlug = null,
 }: {
   categories: CategoryOption[];
   catalog: VehicleCatalogBrand[];
   defaultFromWho?: string;
+  // Kategori sayfasındaki placeholder karttan gelen ön-seçili kategori slug'ı.
+  // Yalnızca seçilebilir bir yaprak kategoriye denk gelirse otomatik seçilir.
+  initialCategorySlug?: string | null;
 }) {
-  const [selected, setSelected] = useState<CategoryOption | null>(null);
-  const [step, setStep] = useState(1);
+  const initialCategory = initialCategorySlug
+    ? categories.find((c) => c.slug === initialCategorySlug) ?? null
+    : null;
+  const [selected, setSelected] = useState<CategoryOption | null>(initialCategory);
+  const [step, setStep] = useState(initialCategory ? 2 : 1);
 
   // Vasıta: kendi 5 adımlı sihirbazı + ilerleme göstergesi var (şu an kapalı).
   if (selected?.isVasita) {
