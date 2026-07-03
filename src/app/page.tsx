@@ -53,6 +53,31 @@ const RECENT_COUNT = 12;
 // "İlan Bekleniyor" placeholder kartı eklenir; kategori bu sayıya ulaşınca
 // (gerçek ilan doldukça) placeholder gösterilmez (bkz. listing-placeholder-card.tsx).
 const CATEGORY_PLACEHOLDER_TARGET = 12;
+// Ana sayfa vitrininde "Yeni Eklenen İlanlar" ızgarasını dolu göstermek için
+// gerçek ilanların ardına eklenen "İlan Bekleniyor" placeholder sayısı. Görsel
+// çeşitlilik için aşağıdaki kategori temaları (ikon/renk) sırayla döndürülür;
+// her kart o kategoride ilan vermeye yönlendirir.
+const HOME_PLACEHOLDER_COUNT = 54;
+const HOME_PLACEHOLDER_SLUGS = [
+  "cep-telefonu",
+  "dizustu-bilgisayar",
+  "koltuk-kanepe",
+  "spor-ayakkabi",
+  "bisiklet",
+  "gitar",
+  "buzdolabi",
+  "oyun-konsolu",
+  "canta",
+  "saat",
+  "kulaklik",
+  "kahve-makinesi",
+  "televizyon",
+  "fotograf-makinesi",
+  "klima",
+  "camasir-makinesi",
+  "kadin-giyim",
+  "erkek-giyim",
+];
 // "Öne Çıkan İlanlar" başlığı ayrı bir bölüm olarak ancak bu kadar (veya
 // daha fazla) öne çıkarılmış ilan varsa gösterilir; aksi halde sayfa az
 // ilanla yarım/boş durmasın diye tüm ilanlar tek "Yeni Eklenen İlanlar"
@@ -311,7 +336,7 @@ export default async function HomePage({
 
                 {vasitaEmlakActive && <BrandGrid />}
 
-                {recentListings.length > 0 && (
+                {(recentListings.length > 0 || HOME_PLACEHOLDER_COUNT > 0) && (
                   <section className="mt-5">
                     <div className="flex items-end justify-between gap-3">
                       <h2 className="text-lg font-bold tracking-tight text-foreground">
@@ -332,6 +357,15 @@ export default async function HomePage({
                           ruleAnalysis={ruleAnalysisFor(listing)}
                           currentUserId={session?.id ?? null}
                           isFavorited={favoritedIds.has(listing.id)}
+                        />
+                      ))}
+                      {/* Gerçek ilanların ardına, ızgarayı doldurmak için çeşitli
+                          kategori temalarında "İlan Bekleniyor" kartları (sahte
+                          ürün/fiyat yok, bkz. listing-placeholder-card.tsx). */}
+                      {Array.from({ length: HOME_PLACEHOLDER_COUNT }).map((_, i) => (
+                        <ListingPlaceholderCard
+                          key={`home-placeholder-${i}`}
+                          categorySlug={HOME_PLACEHOLDER_SLUGS[i % HOME_PLACEHOLDER_SLUGS.length]}
                         />
                       ))}
                     </div>
