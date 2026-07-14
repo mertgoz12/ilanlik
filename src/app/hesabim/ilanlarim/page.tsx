@@ -27,6 +27,7 @@ import {
 } from "@/components/icons";
 import { endOptionAction } from "@/app/ilan/[listingNo]/actions";
 import { deleteListingAction, publishListingAction, resubmitListingAction, unpublishListingAction } from "./actions";
+import { toRaffleNo } from "@/lib/raffle";
 
 type TabKey = "tumu" | "yayinda" | "yayinda-degil";
 
@@ -196,6 +197,12 @@ export default async function MyListingsPage({
                   </span>
                   <span>#{listing.listingNo}</span>
                   <span>{formatDate(listing.createdAt)}</span>
+                </div>
+                <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent-light px-2 py-0.5">
+                  <span className="text-[10px] font-semibold text-slate-400">🎟 Çekiliş No</span>
+                  <span className="font-mono text-[11px] font-bold tracking-wider text-brand">
+                    {toRaffleNo(listing.listingNo)}
+                  </span>
                 </div>
                 {listing.optionStatus === "opsiyonlandi" && listing.optionHolder && (
                   <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-amber-700">

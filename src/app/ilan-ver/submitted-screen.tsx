@@ -3,16 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircleIcon, ClockIcon, CloseIcon, PlusIcon } from "@/components/icons";
-
-// İlan no'sundan deterministik 7 haneli çekiliş numarası üretir.
-// Aynı ilan her zaman aynı numarayı alır, Math.random() kullanılmaz.
-function toRaffleNo(listingNo: string): string {
-  let h = 5381;
-  for (let i = 0; i < listingNo.length; i++) {
-    h = ((h << 5) + h + listingNo.charCodeAt(i)) & 0x7fffffff;
-  }
-  return String(Math.abs(h)).padStart(7, "0").slice(-7);
-}
+import { toRaffleNo } from "@/lib/raffle";
 
 export function SubmittedScreen({ listingNo }: { listingNo?: string | null }) {
   const [raffleOpen, setRaffleOpen] = useState(true);
@@ -25,7 +16,7 @@ export function SubmittedScreen({ listingNo }: { listingNo?: string | null }) {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  const raffleNo = listingNo ? `ADL-2026-${toRaffleNo(listingNo)}` : null;
+  const raffleNo = listingNo ? toRaffleNo(listingNo) : null;
 
   return (
     <>
