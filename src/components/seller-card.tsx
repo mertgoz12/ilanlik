@@ -155,13 +155,15 @@ export function SellerCard({
     <>
       <section ref={cardRef} className="rounded-lg bg-white p-4 shadow-soft sm:p-6">
         <h2 className="mb-3 text-sm font-semibold text-foreground">Satıcı</h2>
-        <div className="flex items-center gap-3">
+        <Link href={`/profil/${sellerId}`} className="group flex items-center gap-3">
           <Avatar name={name} src={avatarUrl} size="md" />
           <div>
-            <p className="text-sm font-semibold text-foreground">{name}</p>
+            <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
+              {name}
+            </p>
             <p className="text-xs text-slate-400">Üyelik: {formatDate(createdAt)}</p>
           </div>
-        </div>
+        </Link>
 
         <div className="mt-4 space-y-2">
           {!isOwnListing && <OfferButton />}

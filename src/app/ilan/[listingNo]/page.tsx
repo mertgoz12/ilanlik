@@ -306,19 +306,30 @@ export default async function ListingDetailPage({
     id: "konum",
     label: "Konum",
     content: (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3.5">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <LocationIcon className="h-4 w-4 text-slate-400" />
-          {listing.il}, {listing.ilce}
-        </span>
-        <a
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-brand transition-colors hover:border-accent hover:bg-accent-light"
-        >
-          Haritada Gör
-        </a>
+      <div className="space-y-3">
+        <div className="overflow-hidden rounded-xl border border-slate-200">
+          <iframe
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(`${listing.il} ${listing.ilce} Türkiye`)}&output=embed&hl=tr&z=13`}
+            className="h-64 w-full sm:h-80"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title={`${listing.il}, ${listing.ilce} konumu`}
+          />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3">
+          <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <LocationIcon className="h-4 w-4 text-slate-400" />
+            {listing.il}, {listing.ilce}
+          </span>
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-brand transition-colors hover:border-accent hover:bg-accent-light"
+          >
+            Google Maps'te Aç
+          </a>
+        </div>
       </div>
     ),
   });
