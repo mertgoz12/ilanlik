@@ -59,10 +59,6 @@ const CATEGORY_PLACEHOLDER_TARGET = 12;
 // çeşitlilik için aşağıdaki kategori temaları (ikon/renk) sırayla döndürülür;
 // her kart o kategoride ilan vermeye yönlendirir.
 const HOME_PLACEHOLDER_COUNT = 54;
-// Sayfanın en üstündeki premium "Öne Çıkan İlanlar" vitrinindeki placeholder
-// kart sayısı. Gerçek öne çıkan ilan yeterli değilken (bkz. showSeparateFeatured)
-// bu prestijli/dikkat çekici blok "İlan Bekleniyor" kartlarıyla doldurulur.
-const FEATURED_PLACEHOLDER_COUNT = 12;
 // "Öne Çıkan İlanlar" başlığı ayrı bir bölüm olarak ancak bu kadar (veya
 // daha fazla) öne çıkarılmış ilan varsa gösterilir; aksi halde sayfa az
 // ilanla yarım/boş durmasın diye tüm ilanlar tek "Yeni Eklenen İlanlar"
@@ -301,49 +297,32 @@ export default async function HomePage({
                     (bkz. showSeparateFeatured) prestijli "İlan Bekleniyor"
                     kartlarıyla dolar - burada SAHTE ilan yok, sadece placeholder. */}
                 {!showSeparateFeatured && (
-                  <section className="mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-brand via-brand-700 to-brand-900 p-4 shadow-soft-lg ring-1 ring-accent/40 sm:p-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-x-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-dark text-white shadow-soft">
-                          <Crown className="h-5 w-5" />
+                  <section className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Crown className="h-4 w-4 shrink-0 text-accent" />
+                        <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
+                          Öne Çıkan İlanlar
+                        </h2>
+                        <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold text-accent-dark">
+                          Premium
                         </span>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h2 className="text-lg font-bold tracking-tight text-white">
-                              Öne Çıkan İlanlar
-                            </h2>
-                            <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-900">
-                              Premium
-                            </span>
-                          </div>
-                          <p className="mt-0.5 hidden text-xs text-brand-100 sm:block">
-                            En çok görüntülenen, vitrindeki ayrıcalıklı alan. İlanını buraya taşı, öne çık.
-                          </p>
-                        </div>
                       </div>
                       <Link
                         href="/one-cikan-ilanlar"
-                        className="shrink-0 text-xs font-semibold text-accent transition-colors hover:text-white sm:text-sm"
+                        className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
                       >
                         Tümünü Gör ›
                       </Link>
                     </div>
-                    {/* Otomatik kayan şerit (marquee): kartlar sağa doğru sürekli
-                        akar, fare üzerine gelince durur. Dikişsiz döngü için aynı
-                        dizi iki kez render edilir (bkz. globals.css marquee-right). */}
-                    <div className="mt-4 overflow-hidden">
-                      <div className="animate-marquee-right flex w-max">
-                        {[0, 1].map((copy) =>
-                          Array.from({ length: FEATURED_PLACEHOLDER_COUNT }).map((_, i) => (
-                            <div key={`featured-marquee-${copy}-${i}`} className="mr-2.5 w-[168px] shrink-0 sm:w-[184px]">
-                              <ListingPlaceholderCard
-                                categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
-                                premium
-                              />
-                            </div>
-                          )),
-                        )}
-                      </div>
+                    <div className="grid gap-2.5 p-4 sm:p-5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <ListingPlaceholderCard
+                          key={`featured-ph-${i}`}
+                          categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
+                          premium
+                        />
+                      ))}
                     </div>
                   </section>
                 )}
@@ -351,11 +330,25 @@ export default async function HomePage({
                 <TrustBanner />
 
                 {featuredListings.length > 0 && (
-                  <section className="mt-5">
-                    <h2 className="text-lg font-bold tracking-tight text-foreground">
-                      Öne Çıkan İlanlar
-                    </h2>
-                    <div className="mt-2.5 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
+                  <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Crown className="h-4 w-4 shrink-0 text-accent" />
+                        <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
+                          Öne Çıkan İlanlar
+                        </h2>
+                        <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold text-accent-dark">
+                          Premium
+                        </span>
+                      </div>
+                      <Link
+                        href="/one-cikan-ilanlar"
+                        className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
+                      >
+                        Tümünü Gör ›
+                      </Link>
+                    </div>
+                    <div className="grid gap-2.5 p-4 sm:p-5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
                       {featuredListings.map((listing) => (
                         <ListingCard
                           key={listing.id}
@@ -363,6 +356,7 @@ export default async function HomePage({
                           ruleAnalysis={ruleAnalysisFor(listing)}
                           currentUserId={session?.id ?? null}
                           isFavorited={favoritedIds.has(listing.id)}
+                          showFeaturedBadge
                         />
                       ))}
                     </div>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Crown, Sparkles } from "lucide-react";
 import { DAMAGE_STATUS_STYLES, damageStatusLabel } from "@/lib/car-data";
 import { CATEGORY_THEME_CLASSES, getCategoryVisual } from "@/lib/category-visuals";
 import { formatKm, formatPrice } from "@/lib/format";
@@ -21,9 +21,10 @@ type ListingCardProps = {
   ruleAnalysis?: RuleAnalysisResult | null;
   currentUserId?: string | null;
   isFavorited?: boolean;
+  showFeaturedBadge?: boolean;
 };
 
-export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFavorited = false }: ListingCardProps) {
+export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFavorited = false, showFeaturedBadge = false }: ListingCardProps) {
   const image = listing.images[0];
   const isVehicle = listing.brand !== null && listing.damageStatus !== null;
   const trustScore =
@@ -94,6 +95,12 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
           <Sparkles className="h-2 w-2 shrink-0 text-accent-dark" />
           YZ Onaylı
         </span>
+        {showFeaturedBadge && (
+          <span className="absolute bottom-1 right-1 inline-flex items-center gap-0.5 rounded-md border border-accent/40 bg-accent-light/90 px-1 py-0.5 text-[8px] font-bold text-accent-dark backdrop-blur-sm">
+            <Crown className="h-2 w-2 shrink-0" />
+            Öne Çıkan
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-2 sm:p-2.5">
