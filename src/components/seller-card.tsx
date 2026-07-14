@@ -165,7 +165,7 @@ export function SellerCard({
               <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
                 {name}
               </p>
-              {badge && <UserBadge badge={badge} size="xs" />}
+              {badge && <UserBadge badge={badge} memberSince={createdAt} size="xs" />}
             </div>
             <p className="text-xs text-slate-400">Üyelik: {formatDate(createdAt)}</p>
           </div>

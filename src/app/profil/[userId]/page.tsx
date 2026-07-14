@@ -87,7 +87,7 @@ export default async function SellerProfilePage({
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="text-xl font-bold text-foreground sm:text-2xl">{user.name}</h1>
-              {user.badge && <UserBadge badge={user.badge} size="sm" />}
+              {user.badge && <UserBadge badge={user.badge} memberSince={user.createdAt} size="sm" />}
             </div>
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500">
               {user.il && (
