@@ -35,23 +35,21 @@ export function UserBadge({ badge, memberSince, size = "sm" }: UserBadgeProps) {
     const imgSize = size === "xs" ? 44 : 60;
 
     return (
-      <div
-        className="relative inline-flex shrink-0 flex-col items-center overflow-hidden rounded-xl border border-slate-300/70 px-2.5 py-2 shadow-sm"
-        style={{
-          background:
-            "linear-gradient(160deg, #e6e6e6 0%, #f8f8f8 28%, #ffffff 48%, #e2e2e2 68%, #c8c8c8 100%)",
-        }}
-      >
-        {/* Üst parlama — metalik yansıma etkisi */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 bg-gradient-to-b from-white/65 to-transparent" />
+      <div className="inline-flex shrink-0 flex-col items-center gap-1">
         <Image
           src="/premiumsatici.png"
           alt="Premium Satıcı"
           width={imgSize}
           height={imgSize}
-          className="relative object-contain"
+          className="object-contain"
         />
-        <span className="relative mt-1 text-[11px] font-bold tracking-wide text-slate-500">
+        <span
+          className="rounded-full border border-slate-300/70 px-2 py-0.5 text-[10px] font-bold tracking-wide text-slate-500 shadow-sm"
+          style={{
+            background:
+              "linear-gradient(160deg, #e6e6e6 0%, #f8f8f8 40%, #ffffff 50%, #e0e0e0 72%, #c8c8c8 100%)",
+          }}
+        >
           {years} Yıl
         </span>
       </div>
