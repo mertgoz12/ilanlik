@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session";
 import { formatDate } from "@/lib/format";
 import { Avatar } from "@/components/avatar";
 import { ListingCard } from "@/components/listing-card";
+import { UserBadge } from "@/components/user-badge";
 import { LocationIcon, CalendarIcon } from "@/components/icons";
 
 export async function generateMetadata({
@@ -77,12 +78,6 @@ export default async function SellerProfilePage({
       )
     : new Set<string>();
 
-  const BADGE_LABELS: Record<string, string> = {
-    galeri: "Galeri",
-    kurumsal: "Yetkili Bayi",
-    premium: "Premium",
-  };
-
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Profil kartı */}
@@ -92,11 +87,7 @@ export default async function SellerProfilePage({
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="text-xl font-bold text-foreground sm:text-2xl">{user.name}</h1>
-              {user.badge && (
-                <span className="rounded-full border border-accent/30 bg-accent-light px-2.5 py-0.5 text-xs font-semibold text-accent-dark">
-                  {BADGE_LABELS[user.badge] ?? user.badge}
-                </span>
-              )}
+              {user.badge && <UserBadge badge={user.badge} size="sm" />}
             </div>
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500">
               {user.il && (

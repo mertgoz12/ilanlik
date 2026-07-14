@@ -11,6 +11,7 @@ import {
 } from "@/app/hesabim/mesajlar/actions";
 import { toggleSellerFollowAction } from "@/lib/social-actions";
 import { Avatar } from "./avatar";
+import { UserBadge } from "./user-badge";
 import { ListingChatWidget } from "./listing-chat-widget";
 import { OfferDialog } from "./offer-dialog";
 import { errorClass, inputClass } from "./form-ui";
@@ -27,6 +28,7 @@ type SellerCardProps = {
   listingPrice: number;
   listingImageUrl: string | null;
   sellerId: string;
+  badge?: string | null;
   currentUserId: string | null;
   isFollowing?: boolean;
   // İlan pazarlığa açık mı (ikinci el) — "Teklif Ver" butonu bununla görünür.
@@ -46,6 +48,7 @@ export function SellerCard({
   listingPrice,
   listingImageUrl,
   sellerId,
+  badge,
   currentUserId,
   isFollowing = false,
   isNegotiable = false,
@@ -158,9 +161,12 @@ export function SellerCard({
         <Link href={`/profil/${sellerId}`} className="group flex items-center gap-3">
           <Avatar name={name} src={avatarUrl} size="md" />
           <div>
-            <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
-              {name}
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-brand">
+                {name}
+              </p>
+              {badge && <UserBadge badge={badge} size="xs" />}
+            </div>
             <p className="text-xs text-slate-400">Üyelik: {formatDate(createdAt)}</p>
           </div>
         </Link>

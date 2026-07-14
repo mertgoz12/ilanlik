@@ -25,6 +25,7 @@ const PAGE_SIZE = 20;
 const BADGE_LABELS: Record<string, string> = {
   galeri: "Galeri",
   kurumsal: "Kurumsal",
+  "premium-satici": "Premium Satıcı",
 };
 
 type SearchParams = { q?: string; role?: string; durum?: string; page?: string };
@@ -236,6 +237,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                     <option value="">Rozet yok</option>
                     <option value="galeri">Galeri</option>
                     <option value="kurumsal">Kurumsal</option>
+                    <option value="premium-satici">Premium Satıcı</option>
                   </select>
                   <button
                     type="submit"

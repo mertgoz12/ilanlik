@@ -80,7 +80,7 @@ export default async function ListingDetailPage({
     include: {
       images: { orderBy: { order: "asc" } },
       category: { include: { parent: true } },
-      user: { select: { id: true, name: true, phone: true, createdAt: true, avatarUrl: true } },
+      user: { select: { id: true, name: true, phone: true, createdAt: true, avatarUrl: true, badge: true } },
       optionHolder: { select: { id: true, name: true } },
     },
   });
@@ -404,6 +404,7 @@ export default async function ListingDetailPage({
             listingPrice={listing.price}
             listingImageUrl={listing.images[0]?.url ?? null}
             sellerId={listing.user.id}
+            badge={listing.user.badge}
             currentUserId={session?.id ?? null}
             isFollowing={isFollowing}
             isNegotiable={listing.isNegotiable}

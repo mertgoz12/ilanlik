@@ -27,7 +27,7 @@ export async function setUserVerifiedAction(userId: string, isVerified: boolean)
 export async function setUserBadgeAction(userId: string, formData: FormData) {
   await requireAdmin();
   const raw = formData.get("badge");
-  const badge = raw === "galeri" || raw === "kurumsal" ? raw : null;
+  const badge = raw === "galeri" || raw === "kurumsal" || raw === "premium-satici" ? raw : null;
   await prisma.user.update({ where: { id: userId }, data: { badge } });
   revalidateUserPaths();
 }
