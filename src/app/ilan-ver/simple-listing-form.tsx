@@ -220,7 +220,7 @@ export function SimpleListingForm({
   }
 
   if (state.submitted) {
-    return <SubmittedScreen />;
+    return <SubmittedScreen listingNo={state.listingNo} />;
   }
 
   return (

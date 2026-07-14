@@ -165,7 +165,7 @@ export function ListingWizard({
       )}
 
       {state.submitted ? (
-        <SubmittedScreen />
+        <SubmittedScreen listingNo={state.listingNo} />
       ) : (
         <>
           <ProgressIndicator current={step} />
