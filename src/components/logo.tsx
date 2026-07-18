@@ -12,9 +12,9 @@ type LogoProps = {
   className?: string;
 };
 
-// public/logo.png opak (alfa kanalsız) beyaz zeminli bir görsel - navy footer
-// üzerinde direkt kullanılırsa beyaz bir kutu gibi görünür, bu yüzden dark
-// varyantta küçük bir beyaz "kart" içine alınıyor.
+// public/logo.png şeffaf zeminli, lacivert (navy) yazılı bir görsel. Koyu/navy
+// footer üzerinde lacivert yazı okunmayacağı için dark varyantta küçük bir beyaz
+// "kart" içine alınıyor.
 const DIMENSIONS: Record<LogoSize, { width: number; height: number }> = {
   sm: { width: 108, height: 27 },
   md: { width: 138, height: 34 },
