@@ -34,23 +34,26 @@ export function ResultsToolbar({ total, view, sort, saveQuery, isLoggedIn }: Res
     return `?${params.toString()}`;
   }
 
+  const toggleBtn = (active: boolean) =>
+    `flex h-7 w-8 items-center justify-center rounded-md transition-all ${
+      active ? "bg-white text-brand shadow-sm ring-1 ring-slate-200/70" : "text-slate-400 hover:text-slate-600"
+    }`;
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-soft sm:px-4">
-      <p className="text-sm font-semibold text-foreground">
-        {total.toLocaleString("tr-TR")} <span className="font-normal text-slate-500">ilan</span>
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white px-3.5 py-2.5 shadow-soft sm:px-4">
+      <p className="text-[15px] font-bold text-foreground">
+        {total.toLocaleString("tr-TR")} <span className="text-sm font-medium text-slate-400">ilan</span>
       </p>
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        {/* Görünüm geçişi */}
-        <div className="flex items-center rounded-lg border border-slate-200 p-0.5">
+        {/* Görünüm geçişi - segmentli kontrol */}
+        <div className="flex items-center gap-0.5 rounded-lg bg-slate-100 p-1">
           <button
             type="button"
             onClick={() => router.push(withParam("gorunum", "liste"))}
             aria-label="Liste görünümü"
             aria-pressed={view === "liste"}
-            className={`flex h-7 w-8 items-center justify-center rounded-md transition-colors ${
-              view === "liste" ? "bg-accent text-brand" : "text-slate-400 hover:text-slate-600"
-            }`}
+            className={toggleBtn(view === "liste")}
           >
             <List className="h-4 w-4" />
           </button>
@@ -59,9 +62,7 @@ export function ResultsToolbar({ total, view, sort, saveQuery, isLoggedIn }: Res
             onClick={() => router.push(withParam("gorunum", "izgara"))}
             aria-label="Izgara görünümü"
             aria-pressed={view === "izgara"}
-            className={`flex h-7 w-8 items-center justify-center rounded-md transition-colors ${
-              view === "izgara" ? "bg-accent text-brand" : "text-slate-400 hover:text-slate-600"
-            }`}
+            className={toggleBtn(view === "izgara")}
           >
             <LayoutGrid className="h-4 w-4" />
           </button>
@@ -74,12 +75,12 @@ export function ResultsToolbar({ total, view, sort, saveQuery, isLoggedIn }: Res
         <span className="hidden h-5 w-px bg-slate-200 sm:block" />
 
         <div className="flex items-center gap-1.5">
-          <span className="hidden text-xs font-medium text-slate-500 sm:inline">İlanları Sırala</span>
+          <span className="hidden text-xs font-medium text-slate-500 sm:inline">Sırala</span>
           <select
             value={sort}
             onChange={(event) => router.push(withParam("sort", event.target.value))}
             aria-label="İlanları sırala"
-            className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[13px] font-medium text-slate-700 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/10"
+            className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[13px] font-medium text-slate-700 transition-colors hover:bg-white focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/10"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>

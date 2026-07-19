@@ -43,7 +43,10 @@ export function FilterPanel({
 
   return (
     <form method="get">
-      <h2 className="mb-2 px-2 text-[13px] font-bold text-foreground">Filtrele</h2>
+      <h2 className="mb-2 flex items-center gap-1.5 px-2 text-[13px] font-bold text-foreground">
+        <span className="h-3.5 w-1 rounded-full bg-gradient-to-b from-accent to-accent-dark" />
+        Filtrele
+      </h2>
 
       {preserved.map(([key, value]) => (
         <input key={key} type="hidden" name={key} value={value} />
@@ -123,7 +126,7 @@ export function FilterPanel({
 
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand px-3 py-2.5 text-[13px] font-bold text-white shadow-sm transition-colors hover:bg-brand/90"
+          className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-brand to-brand-700 px-3 py-2.5 text-[13px] font-bold text-white shadow-soft transition-all hover:shadow-md hover:brightness-110"
         >
           <SearchIcon className="h-4 w-4" />
           Filtrele
