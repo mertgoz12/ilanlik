@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Package } from "lucide-react";
+import { Package, Crown, Sparkles } from "lucide-react";
 import type { Prisma } from "@/generated/prisma/client";
 import { requireUserPage } from "@/lib/account-auth";
 import { prisma } from "@/lib/prisma";
@@ -26,7 +26,15 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { endOptionAction } from "@/app/ilan/[listingNo]/actions";
-import { deleteListingAction, publishListingAction, resubmitListingAction, unpublishListingAction } from "./actions";
+import {
+  deleteListingAction,
+  featureListingAction,
+  publishListingAction,
+  resubmitListingAction,
+  unfeatureListingAction,
+  unpublishListingAction,
+} from "./actions";
+import { getFeatureAllowance, LISTINGS_PER_FEATURE } from "@/lib/featuring";
 import { toRaffleNo } from "@/lib/raffle";
 
 type TabKey = "tumu" | "yayinda" | "yayinda-degil";
@@ -69,6 +77,8 @@ export default async function MyListingsPage({
   for (const c of conversations) {
     messageCountByListing.set(c.listingId, (messageCountByListing.get(c.listingId) ?? 0) + c._count.messages);
   }
+
+  const allowance = await getFeatureAllowance(session.id);
 
   const countsByStatus = new Map(statusCounts.map((c) => [c.status, c._count._all]));
   const totalCount = statusCounts.reduce((sum, c) => sum + c._count._all, 0);
@@ -128,6 +138,47 @@ export default async function MyListingsPage({
         }
       />
 
+      {/* Öne çıkarma (vitrin) hak özeti - "her 3 ilan için 1 öne çıkarma" kuralı */}
+      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-brand via-brand-700 to-brand-900 p-4 shadow-soft ring-1 ring-accent/30 sm:p-5">
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-dark text-white shadow-soft">
+            <Crown className="h-6 w-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="flex flex-wrap items-center gap-2 text-base font-bold text-white">
+              Öne Çıkarma Hakkın
+              <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-900">
+                Ücretsiz
+              </span>
+            </h2>
+            <p className="mt-0.5 text-sm text-brand-100">
+              Yayında olan her <span className="font-bold text-white">{LISTINGS_PER_FEATURE}</span> ilan
+              için <span className="font-bold text-white">1</span> ilanını ücretsiz öne çıkararak
+              aramaların en üstüne taşıyabilirsin.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-extrabold text-accent">{allowance.remaining}</p>
+              <p className="text-[11px] font-medium text-brand-100">Kalan hak</p>
+            </div>
+            <div className="hidden text-center sm:block">
+              <p className="text-2xl font-extrabold text-white">
+                {allowance.used}
+                <span className="text-base text-brand-200">/{allowance.allowance}</span>
+              </p>
+              <p className="text-[11px] font-medium text-brand-100">Kullanılan</p>
+            </div>
+          </div>
+        </div>
+        {allowance.remaining <= 0 && allowance.activeCount > 0 && (
+          <p className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-xs font-medium text-brand-50">
+            Yeni bir öne çıkarma hakkı için <span className="font-bold text-white">{allowance.toNext}</span> ilan
+            daha yayınla.
+          </p>
+        )}
+      </div>
+
       <div className="flex gap-1 overflow-x-auto rounded-xl bg-white p-1.5 shadow-soft">
         {tabs.map((t) => (
           <Link
@@ -186,6 +237,12 @@ export default async function MyListingsPage({
                     <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
                       <ClockIcon className="h-3 w-3" />
                       Opsiyonda
+                    </span>
+                  )}
+                  {listing.isFeatured && (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-accent/40 bg-accent-light px-2 py-0.5 text-xs font-bold text-accent-dark">
+                      <Crown className="h-3 w-3" />
+                      Öne Çıkan
                     </span>
                   )}
                 </div>
@@ -252,6 +309,32 @@ export default async function MyListingsPage({
                       <PencilIcon className="h-3.5 w-3.5" />
                       Düzenle
                     </Link>
+
+                    {status === "active" &&
+                      (listing.isFeatured ? (
+                        <ConfirmActionButton
+                          action={unfeatureListingAction.bind(null, listing.id)}
+                          icon={<Crown className="h-3.5 w-3.5" />}
+                          confirmTitle="Öne çıkarmayı kaldır"
+                          confirmMessage={`"${listing.title}" ilanının öne çıkarmasını kaldırmak istediğinize emin misiniz? Bu hakkı başka bir ilanınızda kullanabilirsiniz.`}
+                          confirmLabel="Evet, kaldır"
+                          successMessage="Öne çıkarma kaldırıldı."
+                          errorMessage="İşlem gerçekleştirilemedi. Lütfen tekrar deneyin."
+                          className="rounded-lg border border-accent/40 bg-accent-light px-2.5 py-1.5 text-xs font-semibold text-accent-dark transition-colors hover:bg-accent/20"
+                        >
+                          Öne Çıkarmayı Kaldır
+                        </ConfirmActionButton>
+                      ) : allowance.remaining > 0 ? (
+                        <ActionButton
+                          action={featureListingAction.bind(null, listing.id)}
+                          icon={<Sparkles className="h-3.5 w-3.5" />}
+                          successMessage={`"${listing.title}" öne çıkarıldı, artık aramaların üstünde.`}
+                          errorMessage="İlan öne çıkarılamadı. Lütfen tekrar deneyin."
+                          className="rounded-lg bg-accent px-2.5 py-1.5 text-xs font-bold text-brand shadow-sm transition-colors hover:bg-accent-dark"
+                        >
+                          Öne Çıkar
+                        </ActionButton>
+                      ) : null)}
 
                     {status === "active" ? (
                       <ActionButton

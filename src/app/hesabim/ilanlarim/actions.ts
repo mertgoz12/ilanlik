@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/account-auth";
 import { prisma } from "@/lib/prisma";
 import { editListingSchema } from "@/lib/validation";
 import { MAX_IMAGES_PER_LISTING, deleteListingPhotoBlob, uploadListingPhoto } from "@/lib/listing-photos";
+import { getFeatureAllowance } from "@/lib/featuring";
 
 // Sahiplik doğrulaması her zaman taze veritabanı durumuna göre yapılır; arayüz
 // başkasının ilanı için bu aksiyonları göstermese de server action seviyesinde
@@ -65,6 +66,39 @@ export async function deleteListingAction(listingId: string) {
   const session = await requireUser();
   const listing = await getOwnedListing(listingId, session.id);
   await prisma.listing.delete({ where: { id: listingId } });
+  revalidateListingPaths(listing.listingNo);
+}
+
+// Öne çıkarma (vitrin) hakkı: yayında olan her 3 ilan için 1 ilan öne
+// çıkarılabilir (bkz. src/lib/featuring.ts). Hak yeterli değilse hata verir.
+export async function featureListingAction(listingId: string) {
+  const session = await requireUser();
+  const listing = await getOwnedListing(listingId, session.id);
+  if (listing.status !== "active") {
+    throw new Error("Yalnızca yayında olan ilanlar öne çıkarılabilir.");
+  }
+  const current = await prisma.listing.findUnique({
+    where: { id: listingId },
+    select: { isFeatured: true },
+  });
+  if (current?.isFeatured) {
+    revalidateListingPaths(listing.listingNo);
+    return;
+  }
+  const { remaining } = await getFeatureAllowance(session.id);
+  if (remaining <= 0) {
+    throw new Error(
+      "Öne çıkarma hakkınız yok. Yayında olan her 3 ilan için 1 öne çıkarma hakkı kazanırsınız.",
+    );
+  }
+  await prisma.listing.update({ where: { id: listingId }, data: { isFeatured: true } });
+  revalidateListingPaths(listing.listingNo);
+}
+
+export async function unfeatureListingAction(listingId: string) {
+  const session = await requireUser();
+  const listing = await getOwnedListing(listingId, session.id);
+  await prisma.listing.update({ where: { id: listingId }, data: { isFeatured: false } });
   revalidateListingPaths(listing.listingNo);
 }
 

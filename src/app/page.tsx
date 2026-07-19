@@ -6,6 +6,7 @@ import { PopularCategoriesPanel } from "@/components/popular-categories-panel";
 import { TrustStrip } from "@/components/trust-strip";
 import { TrustBanner } from "@/components/home/trust-banner";
 import { HeroSlider } from "@/components/home/hero-slider";
+import { FeaturePromoBanner } from "@/components/home/feature-promo-banner";
 import { QuickPostCard } from "@/components/home/quick-post-card";
 import { SafetyTipsCard } from "@/components/home/safety-tips-card";
 import { BlogTipsCard } from "@/components/home/blog-tips-card";
@@ -98,21 +99,24 @@ export default async function HomePage({
     if (node) categoryName = node.name;
   }
 
-  let orderBy: Prisma.ListingOrderByWithRelationInput = { createdAt: "desc" };
+  // Öne çıkan (isFeatured) ilanlar sahibinden "doping" gibi her sıralamada en
+  // üstte yer alır; ikincil kriter seçilen sıralamadır (varsayılan en yeni).
+  let secondary: Prisma.ListingOrderByWithRelationInput = { createdAt: "desc" };
   switch (sp.sort) {
     case "price-asc":
-      orderBy = { price: "asc" };
+      secondary = { price: "asc" };
       break;
     case "price-desc":
-      orderBy = { price: "desc" };
+      secondary = { price: "desc" };
       break;
     case "km-asc":
-      orderBy = { km: "asc" };
+      secondary = { km: "asc" };
       break;
     case "year-desc":
-      orderBy = { year: "desc" };
+      secondary = { year: "desc" };
       break;
   }
+  const orderBy: Prisma.ListingOrderByWithRelationInput[] = [{ isFeatured: "desc" }, secondary];
 
   const showVitrin =
     page === 1 &&
@@ -127,6 +131,8 @@ export default async function HomePage({
     !sp.maxYear &&
     !sp.minPrice &&
     !sp.maxPrice &&
+    !sp.tarih &&
+    !sp.condition &&
     !sp.tum;
 
   const vasitaEmlakActive = isVasitaEmlakActive();
@@ -230,7 +236,9 @@ export default async function HomePage({
     !sp.minYear &&
     !sp.maxYear &&
     !sp.minPrice &&
-    !sp.maxPrice;
+    !sp.maxPrice &&
+    !sp.tarih &&
+    !sp.condition;
   const placeholderCount =
     isPlainCategoryBrowse && page === 1 && total < CATEGORY_PLACEHOLDER_TARGET
       ? CATEGORY_PLACEHOLDER_TARGET - listings.length
@@ -312,6 +320,9 @@ export default async function HomePage({
           <div className="min-w-0">
             {showVitrin ? (
               <>
+                <div className="mb-5">
+                  <FeaturePromoBanner />
+                </div>
                 {/* Sayfanın en üstündeki en dikkat çekici alan: premium "Öne
                     Çıkan İlanlar" vitrini. Gerçek öne çıkan ilan yeterli değilken
                     (bkz. showSeparateFeatured) prestijli "İlan Bekleniyor"

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Crown } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { ListingCard } from "@/components/listing-card";
 import {
   ListingPlaceholderCard,
   PLACEHOLDER_CATEGORY_SLUGS,
@@ -11,12 +14,39 @@ export const metadata: Metadata = {
   description: "Vitrindeki öne çıkan ilan alanı. İlanını buraya taşı, daha çok alıcıya ulaş.",
 };
 
-// Ana sayfadaki premium "Öne Çıkan İlanlar" slider'ındaki "Tümünü Gör" bağlantısı
-// buraya gelir. Henüz öne çıkan gerçek ilan olmadığından tüm alan premium "İlan
-// Bekleniyor" placeholder kartlarıyla gösterilir (sahte ürün/fiyat yok).
-const FEATURED_TOTAL = 48;
+// Izgarayı görsel olarak dolu tutmak için hedeflenen toplam kart sayısı;
+// gerçek öne çıkan ilanlar bunun altındaysa fark kadar "İlan Bekleniyor"
+// premium placeholder eklenir (sahte ürün/fiyat yok).
+const GRID_TARGET = 24;
 
-export default function OneCikanIlanlarPage() {
+export default async function OneCikanIlanlarPage() {
+  const [featured, session] = await Promise.all([
+    prisma.listing.findMany({
+      where: { isFeatured: true, status: "active", optionStatus: { not: "opsiyonlandi" } },
+      orderBy: { createdAt: "desc" },
+      include: {
+        images: { orderBy: { order: "asc" }, take: 1 },
+        category: true,
+        _count: { select: { images: true } },
+      },
+      take: 48,
+    }),
+    getSession(),
+  ]);
+
+  const favoritedIds = session
+    ? new Set(
+        (
+          await prisma.favorite.findMany({
+            where: { userId: session.id, listingId: { in: featured.map((l) => l.id) } },
+            select: { listingId: true },
+          })
+        ).map((f) => f.listingId),
+      )
+    : new Set<string>();
+
+  const placeholderCount = Math.max(0, GRID_TARGET - featured.length);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-brand via-brand-700 to-brand-900 p-5 shadow-soft-lg ring-1 ring-accent/40 sm:p-6">
@@ -34,8 +64,8 @@ export default function OneCikanIlanlarPage() {
               </span>
             </div>
             <p className="mt-1 max-w-xl text-sm text-brand-100">
-              Vitrindeki en çok görüntülenen ayrıcalıklı alan. İlanını buraya taşı, aramaların
-              en üstünde yer al ve daha çok alıcıya ulaş.
+              Vitrindeki en çok görüntülenen ayrıcalıklı alan. Yayında olan her 3 ilanın için 1
+              ilanını ücretsiz öne çıkar, aramaların en üstünde yer al ve daha çok alıcıya ulaş.
             </p>
           </div>
         </div>
@@ -48,7 +78,16 @@ export default function OneCikanIlanlarPage() {
       </section>
 
       <div className="mt-5 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(140px,1fr))]">
-        {Array.from({ length: FEATURED_TOTAL }).map((_, i) => (
+        {featured.map((listing) => (
+          <ListingCard
+            key={listing.id}
+            listing={listing}
+            currentUserId={session?.id ?? null}
+            isFavorited={favoritedIds.has(listing.id)}
+            showFeaturedBadge
+          />
+        ))}
+        {Array.from({ length: placeholderCount }).map((_, i) => (
           <ListingPlaceholderCard
             key={`featured-all-${i}`}
             categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}

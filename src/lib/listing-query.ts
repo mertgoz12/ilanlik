@@ -12,7 +12,13 @@ export async function buildListingWhere(sp: ListingSearchParams): Promise<Prisma
   const where: Prisma.ListingWhereInput = { status: "active", optionStatus: { not: "opsiyonlandi" } };
 
   if (sp.q) {
-    where.OR = [{ title: { contains: sp.q } }, { brand: { contains: sp.q } }, { model: { contains: sp.q } }];
+    // Kelime veya ilan numarası: başlık/marka/model + ilan numarasında arar.
+    where.OR = [
+      { title: { contains: sp.q } },
+      { brand: { contains: sp.q } },
+      { model: { contains: sp.q } },
+      { listingNo: { contains: sp.q } },
+    ];
   }
   if (sp.brand) where.brand = sp.brand;
   if (sp.model) where.model = sp.model;
@@ -32,6 +38,12 @@ export async function buildListingWhere(sp: ListingSearchParams): Promise<Prisma
       ...(sp.minPrice ? { gte: Number(sp.minPrice) } : {}),
       ...(sp.maxPrice ? { lte: Number(sp.maxPrice) } : {}),
     };
+  }
+
+  // İlan tarihi filtresi: sp.tarih = son N gün ("1" | "2" | "7" | "15" | "30").
+  const tarihGun = Number(sp.tarih);
+  if (Number.isFinite(tarihGun) && tarihGun > 0) {
+    where.createdAt = { gte: new Date(Date.now() - tarihGun * 24 * 60 * 60 * 1000) };
   }
 
   if (sp.kategori) {
