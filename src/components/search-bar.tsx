@@ -291,7 +291,7 @@ export function SearchBar({ className = "", autoFocus = false, categoryOptions }
               value={category}
               onChange={(event) => setCategory(event.target.value)}
               aria-label="Kategori seç"
-              className="hidden shrink-0 border-y border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand/10 sm:block"
+              className="hidden w-40 shrink-0 truncate border-y border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand/10 sm:block lg:w-44"
             >
               <option value="">Tüm Kategoriler</option>
               {categoryOptions.map((c) => (
