@@ -19,7 +19,9 @@ import { SignupPromoCard } from "@/components/home/signup-promo-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
 import { ListingPlaceholderCard, PLACEHOLDER_CATEGORY_SLUGS } from "@/components/listing-placeholder-card";
-import { ListingFilters } from "@/components/listing-filters";
+import { ListingListView } from "@/components/listing-list-view";
+import { ResultsToolbar } from "@/components/results-toolbar";
+import { FilterPanel } from "@/components/filter-panel";
 import { Pagination } from "@/components/pagination";
 import { CategorySidebar } from "@/components/category-sidebar";
 import { SidebarShell } from "@/components/sidebar-shell";
@@ -74,6 +76,15 @@ export default async function HomePage({
 }) {
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
+  // Kategori/arama sonuç sayfasında liste (sahibinden tarzı satır) veya ızgara
+  // görünümü - varsayılan liste. (Ana sayfa vitrini bundan bağımsız ızgaradır.)
+  const view = sp.gorunum === "izgara" ? "izgara" : "liste";
+  const currentSort = sp.sort ?? "newest";
+  const saveSearchQuery = new URLSearchParams(
+    Object.entries(sp).filter(
+      ([key, value]) => Boolean(value) && key !== "page" && key !== "gorunum",
+    ) as [string, string][],
+  ).toString();
 
   // Cron/arka plan görevi olmadığı için süresi dolan opsiyonlar okuma
   // anında tembel olarak süpürülür (bkz. src/lib/listing-options.ts).
@@ -284,8 +295,17 @@ export default async function HomePage({
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)] xl:grid-cols-[224px_minmax(0,1fr)_256px]">
+        <div
+          className={`grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)] ${
+            showVitrin ? "xl:grid-cols-[224px_minmax(0,1fr)_256px]" : ""
+          }`}
+        >
           <SidebarShell>
+            {!showVitrin && !categoryComingSoon && (
+              <div className="mb-2 border-b border-slate-100 pb-2">
+                <FilterPanel searchParams={sp} />
+              </div>
+            )}
             <CategorySidebar activeSlug={sp.kategori} />
           </SidebarShell>
 
@@ -302,7 +322,7 @@ export default async function HomePage({
                       <div className="flex min-w-0 items-center gap-2">
                         <Crown className="h-4 w-4 shrink-0 text-accent" />
                         <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
-                          Öne Çıkan İlanlar
+                          Vitrin İlanları
                         </h2>
                         <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold text-accent-dark">
                           Premium
@@ -312,7 +332,7 @@ export default async function HomePage({
                         href="/one-cikan-ilanlar"
                         className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
                       >
-                        Tümünü Gör ›
+                        Tüm vitrin ilanlarını gör ›
                       </Link>
                     </div>
                     <div className="grid gap-2.5 p-4 sm:p-5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
@@ -335,7 +355,7 @@ export default async function HomePage({
                       <div className="flex min-w-0 items-center gap-2">
                         <Crown className="h-4 w-4 shrink-0 text-accent" />
                         <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
-                          Öne Çıkan İlanlar
+                          Vitrin İlanları
                         </h2>
                         <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold text-accent-dark">
                           Premium
@@ -345,7 +365,7 @@ export default async function HomePage({
                         href="/one-cikan-ilanlar"
                         className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
                       >
-                        Tümünü Gör ›
+                        Tüm vitrin ilanlarını gör ›
                       </Link>
                     </div>
                     <div className="grid gap-2.5 p-4 sm:p-5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
@@ -427,18 +447,19 @@ export default async function HomePage({
               </div>
             ) : (
               <>
-                <ListingFilters searchParams={sp} isLoggedIn={!!session} />
-
-                <div className="mt-5 flex items-end justify-between gap-4">
-                  <div>
-                    <h2 className="text-lg font-bold tracking-tight text-foreground">
-                      {listingsHeading}
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      <span className="font-semibold text-foreground">{total}</span> ilan bulundu
-                    </p>
-                  </div>
+                <div className="mb-2 flex items-baseline gap-2">
+                  <h1 className="text-lg font-bold tracking-tight text-foreground">
+                    {listingsHeading}
+                  </h1>
                 </div>
+
+                <ResultsToolbar
+                  total={total}
+                  view={view}
+                  sort={currentSort}
+                  saveQuery={saveSearchQuery}
+                  isLoggedIn={!!session}
+                />
 
                 {listings.length === 0 && placeholderCount === 0 ? (
                   <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white py-16 text-center shadow-soft">
@@ -452,6 +473,14 @@ export default async function HomePage({
                     >
                       Filtreleri temizle
                     </Link>
+                  </div>
+                ) : view === "liste" && listings.length > 0 ? (
+                  <div className="mt-3">
+                    <ListingListView
+                      listings={listings}
+                      currentUserId={session?.id ?? null}
+                      favoritedIds={favoritedIds}
+                    />
                   </div>
                 ) : (
                   <div className="mt-3 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
