@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Crown } from "lucide-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import { isHeroGif, isHeroVideo } from "@/lib/hero-media";
 
@@ -13,6 +14,9 @@ export type HeroSlideView = {
   subtitle: string | null;
   buttonText: string | null;
   buttonLink: string | null;
+  // "promo" ise görsel/video yerine kod tabanlı degrade tasarımlı öne çıkarma
+  // slaydı gösterilir (bkz. page.tsx - vitrin slider'ına eklenen promo slayt).
+  variant?: "media" | "promo";
 };
 
 const AUTOPLAY_MS = 5000;
@@ -116,37 +120,52 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
         className="flex h-32 transition-transform duration-500 ease-out sm:h-36 md:h-40"
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
-        {slides.map((slide) => (
-          <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
-            <SlideMedia slide={slide} priority={slide.id === slides[0].id} />
-            {/* Üzerinde yazı/buton varsa metin katmanı; yoksa degrade de
-                binmesin, görsel/video tertemiz tek başına gözüksün. */}
-            {(slide.title || slide.subtitle || (slide.buttonText && slide.buttonLink)) && (
-              <>
-                {/* Marka lacivertinden soldan sağa açılan yumuşak degrade -
-                    metin okunaklı kalsın, görünüm sakin/zarif olsun. */}
-                <div className="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/55 to-brand/10" />
-                <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 sm:px-8 md:px-10">
-                  {slide.title && (
-                    <h2 className="max-w-md text-base font-bold leading-snug tracking-tight text-white drop-shadow-sm sm:text-lg md:text-2xl">
-                      {slide.title}
-                    </h2>
+        {slides.map((slide) => {
+          const isPromo = slide.variant === "promo";
+          return (
+            <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
+              {isPromo ? (
+                // Kod tabanlı öne çıkarma promo slaydı: degrade zemin + taç rozeti.
+                <div className="absolute inset-0 bg-gradient-to-r from-brand via-brand-700 to-brand-900" />
+              ) : (
+                <SlideMedia slide={slide} priority={slide.id === slides[0].id} />
+              )}
+              {/* Üzerinde yazı/buton varsa metin katmanı; yoksa degrade de
+                  binmesin, görsel/video tertemiz tek başına gözüksün. */}
+              {(isPromo || slide.title || slide.subtitle || (slide.buttonText && slide.buttonLink)) && (
+                <>
+                  {/* Marka lacivertinden soldan sağa açılan yumuşak degrade -
+                      metin okunaklı kalsın (promo zaten degrade zeminli). */}
+                  {!isPromo && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/55 to-brand/10" />
                   )}
-                  {slide.subtitle && (
-                    <p className="max-w-sm text-xs text-white/85 sm:text-sm">
-                      {slide.subtitle}
-                    </p>
-                  )}
-                  {slide.buttonText && slide.buttonLink && (
-                    <div className="mt-1">
-                      <SlideButton text={slide.buttonText} link={slide.buttonLink} />
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        ))}
+                  <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 sm:px-8 md:px-10">
+                    {slide.title && (
+                      <h2 className="flex max-w-md items-center gap-2 text-base font-bold leading-snug tracking-tight text-white drop-shadow-sm sm:text-lg md:text-2xl">
+                        {isPromo && (
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-dark text-white shadow-soft sm:h-9 sm:w-9">
+                            <Crown className="h-5 w-5" />
+                          </span>
+                        )}
+                        {slide.title}
+                      </h2>
+                    )}
+                    {slide.subtitle && (
+                      <p className="max-w-sm text-xs text-white/85 sm:text-sm">
+                        {slide.subtitle}
+                      </p>
+                    )}
+                    {slide.buttonText && slide.buttonLink && (
+                      <div className="mt-1">
+                        <SlideButton text={slide.buttonText} link={slide.buttonLink} />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* İleri/geri okları - birden çok slayt varsa */}

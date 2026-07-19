@@ -5,8 +5,7 @@ import { FeaturedCategories } from "@/components/featured-categories";
 import { PopularCategoriesPanel } from "@/components/popular-categories-panel";
 import { TrustStrip } from "@/components/trust-strip";
 import { TrustBanner } from "@/components/home/trust-banner";
-import { HeroSlider } from "@/components/home/hero-slider";
-import { FeaturePromoBanner } from "@/components/home/feature-promo-banner";
+import { HeroSlider, type HeroSlideView } from "@/components/home/hero-slider";
 import { QuickPostCard } from "@/components/home/quick-post-card";
 import { SafetyTipsCard } from "@/components/home/safety-tips-card";
 import { BlogTipsCard } from "@/components/home/blog-tips-card";
@@ -290,6 +289,20 @@ export default async function HomePage({
 
   const listingsHeading = categoryName ?? "Son Eklenen İlanlar";
 
+  // "Her 3 ilan için 1 ücretsiz öne çıkarma" promosyonu, mevcut vitrin
+  // banner'ına (çekiliş vb. slaytların hemen arkasına) ekstra bir slayt olarak
+  // eklenir - kod tabanlı degrade tasarımlı "promo" slaydı (bkz. HeroSlider).
+  const promoSlide: HeroSlideView = {
+    id: "promo-feature",
+    imageUrl: "",
+    title: "3 İlan Ver, 1 İlanını Ücretsiz Öne Çıkar!",
+    subtitle: "Yayında olan her 3 ilanın için 1 ilanını vitrine taşı, aramaların en üstünde yer al.",
+    buttonText: "Ücretsiz İlan Ver",
+    buttonLink: "/ilan-ver",
+    variant: "promo",
+  };
+  const heroSlideViews: HeroSlideView[] = [...heroSlides, promoSlide];
+
   return (
     <div>
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
@@ -297,9 +310,9 @@ export default async function HomePage({
             sağ "Hızlı İlan Ver" kutusuna kadar) kaplayan ince yatay şerit.
             Mobilde gizli (hidden md:block) - dar ekranda düzeni bozuyordu;
             yalnızca tablet/masaüstünde gösterilir. */}
-        {showVitrin && heroSlides.length > 0 && (
+        {showVitrin && heroSlideViews.length > 0 && (
           <div className="mb-4 hidden md:block">
-            <HeroSlider slides={heroSlides} />
+            <HeroSlider slides={heroSlideViews} />
           </div>
         )}
 
@@ -320,9 +333,6 @@ export default async function HomePage({
           <div className="min-w-0">
             {showVitrin ? (
               <>
-                <div className="mb-5">
-                  <FeaturePromoBanner />
-                </div>
                 {/* Sayfanın en üstündeki en dikkat çekici alan: premium "Öne
                     Çıkan İlanlar" vitrini. Gerçek öne çıkan ilan yeterli değilken
                     (bkz. showSeparateFeatured) prestijli "İlan Bekleniyor"
