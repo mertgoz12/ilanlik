@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import { apiJson, apiError } from "@/lib/mobile-api";
+import { apiJson, apiError, getMobileUser } from "@/lib/mobile-api";
 import { analyzeListing, loadAnalysisContext } from "@/lib/mobile-analysis";
+import { getFavoritedIds } from "@/lib/mobile-favorites";
 import { parseAiAnalysis } from "@/lib/ai-analysis";
 
 // GET /api/mobile/listings/:listingNo
 // İlan detay ekranı: tam ilan + görseller + kategori + satıcı özeti.
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ listingNo: string }> },
 ) {
   const { listingNo } = await params;
@@ -33,6 +34,10 @@ export async function GET(
   const ctx = await loadAnalysisContext();
   const analysis = analyzeListing({ ...l, photoCount: l._count.images }, ctx);
   const ekspertiz = parseAiAnalysis(l.aiAnalysis)?.ekspertiz_raporu ?? null;
+
+  const user = await getMobileUser(request);
+  const isFavorited = user ? (await getFavoritedIds(user.id, [l.id])).has(l.id) : false;
+  const isOwner = user?.id === l.user.id;
 
   const listing = {
     id: l.id,
@@ -74,6 +79,8 @@ export async function GET(
     priceStatus: analysis.fiyat_analizi.fiyat_durumu,
     analysis,
     ekspertiz,
+    isFavorited,
+    isOwner,
   };
 
   return apiJson({ listing });

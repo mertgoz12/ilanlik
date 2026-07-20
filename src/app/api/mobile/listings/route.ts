@@ -2,8 +2,10 @@ import { NextRequest } from "next/server";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { buildListingWhere } from "@/lib/listing-query";
-import { apiJson } from "@/lib/mobile-api";
-import { analyzeListing, loadAnalysisContext } from "@/lib/mobile-analysis";
+import { apiJson, getMobileUser } from "@/lib/mobile-api";
+import { loadAnalysisContext } from "@/lib/mobile-analysis";
+import { LISTING_SUMMARY_INCLUDE, toListingSummary } from "@/lib/mobile-dto";
+import { getFavoritedIds } from "@/lib/mobile-favorites";
 
 // GET /api/mobile/listings
 // Ana sayfa / arama için ilan listesi. Web ile AYNI filtre mantığını
@@ -35,45 +37,23 @@ export async function GET(request: NextRequest) {
   }
   const orderBy: Prisma.ListingOrderByWithRelationInput[] = [{ isFeatured: "desc" }, secondary];
 
-  const [rows, total, analysisCtx] = await Promise.all([
+  const [rows, total, analysisCtx, user] = await Promise.all([
     prisma.listing.findMany({
       where,
       orderBy,
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
-      include: {
-        images: { orderBy: { order: "asc" }, take: 1 },
-        category: { select: { name: true, slug: true } },
-        _count: { select: { images: true } },
-      },
+      include: LISTING_SUMMARY_INCLUDE,
     }),
     prisma.listing.count({ where }),
     loadAnalysisContext(),
+    getMobileUser(request),
   ]);
 
-  const listings = rows.map((l) => {
-    // Güven puanı + fiyat durumu web ile birebir aynı hesaplanır.
-    const ra = analyzeListing({ ...l, photoCount: l._count.images }, analysisCtx);
-    return {
-      id: l.id,
-      listingNo: l.listingNo,
-      title: l.title,
-      price: l.price,
-      il: l.il,
-      ilce: l.ilce,
-      isFeatured: l.isFeatured,
-      imageUrl: l.images[0]?.url ?? null,
-      categoryName: l.category.name,
-      categorySlug: l.category.slug,
-      brand: l.brand,
-      year: l.year,
-      km: l.km,
-      fuelType: l.fuelType,
-      createdAt: l.createdAt.toISOString(),
-      trustScore: ra.tutarlilik_analizi.guven_puani,
-      priceStatus: ra.fiyat_analizi.fiyat_durumu,
-    };
-  });
+  // Oturum varsa favori durumları tek sorguda çekilir.
+  const favoritedIds = user ? await getFavoritedIds(user.id, rows.map((l) => l.id)) : new Set<string>();
+
+  const listings = rows.map((l) => toListingSummary(l, analysisCtx, favoritedIds.has(l.id)));
 
   return apiJson({
     listings,
