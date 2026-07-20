@@ -3,6 +3,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { buildListingWhere } from "@/lib/listing-query";
 import { apiJson } from "@/lib/mobile-api";
+import { analyzeListing, loadAnalysisContext } from "@/lib/mobile-analysis";
 
 // GET /api/mobile/listings
 // Ana sayfa / arama için ilan listesi. Web ile AYNI filtre mantığını
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
   const orderBy: Prisma.ListingOrderByWithRelationInput[] = [{ isFeatured: "desc" }, secondary];
 
-  const [rows, total] = await Promise.all([
+  const [rows, total, analysisCtx] = await Promise.all([
     prisma.listing.findMany({
       where,
       orderBy,
@@ -43,28 +44,36 @@ export async function GET(request: NextRequest) {
       include: {
         images: { orderBy: { order: "asc" }, take: 1 },
         category: { select: { name: true, slug: true } },
+        _count: { select: { images: true } },
       },
     }),
     prisma.listing.count({ where }),
+    loadAnalysisContext(),
   ]);
 
-  const listings = rows.map((l) => ({
-    id: l.id,
-    listingNo: l.listingNo,
-    title: l.title,
-    price: l.price,
-    il: l.il,
-    ilce: l.ilce,
-    isFeatured: l.isFeatured,
-    imageUrl: l.images[0]?.url ?? null,
-    categoryName: l.category.name,
-    categorySlug: l.category.slug,
-    brand: l.brand,
-    year: l.year,
-    km: l.km,
-    fuelType: l.fuelType,
-    createdAt: l.createdAt.toISOString(),
-  }));
+  const listings = rows.map((l) => {
+    // Güven puanı + fiyat durumu web ile birebir aynı hesaplanır.
+    const ra = analyzeListing({ ...l, photoCount: l._count.images }, analysisCtx);
+    return {
+      id: l.id,
+      listingNo: l.listingNo,
+      title: l.title,
+      price: l.price,
+      il: l.il,
+      ilce: l.ilce,
+      isFeatured: l.isFeatured,
+      imageUrl: l.images[0]?.url ?? null,
+      categoryName: l.category.name,
+      categorySlug: l.category.slug,
+      brand: l.brand,
+      year: l.year,
+      km: l.km,
+      fuelType: l.fuelType,
+      createdAt: l.createdAt.toISOString(),
+      trustScore: ra.tutarlilik_analizi.guven_puani,
+      priceStatus: ra.fiyat_analizi.fiyat_durumu,
+    };
+  });
 
   return apiJson({
     listings,

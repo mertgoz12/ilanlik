@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { apiJson, apiError } from "@/lib/mobile-api";
+import { analyzeListing, loadAnalysisContext } from "@/lib/mobile-analysis";
+import { parseAiAnalysis } from "@/lib/ai-analysis";
 
 // GET /api/mobile/listings/:listingNo
 // İlan detay ekranı: tam ilan + görseller + kategori + satıcı özeti.
@@ -15,6 +17,7 @@ export async function GET(
       images: { orderBy: { order: "asc" } },
       category: { include: { parent: { select: { name: true, slug: true } } } },
       user: { select: { id: true, name: true, phone: true, avatarUrl: true, createdAt: true } },
+      _count: { select: { images: true } },
     },
   });
 
@@ -25,6 +28,11 @@ export async function GET(
   // Görüntülenme sayacını artır (web ilan detayı ile aynı davranış) - hata
   // olsa da yanıtı bloklamaz.
   prisma.listing.update({ where: { id: l.id }, data: { views: { increment: 1 } } }).catch(() => {});
+
+  // Güven puanı + fiyat/ekspertiz analizi (web ilan detayı ile birebir).
+  const ctx = await loadAnalysisContext();
+  const analysis = analyzeListing({ ...l, photoCount: l._count.images }, ctx);
+  const ekspertiz = parseAiAnalysis(l.aiAnalysis)?.ekspertiz_raporu ?? null;
 
   const listing = {
     id: l.id,
@@ -61,6 +69,11 @@ export async function GET(
       avatarUrl: l.user.avatarUrl,
       memberSince: l.user.createdAt.toISOString(),
     },
+    // Yapay zeka / güven puanı (web AiReportCard ile aynı veriler)
+    trustScore: analysis.tutarlilik_analizi.guven_puani,
+    priceStatus: analysis.fiyat_analizi.fiyat_durumu,
+    analysis,
+    ekspertiz,
   };
 
   return apiJson({ listing });
