@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { apiJson, apiError, getMobileUser } from "@/lib/mobile-api";
 import { getFeatureAllowance } from "@/lib/featuring";
+import { editListingSchema } from "@/lib/validation";
 
 // POST /api/mobile/me/listings/:id  { action }
 // İlan yönetimi: feature | unfeature | publish | unpublish | resubmit | delete.
@@ -66,4 +67,52 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     default:
       return apiError("Geçersiz işlem.");
   }
+}
+
+// PUT /api/mobile/me/listings/:id - ilan düzenleme (web updateListingAction ile
+// aynı: temel alanlar; reddedilen ilan düzenlenince tekrar onaya gider).
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getMobileUser(request);
+  if (!user) return apiError("Giriş yapmalısınız.", 401);
+  const { id } = await params;
+
+  const listing = await prisma.listing.findUnique({
+    where: { id },
+    select: { id: true, userId: true, status: true },
+  });
+  if (!listing || listing.userId !== user.id) {
+    return apiError("Bu ilan üzerinde işlem yapma yetkiniz yok.", 403);
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return apiError("Geçersiz istek gövdesi.");
+  }
+
+  const parsed = editListingSchema.safeParse(body);
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const first = Object.values(fieldErrors).flat()[0] ?? "Bilgileri kontrol edin.";
+    return apiJson({ error: first, fieldErrors }, { status: 422 });
+  }
+  const data = parsed.data;
+
+  await prisma.listing.update({
+    where: { id },
+    data: {
+      title: data.title,
+      description: data.description || null,
+      price: data.price,
+      condition: data.condition || null,
+      il: data.il,
+      ilce: data.ilce,
+      ...(listing.status === "rejected"
+        ? { status: "pending_review", rejectionReason: null, reviewedAt: null }
+        : {}),
+    },
+  });
+
+  return apiJson({ ok: true });
 }

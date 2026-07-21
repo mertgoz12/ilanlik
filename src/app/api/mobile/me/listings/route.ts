@@ -38,6 +38,8 @@ export async function GET(request: Request) {
     createdAt: l.createdAt.toISOString(),
     messageCount: msgByListing.get(l.id) ?? 0,
     rejectionReason: l.rejectionReason,
+    description: l.description,
+    condition: l.condition,
   }));
 
   return apiJson({ allowance, listings });
