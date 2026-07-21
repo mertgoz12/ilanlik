@@ -3,6 +3,7 @@ import { apiJson, apiError, getMobileUser } from "@/lib/mobile-api";
 import { validateOfferAmount, type OfferRole } from "@/lib/offers";
 import { CONTACT_INFO_WARNING, MESSAGE_RATE_LIMIT, RATE_LIMIT_WARNING, containsContactInfo } from "@/lib/message-filters";
 import { formatPrice } from "@/lib/format";
+import { createNotification } from "@/lib/notifications";
 
 // POST /api/mobile/conversations/offer  { listingId? | conversationId?, amount, note? }
 // Web submitOfferAction ile aynı: ilk teklif / karşı teklif / teklif güncelleme.
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
 
   let conversationId: string | null = null;
   let sellerId: string;
+  let buyerId: string;
   let listingId: string;
   let listingPrice: number;
   let isNegotiable: boolean;
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
     }
     conversationId = conversation.id;
     sellerId = conversation.sellerId;
+    buyerId = conversation.buyerId;
     listingId = conversation.listingId;
     listingPrice = conversation.listing.price;
     isNegotiable = conversation.listing.isNegotiable;
@@ -52,6 +55,7 @@ export async function POST(request: Request) {
     if (!listing) return apiError("İlan bulunamadı.", 404);
     if (listing.userId === user.id) return apiError("Kendi ilanınıza teklif veremezsiniz.");
     sellerId = listing.userId;
+    buyerId = user.id;
     listingId = listing.id;
     listingPrice = listing.price;
     isNegotiable = listing.isNegotiable;
@@ -107,6 +111,16 @@ export async function POST(request: Request) {
     data: { conversationId, senderId: user.id, body, type: "offer", offerId: offer.id },
   });
   await prisma.conversation.update({ where: { id: conversationId }, data: { updatedAt: new Date() } });
+
+  // Karşı tarafa teklif bildirimi.
+  const recipientId = user.id === sellerId ? buyerId : sellerId;
+  await createNotification({
+    userId: recipientId,
+    type: "new_offer",
+    title: "Yeni teklif",
+    body: `${formatPrice(amount)} ${prior ? "karşı teklif" : "teklif"} geldi.`,
+    link: "/hesabim/mesajlar",
+  });
 
   return apiJson({ conversationId, offerId: offer.id });
 }

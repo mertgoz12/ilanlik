@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 
-export type NotificationType = "listing_approved" | "listing_rejected";
+export type NotificationType =
+  | "listing_approved"
+  | "listing_rejected"
+  | "new_message"
+  | "new_offer";
 
 type CreateNotificationInput = {
   userId: string;

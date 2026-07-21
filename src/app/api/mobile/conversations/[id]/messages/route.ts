@@ -7,6 +7,7 @@ import {
   RATE_LIMIT_WARNING,
   containsContactInfo,
 } from "@/lib/message-filters";
+import { createNotification } from "@/lib/notifications";
 
 // POST /api/mobile/conversations/:id/messages  { body } -> { message }
 // Web sendMessageAction ile aynı doğrulama: boş/uzunluk, iletişim bilgisi
@@ -48,6 +49,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     select: { id: true, body: true, createdAt: true },
   });
   await prisma.conversation.update({ where: { id }, data: { updatedAt: new Date() } });
+
+  // Karşı tarafa bildirim (uygulama içi zil + rozet).
+  const recipientId = convo.buyerId === user.id ? convo.sellerId : convo.buyerId;
+  await createNotification({
+    userId: recipientId,
+    type: "new_message",
+    title: user.name,
+    body: body.slice(0, 80),
+    link: "/hesabim/mesajlar",
+  });
 
   return apiJson({
     message: { id: message.id, body: message.body, mine: true, createdAt: message.createdAt.toISOString() },

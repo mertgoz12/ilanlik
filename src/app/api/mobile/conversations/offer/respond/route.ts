@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { apiJson, apiError, getMobileUser } from "@/lib/mobile-api";
 import { formatPrice } from "@/lib/format";
+import { createNotification } from "@/lib/notifications";
 
 // POST /api/mobile/conversations/offer/respond  { offerId, decision: "accept"|"reject" }
 // Web respondOfferAction ile aynı: karşı tarafın bekleyen teklifini kabul/reddet.
@@ -54,6 +55,15 @@ export async function POST(request: Request) {
       : `❌ ${formatPrice(offer.amount)} teklifi reddedildi.`;
   await prisma.message.create({ data: { conversationId: conv.id, senderId: user.id, body } });
   await prisma.conversation.update({ where: { id: conv.id }, data: { updatedAt: new Date() } });
+
+  // Teklifi verene sonuç bildirimi.
+  await createNotification({
+    userId: offer.createdById,
+    type: "new_offer",
+    title: decision === "accept" ? "Teklifin kabul edildi 🎉" : "Teklifin reddedildi",
+    body: `${formatPrice(offer.amount)} teklifin ${decision === "accept" ? "kabul edildi" : "reddedildi"}.`,
+    link: "/hesabim/mesajlar",
+  });
 
   return apiJson({ ok: true });
 }
