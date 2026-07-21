@@ -38,9 +38,10 @@ export function buildGoogleAuthUrl(state: string, redirectUri: string = getGoogl
 }
 
 // Mobil OAuth callback URI'si (Google Console'a "Authorized redirect URIs"
-// olarak ayrıca eklenmelidir).
+// olarak ayrıca eklenmelidir). Kanonik www kullanılır - apex (ilanlio.com)
+// 308 ile www'ye yönlendiğinden OAuth callback'inde ekstra atlama olmasın diye.
 export function getMobileGoogleRedirectUri(): string {
-  const base = process.env.NODE_ENV === "production" ? "https://ilanlio.com" : "http://localhost:3000";
+  const base = process.env.NODE_ENV === "production" ? "https://www.ilanlio.com" : "http://localhost:3000";
   return `${base}/api/mobile/auth/google/callback`;
 }
 
