@@ -13,10 +13,12 @@ export async function buildListingWhere(sp: ListingSearchParams): Promise<Prisma
 
   if (sp.q) {
     // Kelime veya ilan numarası: başlık/marka/model + ilan numarasında arar.
+    // mode: "insensitive" -> büyük/küçük harf duyarsız (Postgres varsayılanı
+    // duyarlı; "lenovo" aramasi "Lenovo"yu bulmalı).
     where.OR = [
-      { title: { contains: sp.q } },
-      { brand: { contains: sp.q } },
-      { model: { contains: sp.q } },
+      { title: { contains: sp.q, mode: "insensitive" } },
+      { brand: { contains: sp.q, mode: "insensitive" } },
+      { model: { contains: sp.q, mode: "insensitive" } },
       { listingNo: { contains: sp.q } },
     ];
   }
