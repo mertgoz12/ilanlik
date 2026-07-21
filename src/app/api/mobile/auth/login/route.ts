@@ -37,6 +37,13 @@ export async function POST(request: Request) {
 
   return apiJson({
     token,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role, avatarUrl: user.avatarUrl },
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+      emailVerified: user.emailVerified,
+    },
   });
 }
