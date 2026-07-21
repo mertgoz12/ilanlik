@@ -31,6 +31,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const favoritedIds = user ? await getFavoritedIds(user.id, rows.map((l) => l.id)) : new Set<string>();
   const listings = rows.map((l) => toListingSummary(l, ctx, favoritedIds.has(l.id)));
 
+  // Oturum varsa bu satıcıyı takip ediyor mu?
+  let isFollowing = false;
+  if (user && user.id !== id) {
+    const follow = await prisma.sellerFollow.findUnique({
+      where: { followerId_sellerId: { followerId: user.id, sellerId: id } },
+      select: { id: true },
+    });
+    isFollowing = !!follow;
+  }
+
   return apiJson({
     seller: {
       id: seller.id,
@@ -38,6 +48,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       avatarUrl: seller.avatarUrl,
       memberSince: seller.createdAt.toISOString(),
       listingCount,
+      isFollowing,
+      isSelf: user?.id === id,
     },
     listings,
   });
