@@ -9,11 +9,15 @@ import type { SessionUser } from "./session";
 // yani tek bir kimlik sistemi, iki taşıma yöntemi.
 
 export function apiJson(data: unknown, init?: ResponseInit): NextResponse {
-  return NextResponse.json(data, init);
+  const res = NextResponse.json(data, init);
+  // charset=utf-8 şart: aksi halde React Native fetch yanıtı Latin-1 çözüp
+  // Türkçe karakterleri bozuyor (mesaj/isim/açıklama vb. mojibake).
+  res.headers.set("content-type", "application/json; charset=utf-8");
+  return res;
 }
 
 export function apiError(message: string, status = 400): NextResponse {
-  return NextResponse.json({ error: message }, { status });
+  return apiJson({ error: message }, { status });
 }
 
 // İsteğin Authorization başlığından mobil kullanıcıyı çözer (yoksa null).
