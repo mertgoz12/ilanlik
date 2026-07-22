@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
 import { createNotification } from "@/lib/notifications";
+import { notifyNearbyOfListing } from "@/lib/notify-nearby";
 import { renderListingApprovedEmail, renderListingRejectedEmail } from "@/lib/email-templates";
 
 function revalidateApprovalPaths(listingNo?: string) {
@@ -23,13 +24,22 @@ export async function approveListingAction(listingId: string): Promise<void> {
 
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
-    select: { id: true, title: true, listingNo: true, userId: true, status: true },
+    select: { id: true, title: true, listingNo: true, userId: true, status: true, il: true, ilce: true },
   });
   if (!listing || listing.status !== "pending_review") return;
 
   await prisma.listing.update({
     where: { id: listingId },
     data: { status: "active", reviewedAt: new Date(), rejectionReason: null },
+  });
+
+  // Aynı ilçedeki kullanıcılara "yakınında yeni ilan" bildirimi.
+  await notifyNearbyOfListing({
+    ownerId: listing.userId,
+    il: listing.il,
+    ilce: listing.ilce,
+    title: listing.title,
+    listingNo: listing.listingNo,
   });
 
   await createNotification({

@@ -5,7 +5,8 @@ export type NotificationType =
   | "listing_approved"
   | "listing_rejected"
   | "new_message"
-  | "new_offer";
+  | "new_offer"
+  | "new_listing_nearby";
 
 type CreateNotificationInput = {
   userId: string;
