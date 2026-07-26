@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { sendPushToUsers } from "./push";
 
 // İlan yayına alınınca (onaylanınca) AYNI İLÇEDEKİ kullanıcılara "yakınında
 // yeni ilan" bildirimi. İlçe bazlı - il çok geniş olduğundan kullanıcı sürekli
@@ -35,6 +36,16 @@ export async function notifyNearbyOfListing(params: {
         link: `/ilan/${params.listingNo}`,
       })),
     });
+
+    // Mobil push (token'ı olanlara).
+    await sendPushToUsers(
+      users.map((u) => u.id),
+      {
+        title: `Yakınında yeni ilan · ${params.ilce}`,
+        body: params.title,
+        data: { link: `/ilan/${params.listingNo}` },
+      },
+    );
   } catch (err) {
     // Bildirim asla onay akışını çökertmemeli.
     console.error("[notify-nearby] failed:", err);

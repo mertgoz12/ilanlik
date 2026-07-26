@@ -20,6 +20,10 @@ model User {
   ilce      String?
   avatarUrl String?
 
+  // Mobil uygulama Expo push bildirim token'ı (cihaz başına; en son giriş yapılan
+  // cihazınki tutulur). Boşsa push gönderilmez.
+  pushToken String?
+
   // Google ile giriş yapan hesaplarda Google'ın kararlı kullanıcı kimliği
   // ("sub" claim). E-posta/şifre ile açılmış bir hesaba sonradan Google ile
   // giriş yapılırsa bu alan dolar (hesaplar e-posta üzerinden birleştirilir).

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { sendPushToUser } from "@/lib/push";
 
 export type NotificationType =
   | "listing_approved"
@@ -36,6 +37,13 @@ export async function createNotification(input: CreateNotificationInput): Promis
   } catch (err) {
     console.error("[notifications] create failed:", err);
   }
+
+  // Mobil push (token'ı olan kullanıcılara). Hata yutulur.
+  await sendPushToUser(input.userId, {
+    title: input.title,
+    body: input.body,
+    data: input.link ? { link: input.link } : {},
+  });
 
   if (input.email) {
     try {
