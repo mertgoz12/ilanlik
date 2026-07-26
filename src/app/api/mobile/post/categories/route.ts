@@ -13,12 +13,16 @@ export async function GET() {
   });
   const idBySlug = new Map(dbCats.map((c) => [c.slug, c.id]));
 
+  // Mobil kademeli (drill-down) kategori seçici, web category-picker ile aynı:
+  // her yaprak için tam breadcrumb ad/slug zinciri (ağacı istemcide kurar).
   const categories = leaves
     .filter((l) => idBySlug.has(l.slug))
     .map((l) => ({
       id: idBySlug.get(l.slug) as string,
+      slug: l.slug,
       name: l.name,
-      breadcrumb: l.breadcrumb.join(" › "),
+      breadcrumb: l.breadcrumb,
+      breadcrumbSlugs: l.breadcrumbSlugs,
     }));
 
   return apiJson({ categories });
