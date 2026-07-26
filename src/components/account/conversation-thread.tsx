@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
@@ -24,12 +23,41 @@ const initialState: MessageFormState = {};
 
 export function ConversationThread({ conversation, currentUserId }: ConversationThreadProps) {
   const [state, formAction, pending] = useActionState(sendMessageAction, initialState);
-  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const otherUser = conversation.buyerId === currentUserId ? conversation.seller : conversation.buyer;
   const listingImage = conversation.listing.images[0]?.url ?? null;
   const { markRead } = useUnreadMessages();
+
+  // Mesajlar istemci state'inde tutulur; canlı güncelleme için hafif uç
+  // periyodik çağrılıp yalnızca liste tazelenir (textarea/odak bozulmaz).
+  const [messages, setMessages] = useState(conversation.messages);
+
+  const refetch = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/conversations/${conversation.id}/messages`, {
+        cache: "no-store",
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { messages: typeof conversation.messages };
+      if (Array.isArray(data.messages)) setMessages(data.messages);
+    } catch {
+      /* sessiz */
+    }
+  }, [conversation.id]);
+
+  // Konuşma değişince yeni mesajlarla başla.
+  useEffect(() => {
+    setMessages(conversation.messages);
+  }, [conversation.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Canlı: 4 sn'de bir (sekme önplandaysa) mesajları tazele.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") refetch();
+    }, 4000);
+    return () => clearInterval(id);
+  }, [refetch]);
 
   // Teklif/karşı teklif penceresi. defaultAmount, "Karşı/Yeni Teklif Ver"den
   // gelen ön-doldurma tutarıdır.
@@ -39,24 +67,19 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
 
   // Kabul edilmiş teklif varsa pazarlık sonuçlanmıştır; "Teklif Ver" gizlenir
   // (sunucu da yeni teklifi reddeder, bkz. submitOfferAction).
-  const hasAcceptedOffer = conversation.messages.some((m) => m.offer?.status === "accepted");
+  const hasAcceptedOffer = messages.some((m) => m.offer?.status === "accepted");
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [conversation.messages.length]);
+  }, [messages.length]);
 
-  // Canlı güncelleme: konuşma açıkken sunucu verisini (yeni mesaj/teklif)
-  // birkaç saniyede bir sessizce tazele. Sekme arka plandaysa atla.
+  // Mesaj gönderilince formu temizle + gönderilen mesajı hemen getir.
   useEffect(() => {
-    const id = setInterval(() => {
-      if (document.visibilityState === "visible") router.refresh();
-    }, 4000);
-    return () => clearInterval(id);
-  }, [router]);
-
-  useEffect(() => {
-    if (state.success) formRef.current?.reset();
-  }, [state.success]);
+    if (state.success) {
+      formRef.current?.reset();
+      refetch();
+    }
+  }, [state.success, refetch]);
 
   // Sunucu bu konuşmayı yüklerken okunmamış mesajları DB'de okundu olarak
   // işaretledi (bkz. mesajlar/page.tsx); navbar rozetini de aynı miktarda
@@ -105,7 +128,7 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
       </div>
 
       <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-4">
-        {conversation.messages.map((message) => {
+        {messages.map((message) => {
           const isOwn = message.senderId === currentUserId;
           // Teklif mesajı: metin baloncuğu yerine aksiyonlu teklif baloncuğu.
           if (message.type === "offer" && message.offer) {
