@@ -4,6 +4,7 @@ import { getConversationDetail, getUserConversations, markConversationRead } fro
 import { PageHeader } from "@/components/admin/page-header";
 import { ConversationList } from "@/components/account/conversation-list";
 import { ConversationThread } from "@/components/account/conversation-thread";
+import { MessagesAutoRefresh } from "@/components/account/messages-auto-refresh";
 import { InboxIcon } from "@/components/icons";
 
 export default async function MessagesPage({
@@ -45,6 +46,9 @@ export default async function MessagesPage({
           {activeConversation ? (
             <ConversationThread conversation={activeConversation} currentUserId={session.id} />
           ) : (
+            <MessagesAutoRefresh />
+          )}
+          {!activeConversation && (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-slate-400">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-300">
                 <InboxIcon className="h-6 w-6" />

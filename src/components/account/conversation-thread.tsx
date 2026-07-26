@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
@@ -23,6 +24,7 @@ const initialState: MessageFormState = {};
 
 export function ConversationThread({ conversation, currentUserId }: ConversationThreadProps) {
   const [state, formAction, pending] = useActionState(sendMessageAction, initialState);
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const otherUser = conversation.buyerId === currentUserId ? conversation.seller : conversation.buyer;
@@ -42,6 +44,15 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [conversation.messages.length]);
+
+  // Canlı güncelleme: konuşma açıkken sunucu verisini (yeni mesaj/teklif)
+  // birkaç saniyede bir sessizce tazele. Sekme arka plandaysa atla.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, 4000);
+    return () => clearInterval(id);
+  }, [router]);
 
   useEffect(() => {
     if (state.success) formRef.current?.reset();
