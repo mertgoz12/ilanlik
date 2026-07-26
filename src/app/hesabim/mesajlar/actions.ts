@@ -13,6 +13,7 @@ import {
 import { formatPrice } from "@/lib/format";
 import { validateOfferAmount, type OfferRole, type OfferView } from "@/lib/offers";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
 export type MessageFormState = {
   error?: string;
@@ -61,6 +62,17 @@ export async function sendMessageAction(
     data: { conversationId, senderId: session.id, body },
   });
   await prisma.conversation.update({ where: { id: conversationId }, data: { updatedAt: new Date() } });
+
+  // Karşı tarafa bildirim + mobil push (mobil route ile aynı).
+  const recipientId =
+    conversation.buyerId === session.id ? conversation.sellerId : conversation.buyerId;
+  await createNotification({
+    userId: recipientId,
+    type: "new_message",
+    title: session.name,
+    body: body.slice(0, 80),
+    link: "/hesabim/mesajlar",
+  });
 
   revalidatePath("/hesabim/mesajlar");
   return { success: true };
@@ -219,6 +231,15 @@ export async function sendListingMessageAction(
     data: { conversationId: conversation.id, senderId: session.id, body },
   });
 
+  // İlan sahibine bildirim + mobil push.
+  await createNotification({
+    userId: listing.userId,
+    type: "new_message",
+    title: session.name,
+    body: body.slice(0, 80),
+    link: "/hesabim/mesajlar",
+  });
+
   revalidatePath("/hesabim/mesajlar");
   return { conversationId: conversation.id, sentAt: Date.now() };
 }
@@ -282,6 +303,7 @@ export async function submitOfferAction(
   let listingId: string;
   let listingPrice: number;
   let isNegotiable: boolean;
+  let recipientId: string;
 
   if (conversationIdInput) {
     const conversation = await prisma.conversation.findUnique({
@@ -302,6 +324,7 @@ export async function submitOfferAction(
     listingId = conversation.listingId;
     listingPrice = conversation.listing.price;
     isNegotiable = conversation.listing.isNegotiable;
+    recipientId = session.id === conversation.buyerId ? conversation.sellerId : conversation.buyerId;
   } else {
     const listing = await prisma.listing.findUnique({
       where: { id: listingIdInput },
@@ -313,6 +336,7 @@ export async function submitOfferAction(
     listingId = listing.id;
     listingPrice = listing.price;
     isNegotiable = listing.isNegotiable;
+    recipientId = sellerId; // yeni teklifte gönderen daima alıcı
   }
 
   if (!isNegotiable) return { error: "Bu ilan tekliflere kapalı." };
@@ -384,6 +408,15 @@ export async function submitOfferAction(
   });
   await prisma.conversation.update({ where: { id: conversationId }, data: { updatedAt: new Date() } });
 
+  // Karşı tarafa bildirim + mobil push.
+  await createNotification({
+    userId: recipientId,
+    type: "new_offer",
+    title: session.name,
+    body: body.slice(0, 80),
+    link: "/hesabim/mesajlar",
+  });
+
   revalidatePath("/hesabim/mesajlar");
   return { ok: true, conversationId, offerId: offer.id, at: Date.now() };
 }
@@ -443,6 +476,15 @@ export async function respondOfferAction(
       : `❌ ${formatPrice(offer.amount)} teklifi reddedildi.`;
   await prisma.message.create({ data: { conversationId: conv.id, senderId: session.id, body } });
   await prisma.conversation.update({ where: { id: conv.id }, data: { updatedAt: new Date() } });
+
+  // Teklifi veren tarafa sonucu bildir + mobil push.
+  await createNotification({
+    userId: offer.createdById,
+    type: "new_offer",
+    title: session.name,
+    body,
+    link: "/hesabim/mesajlar",
+  });
 
   revalidatePath("/hesabim/mesajlar");
   return { ok: true, at: Date.now() };
