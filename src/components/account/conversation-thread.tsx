@@ -93,8 +93,8 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
   }, [conversation.id]);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
-      <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex shrink-0 items-center gap-3 border-b border-slate-100 px-4 py-3">
         <Link href="/hesabim/mesajlar" className="text-slate-400 hover:text-slate-600 md:hidden">
           <ChevronLeftIcon className="h-5 w-5" />
         </Link>
@@ -127,7 +127,7 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-4">
+      <div ref={scrollRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
         {messages.map((message) => {
           const isOwn = message.senderId === currentUserId;
           // Teklif mesajı: metin baloncuğu yerine aksiyonlu teklif baloncuğu.
@@ -169,7 +169,7 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
         })}
       </div>
 
-      <form ref={formRef} action={formAction} className="border-t border-slate-100 p-3">
+      <form ref={formRef} action={formAction} className="shrink-0 border-t border-slate-100 p-3">
         <input type="hidden" name="conversationId" value={conversation.id} />
         {conversation.listing.isNegotiable && hasAcceptedOffer ? (
           <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700">
