@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { logoutAction } from "@/lib/actions/logout";
 import { isVasitaEmlakActive, CATEGORY_TREE, COMING_SOON_SLUGS } from "@/lib/categories";
-import { TypewriterLogo } from "./typewriter-logo";
+import { Logo } from "./logo";
 import { LoginModalButton } from "./login-modal";
 import { MobileSearchRow, MobileSearchToggleButton } from "./mobile-search-row";
 import { NavbarMobileMenu } from "./navbar-mobile-menu";
@@ -37,7 +37,7 @@ export async function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
-        <TypewriterLogo />
+        <Logo size="md" />
 
         <SearchBar className="hidden flex-1 md:block" categoryOptions={categoryOptions} />
 
