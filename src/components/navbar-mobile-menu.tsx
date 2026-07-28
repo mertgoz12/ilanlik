@@ -7,6 +7,7 @@ import type { SessionUser } from "@/lib/session";
 import { ACCOUNT_NAV_ITEMS } from "@/lib/account-nav";
 import { Avatar } from "@/components/avatar";
 import { useUnreadMessages } from "@/components/unread-messages-context";
+import { LoginModalButton } from "@/components/login-modal";
 
 type NavbarMobileMenuProps = {
   session: SessionUser | null;
@@ -105,13 +106,12 @@ export function NavbarMobileMenu({ session, avatarUrl, logoutAction }: NavbarMob
                 </>
               ) : (
                 <>
-                  <Link
-                    href="/giris"
-                    onClick={() => setOpen(false)}
-                    className="rounded-lg px-3 py-3 text-base font-medium text-slate-600 transition-colors active:bg-slate-100 hover:bg-slate-50"
+                  <LoginModalButton
+                    onOpen={() => setOpen(false)}
+                    className="w-full rounded-lg px-3 py-3 text-left text-base font-medium text-slate-600 transition-colors active:bg-slate-100 hover:bg-slate-50"
                   >
                     Giriş Yap
-                  </Link>
+                  </LoginModalButton>
                   <Link
                     href="/kayit"
                     onClick={() => setOpen(false)}
