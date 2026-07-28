@@ -79,6 +79,42 @@ model User {
 
   blogPosts     BlogPost[]
   notifications Notification[]
+
+  // Kullanıcı engelleme + kullanıcı şikayeti
+  blocksInitiated UserBlock[]  @relation("BlocksInitiated")
+  blocksReceived  UserBlock[]  @relation("BlocksReceived")
+  reportsFiled    UserReport[] @relation("UserReportsFiled")
+  reportsReceived UserReport[] @relation("UserReportsReceived")
+}
+
+// Bir kullanıcının başka bir kullanıcıyı engellemesi. Engellenen kişinin
+// ilanları engelleyenin aramalarında gizlenir ve aralarında mesajlaşma engellenir.
+model UserBlock {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("BlocksInitiated", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+// Kullanıcı şikayeti (satıcı profilinden). Admin moderasyonu için "pending".
+model UserReport {
+  id             String   @id @default(cuid())
+  reporterId     String?
+  reporter       User?    @relation("UserReportsFiled", fields: [reporterId], references: [id], onDelete: SetNull)
+  reportedUserId String
+  reported       User     @relation("UserReportsReceived", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reason         String
+  status         String   @default("pending")
+  createdAt      DateTime @default(now())
+
+  @@index([reportedUserId])
+  @@index([status])
 }
 
 // Site içi bildirim (navbar zil/sayaç + Hesabım > Bildirimler). Şu an

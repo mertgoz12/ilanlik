@@ -8,6 +8,7 @@ import {
   containsContactInfo,
 } from "@/lib/message-filters";
 import { createNotification } from "@/lib/notifications";
+import { isBlockedBetween } from "@/lib/blocks";
 
 // POST /api/mobile/conversations/:id/messages  { body } -> { message }
 // Web sendMessageAction ile aynı doğrulama: boş/uzunluk, iletişim bilgisi
@@ -37,6 +38,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   });
   if (!convo || (convo.buyerId !== user.id && convo.sellerId !== user.id)) {
     return apiError("Bu konuşmaya erişim yetkiniz yok.", 403);
+  }
+
+  const otherId = convo.buyerId === user.id ? convo.sellerId : convo.buyerId;
+  if (await isBlockedBetween(user.id, otherId)) {
+    return apiError("Bu kullanıcıyla mesajlaşamazsınız (engel mevcut).", 403);
   }
 
   // Hız limiti (son pencerede gönderilen mesaj sayısı).

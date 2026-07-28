@@ -6,6 +6,7 @@ import { apiJson, getMobileUser } from "@/lib/mobile-api";
 import { loadAnalysisContext } from "@/lib/mobile-analysis";
 import { LISTING_SUMMARY_INCLUDE, toListingSummary } from "@/lib/mobile-dto";
 import { getFavoritedIds } from "@/lib/mobile-favorites";
+import { getHiddenUserIds } from "@/lib/blocks";
 
 // GET /api/mobile/listings
 // Ana sayfa / arama için ilan listesi. Web ile AYNI filtre mantığını
@@ -17,7 +18,12 @@ export async function GET(request: NextRequest) {
   const sp = Object.fromEntries(request.nextUrl.searchParams) as Record<string, string | undefined>;
   const page = Math.max(1, Number(sp.page) || 1);
 
-  const where = await buildListingWhere(sp);
+  const user = await getMobileUser(request);
+  const hidden = user ? await getHiddenUserIds(user.id) : [];
+  const baseWhere = await buildListingWhere(sp);
+  const where: Prisma.ListingWhereInput = hidden.length
+    ? { AND: [baseWhere, { userId: { notIn: hidden } }] }
+    : baseWhere;
 
   // Öne çıkan ilanlar her sıralamada en üstte (web /page.tsx ile aynı davranış).
   let secondary: Prisma.ListingOrderByWithRelationInput = { createdAt: "desc" };
@@ -37,7 +43,7 @@ export async function GET(request: NextRequest) {
   }
   const orderBy: Prisma.ListingOrderByWithRelationInput[] = [{ isFeatured: "desc" }, secondary];
 
-  const [rows, total, analysisCtx, user] = await Promise.all([
+  const [rows, total, analysisCtx] = await Promise.all([
     prisma.listing.findMany({
       where,
       orderBy,
@@ -47,7 +53,6 @@ export async function GET(request: NextRequest) {
     }),
     prisma.listing.count({ where }),
     loadAnalysisContext(),
-    getMobileUser(request),
   ]);
 
   // Oturum varsa favori durumları tek sorguda çekilir.

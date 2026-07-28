@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { apiJson, apiError, getMobileUser } from "@/lib/mobile-api";
+import { isBlockedBetween } from "@/lib/blocks";
 
 // GET /api/mobile/conversations - kullanıcının konuşmaları (alıcı veya satıcı).
 export async function GET(request: Request) {
@@ -70,6 +71,10 @@ export async function POST(request: Request) {
   });
   if (!listing || listing.status !== "active") return apiError("İlan bulunamadı.", 404);
   if (listing.userId === user.id) return apiError("Kendi ilanınıza mesaj gönderemezsiniz.", 400);
+
+  if (await isBlockedBetween(user.id, listing.userId)) {
+    return apiError("Bu kullanıcıyla mesajlaşamazsınız (engel mevcut).", 403);
+  }
 
   const conversation = await prisma.conversation.upsert({
     where: {
