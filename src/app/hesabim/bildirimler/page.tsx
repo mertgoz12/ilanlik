@@ -1,11 +1,20 @@
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { Bell, CheckCircle2, XCircle, MessageCircle, Tag, MapPin, type LucideIcon } from "lucide-react";
 import { requireUserPage } from "@/lib/account-auth";
 import { getNotifications } from "@/lib/notifications";
 import { formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/admin/page-header";
-import { CheckCircleIcon, XCircleIcon } from "@/components/icons";
 import { MarkNotificationsRead } from "./mark-read";
+
+// Bildirim tipine göre ikon + renk (her tip kendi görünümüyle).
+const TYPE_META: Record<string, { Icon: LucideIcon; wrap: string }> = {
+  listing_approved: { Icon: CheckCircle2, wrap: "bg-emerald-50 text-emerald-600" },
+  listing_rejected: { Icon: XCircle, wrap: "bg-red-50 text-red-500" },
+  new_message: { Icon: MessageCircle, wrap: "bg-blue-50 text-blue-600" },
+  new_offer: { Icon: Tag, wrap: "bg-amber-50 text-amber-600" },
+  new_listing_nearby: { Icon: MapPin, wrap: "bg-sky-50 text-sky-600" },
+};
+const DEFAULT_META = { Icon: Bell, wrap: "bg-slate-100 text-slate-400" };
 
 export default async function NotificationsPage() {
   const session = await requireUserPage("/hesabim/bildirimler");
@@ -37,7 +46,7 @@ export default async function NotificationsPage() {
       ) : (
         <div className="space-y-2">
           {notifications.map((n) => {
-            const approved = n.type === "listing_approved";
+            const meta = TYPE_META[n.type] ?? DEFAULT_META;
             const unread = n.readAt === null;
             const Inner = (
               <div
@@ -46,11 +55,9 @@ export default async function NotificationsPage() {
                 } ${n.link ? "hover:bg-slate-50" : ""}`}
               >
                 <span
-                  className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                    approved ? "bg-emerald-50 text-emerald-500" : "bg-red-50 text-red-500"
-                  }`}
+                  className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${meta.wrap}`}
                 >
-                  {approved ? <CheckCircleIcon className="h-5 w-5" /> : <XCircleIcon className="h-5 w-5" />}
+                  <meta.Icon className="h-5 w-5" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
