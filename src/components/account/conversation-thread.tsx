@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { CheckIcon, ChevronLeftIcon, ImageIcon, TagIcon } from "@/components/icons";
 import { OfferBubble } from "@/components/offer-bubble";
+import { DeleteMessageButton } from "@/components/account/delete-message-button";
 import { OfferDialog } from "@/components/offer-dialog";
 import { RelativeTime } from "@/components/relative-time";
 import { useUnreadMessages } from "@/components/unread-messages-context";
@@ -149,7 +150,7 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
           return (
             <div
               key={message.id}
-              className={`flex items-end gap-1.5 ${isOwn ? "flex-row-reverse justify-start" : "justify-start"}`}
+              className={`group flex items-end gap-1.5 ${isOwn ? "flex-row-reverse justify-start" : "justify-start"}`}
             >
               <Avatar name={message.sender.name} src={message.sender.avatarUrl} size="xs" className="mb-0.5" />
               <div
@@ -164,6 +165,7 @@ export function ConversationThread({ conversation, currentUserId }: Conversation
                   className={`mt-1 block text-right text-[10px] ${isOwn ? "text-white/60" : "text-slate-400"}`}
                 />
               </div>
+              {isOwn && <DeleteMessageButton messageId={message.id} />}
             </div>
           );
         })}

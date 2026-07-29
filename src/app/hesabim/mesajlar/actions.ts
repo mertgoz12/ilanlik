@@ -78,6 +78,30 @@ export async function sendMessageAction(
   return { success: true };
 }
 
+export type DeleteMessageState = { error?: string; ok?: boolean; at?: number };
+
+// Kendi metin mesajını sil (teklif mesajları silinemez).
+export async function deleteMessageAction(
+  _prevState: DeleteMessageState,
+  formData: FormData,
+): Promise<DeleteMessageState> {
+  const session = await requireUser();
+  const messageId = String(formData.get("messageId") ?? "");
+  if (!messageId) return { error: "Mesaj bulunamadı." };
+
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
+    select: { id: true, senderId: true, type: true },
+  });
+  if (!message) return { error: "Mesaj bulunamadı." };
+  if (message.senderId !== session.id) return { error: "Yalnızca kendi mesajınızı silebilirsiniz." };
+  if (message.type === "offer") return { error: "Teklif mesajları silinemez." };
+
+  await prisma.message.delete({ where: { id: messageId } });
+  revalidatePath("/hesabim/mesajlar");
+  return { ok: true, at: Date.now() };
+}
+
 // ---------------------------------------------------------------------------
 // İlan detay sayfasındaki sohbet kutusu (masaüstü widget) + mobil yönlendirme
 // ---------------------------------------------------------------------------
