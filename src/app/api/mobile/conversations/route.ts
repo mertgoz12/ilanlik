@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { apiJson, apiError, getMobileUser } from "@/lib/mobile-api";
-import { isBlockedBetween } from "@/lib/blocks";
+import { getHiddenUserIds, isBlockedBetween } from "@/lib/blocks";
 
 // GET /api/mobile/conversations - kullanıcının konuşmaları (alıcı veya satıcı).
 export async function GET(request: Request) {
   const user = await getMobileUser(request);
   if (!user) return apiError("Giriş yapmalısınız.", 401);
 
+  // Engellenen/engelleyen kullanıcıların konuşmaları listede gösterilmez.
+  const hiddenUserIds = await getHiddenUserIds(user.id);
   const convos = await prisma.conversation.findMany({
     // Kişiye özel gizlenen (silinen) konuşmalar listede gösterilmez.
     where: {
@@ -14,6 +16,9 @@ export async function GET(request: Request) {
         { buyerId: user.id, hiddenForBuyer: false },
         { sellerId: user.id, hiddenForSeller: false },
       ],
+      ...(hiddenUserIds.length > 0
+        ? { buyerId: { notIn: hiddenUserIds }, sellerId: { notIn: hiddenUserIds } }
+        : {}),
     },
     orderBy: { updatedAt: "desc" },
     include: {

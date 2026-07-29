@@ -4,6 +4,7 @@ import { Avatar } from "@/components/avatar";
 import { RelativeTime } from "@/components/relative-time";
 import { ImageIcon, InboxIcon } from "@/components/icons";
 import type { ConversationListItem } from "@/lib/messages";
+import { ConversationRowMenu } from "@/components/account/conversation-row-menu";
 
 type ConversationListProps = {
   conversations: ConversationListItem[];
@@ -29,10 +30,10 @@ export function ConversationList({ conversations, activeId, currentUserId }: Con
         const active = c.id === activeId;
         const unread = c.unreadCount > 0;
         return (
+          <div key={c.id} className={`relative ${active ? "bg-accent-light" : ""}`}>
           <Link
-            key={c.id}
             href={`/hesabim/mesajlar?c=${c.id}`}
-            className={`flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 ${active ? "bg-accent-light" : ""}`}
+            className={`flex items-center gap-3 py-3 pl-4 pr-10 transition-colors hover:bg-slate-50 ${active ? "bg-accent-light" : ""}`}
           >
             <div className="relative shrink-0">
               <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100">
@@ -77,6 +78,10 @@ export function ConversationList({ conversations, activeId, currentUserId }: Con
               </span>
             )}
           </Link>
+          <div className="absolute right-1.5 top-1.5">
+            <ConversationRowMenu conversationId={c.id} otherUserName={c.otherUserName} />
+          </div>
+          </div>
         );
       })}
     </div>

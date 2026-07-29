@@ -102,6 +102,60 @@ export async function deleteMessageAction(
   return { ok: true, at: Date.now() };
 }
 
+export type ConversationActionResult = { error?: string; ok?: boolean };
+
+// Konuşmayı yalnızca bu kullanıcı için gizler (karşı taraf etkilenmez). Karşı
+// taraf yeni mesaj atarsa konuşma tekrar görünür (mobil DELETE ile aynı mantık).
+export async function deleteConversationAction(formData: FormData): Promise<ConversationActionResult> {
+  const session = await requireUser();
+  const conversationId = String(formData.get("conversationId") ?? "");
+  if (!conversationId) return { error: "Konuşma bulunamadı." };
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    select: { id: true, buyerId: true, sellerId: true },
+  });
+  if (!conversation || (conversation.buyerId !== session.id && conversation.sellerId !== session.id)) {
+    return { error: "Bu konuşmaya erişim yetkiniz yok." };
+  }
+
+  await prisma.conversation.update({
+    where: { id: conversationId },
+    data: conversation.buyerId === session.id ? { hiddenForBuyer: true } : { hiddenForSeller: true },
+  });
+  revalidatePath("/hesabim/mesajlar");
+  return { ok: true };
+}
+
+// Konuşmadaki karşı tarafı engelle: karşılıklı mesajlaşma kapanır ve konuşma
+// listeden düşer (getUserConversations engellileri gizler).
+export async function blockUserFromConversationAction(
+  formData: FormData,
+): Promise<ConversationActionResult> {
+  const session = await requireUser();
+  const conversationId = String(formData.get("conversationId") ?? "");
+  if (!conversationId) return { error: "Konuşma bulunamadı." };
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    select: { id: true, buyerId: true, sellerId: true },
+  });
+  if (!conversation || (conversation.buyerId !== session.id && conversation.sellerId !== session.id)) {
+    return { error: "Bu konuşmaya erişim yetkiniz yok." };
+  }
+
+  const otherId = conversation.buyerId === session.id ? conversation.sellerId : conversation.buyerId;
+  const existing = await prisma.userBlock.findUnique({
+    where: { blockerId_blockedId: { blockerId: session.id, blockedId: otherId } },
+    select: { id: true },
+  });
+  if (!existing) {
+    await prisma.userBlock.create({ data: { blockerId: session.id, blockedId: otherId } });
+  }
+  revalidatePath("/hesabim/mesajlar");
+  return { ok: true };
+}
+
 // ---------------------------------------------------------------------------
 // İlan detay sayfasındaki sohbet kutusu (masaüstü widget) + mobil yönlendirme
 // ---------------------------------------------------------------------------

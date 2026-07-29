@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { getHiddenUserIds } from "./blocks";
 
 export type ConversationListItem = {
   id: string;
@@ -15,8 +16,20 @@ export type ConversationListItem = {
 };
 
 export async function getUserConversations(userId: string): Promise<ConversationListItem[]> {
+  // Engellenen/engelleyen kullanıcıların konuşmaları listede gösterilmez.
+  const hiddenUserIds = await getHiddenUserIds(userId);
   const conversations = await prisma.conversation.findMany({
-    where: { OR: [{ buyerId: userId }, { sellerId: userId }] },
+    where: {
+      // Kişiye özel gizlenen (silinen) konuşmaları hariç tut.
+      OR: [
+        { buyerId: userId, hiddenForBuyer: false },
+        { sellerId: userId, hiddenForSeller: false },
+      ],
+      // Karşı taraf engelli ise konuşmayı gizle (kendi id'm listede olamaz).
+      ...(hiddenUserIds.length > 0
+        ? { buyerId: { notIn: hiddenUserIds }, sellerId: { notIn: hiddenUserIds } }
+        : {}),
+    },
     orderBy: { updatedAt: "desc" },
     include: {
       listing: {
