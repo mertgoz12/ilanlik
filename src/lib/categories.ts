@@ -424,6 +424,46 @@ export function collectSlugs(node: CategoryNode): string[] {
   return [node.slug, ...(node.children?.flatMap(collectSlugs) ?? [])];
 }
 
+// Adı arama sorgusunu içeren (TR harf + büyük/küçük duyarsız) tüm kategori
+// düğümlerinin slug'larını döndürür. Aramanın kategori adıyla da eşleşmesi için
+// kullanılır (örn. "telefon" -> Telefon kategorisi). 2 karakterden kısa sorgu
+// gürültü yapmasın diye boş döner.
+export function findCategorySlugsByName(query: string): string[] {
+  const q = query.trim().toLocaleLowerCase("tr-TR");
+  if (q.length < 2) return [];
+  const out: string[] = [];
+  const walk = (nodes: CategoryNode[]) => {
+    for (const n of nodes) {
+      if (n.name.toLocaleLowerCase("tr-TR").includes(q)) out.push(n.slug);
+      if (n.children) walk(n.children);
+    }
+  };
+  walk(CATEGORY_TREE);
+  return out;
+}
+
+// Arama takma adları: kategori adında geçmeyen ama bir kategoriye işaret eden
+// popüler terimler (marka/model). Örn. "iphone" -> Telefon kategorisi. Anahtarlar
+// küçük harf; sorgu bu anahtarı içeriyorsa ilgili slug'lar eklenir.
+const SEARCH_ALIASES: Record<string, string[]> = {
+  iphone: ["telefon"],
+  galaxy: ["telefon"],
+  airpods: ["telefon-kulaklik"],
+  airpod: ["telefon-kulaklik"],
+};
+
+// Bir arama sorgusu için eşleşen kategori slug'ları: hem kategori adıyla
+// (findCategorySlugsByName) hem de takma adlarla. Arama, ilanları bu
+// kategorilerle de eşleştirir.
+export function categorySlugsForQuery(query: string): string[] {
+  const q = query.trim().toLocaleLowerCase("tr-TR");
+  const slugs = new Set(findCategorySlugsByName(q));
+  for (const [alias, aliasSlugs] of Object.entries(SEARCH_ALIASES)) {
+    if (q.includes(alias)) for (const s of aliasSlugs) slugs.add(s);
+  }
+  return [...slugs];
+}
+
 export function isVasitaSlug(slug: string): boolean {
   const path = findCategoryPath(slug);
   return !!path && path[0]?.slug === VASITA_SLUG;
