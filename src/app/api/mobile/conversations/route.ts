@@ -8,7 +8,13 @@ export async function GET(request: Request) {
   if (!user) return apiError("Giriş yapmalısınız.", 401);
 
   const convos = await prisma.conversation.findMany({
-    where: { OR: [{ buyerId: user.id }, { sellerId: user.id }] },
+    // Kişiye özel gizlenen (silinen) konuşmalar listede gösterilmez.
+    where: {
+      OR: [
+        { buyerId: user.id, hiddenForBuyer: false },
+        { sellerId: user.id, hiddenForSeller: false },
+      ],
+    },
     orderBy: { updatedAt: "desc" },
     include: {
       listing: {
@@ -40,6 +46,7 @@ export async function GET(request: Request) {
       listingNo: c.listing.listingNo,
       listingTitle: c.listing.title,
       listingImage: c.listing.images[0]?.url ?? null,
+      otherId: other.id,
       otherName: other.name,
       otherAvatarUrl: other.avatarUrl,
       lastMessage: last ? { body: last.body, createdAt: last.createdAt.toISOString(), mine: last.senderId === user.id } : null,

@@ -55,6 +55,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   return apiJson({
     conversation: {
+      otherId: other.id,
       id: convo.id,
       listingNo: convo.listing.listingNo,
       listingTitle: convo.listing.title,
@@ -84,4 +85,27 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         : null,
     })),
   });
+}
+
+// DELETE /api/mobile/conversations/:id - konuşmayı yalnızca bu kullanıcı için
+// gizler (karşı taraf etkilenmez). Karşı taraf yeni mesaj atarsa tekrar görünür.
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getMobileUser(request);
+  if (!user) return apiError("Giriş yapmalısınız.", 401);
+  const { id } = await params;
+
+  const convo = await prisma.conversation.findUnique({
+    where: { id },
+    select: { id: true, buyerId: true, sellerId: true },
+  });
+  if (!convo || (convo.buyerId !== user.id && convo.sellerId !== user.id)) {
+    return apiError("Bu konuşmaya erişim yetkiniz yok.", 403);
+  }
+
+  await prisma.conversation.update({
+    where: { id },
+    data: convo.buyerId === user.id ? { hiddenForBuyer: true } : { hiddenForSeller: true },
+  });
+
+  return apiJson({ ok: true });
 }

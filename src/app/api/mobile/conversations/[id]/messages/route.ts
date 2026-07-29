@@ -54,7 +54,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     data: { conversationId: id, senderId: user.id, body },
     select: { id: true, body: true, createdAt: true },
   });
-  await prisma.conversation.update({ where: { id }, data: { updatedAt: new Date() } });
+  // Konuşmayı üste taşı ve her iki taraf için gizlemeyi kaldır: silmiş olan
+  // taraf yeni mesajla konuşmayı tekrar görür.
+  await prisma.conversation.update({
+    where: { id },
+    data: { updatedAt: new Date(), hiddenForBuyer: false, hiddenForSeller: false },
+  });
 
   // Karşı tarafa bildirim (uygulama içi zil + rozet).
   const recipientId = convo.buyerId === user.id ? convo.sellerId : convo.buyerId;
