@@ -59,6 +59,15 @@ export async function POST(request: Request) {
 
   const isNegotiable = form.get("isNegotiable") === "true";
 
+  // Sokak düzeyi adres + koordinat (isteğe bağlı). Mobil, adresi geocode edip
+  // latitude/longitude olarak gönderir.
+  const mahalle = (form.get("mahalle") as string | null)?.trim() || null;
+  const cadde = (form.get("cadde") as string | null)?.trim() || null;
+  const lat = Number(form.get("latitude"));
+  const lng = Number(form.get("longitude"));
+  const latitude = Number.isFinite(lat) && lat !== 0 ? lat : null;
+  const longitude = Number.isFinite(lng) && lng !== 0 ? lng : null;
+
   const listing = await prisma.listing.create({
     data: {
       listingNo,
@@ -70,6 +79,10 @@ export async function POST(request: Request) {
       isNegotiable,
       il: data.il,
       ilce: data.ilce,
+      mahalle,
+      cadde,
+      latitude,
+      longitude,
       userId: user.id,
     },
   });

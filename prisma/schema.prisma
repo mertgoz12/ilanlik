@@ -196,6 +196,12 @@ model Listing {
 
   il   String
   ilce String
+  // Sokak düzeyi adres + harita koordinatı (letgo tarzı). İsteğe bağlı; eski
+  // ilanlarda boş olabilir. lat/lng, adres metninden geocode ile üretilir.
+  mahalle   String?
+  cadde     String?
+  latitude  Float?
+  longitude Float?
 
   isFeatured Boolean @default(false)
   views      Int     @default(0)
