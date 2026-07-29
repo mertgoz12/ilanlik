@@ -37,6 +37,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       body: true,
       senderId: true,
       createdAt: true,
+      readAt: true,
       type: true,
       offer: { select: { id: true, amount: true, status: true, role: true, createdById: true, note: true } },
     },
@@ -70,6 +71,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       id: m.id,
       body: m.body,
       mine: m.senderId === user.id,
+      // Kendi mesajım için: karşı taraf okudu mu (çift tik).
+      read: m.readAt !== null,
       createdAt: m.createdAt.toISOString(),
       type: m.type,
       offer: m.offer
