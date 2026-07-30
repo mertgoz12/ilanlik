@@ -3,6 +3,7 @@ import { apiJson, apiError, getMobileUser } from "@/lib/mobile-api";
 import { analyzeListing, loadAnalysisContext } from "@/lib/mobile-analysis";
 import { getFavoritedIds } from "@/lib/mobile-favorites";
 import { parseAiAnalysis } from "@/lib/ai-analysis";
+import { expireStaleOptions, getOptionSettings } from "@/lib/listing-options";
 
 // GET /api/mobile/listings/:listingNo
 // İlan detay ekranı: tam ilan + görseller + kategori + satıcı özeti.
@@ -12,18 +13,34 @@ export async function GET(
 ) {
   const { listingNo } = await params;
 
+  // Süresi dolan opsiyonları tembel olarak süpür (web ilan detayı ile aynı).
+  await expireStaleOptions();
+
   const l = await prisma.listing.findUnique({
     where: { listingNo },
     include: {
       images: { orderBy: { order: "asc" } },
       category: { include: { parent: { select: { name: true, slug: true } } } },
       user: { select: { id: true, name: true, phone: true, avatarUrl: true, createdAt: true } },
+      optionHolder: { select: { id: true, name: true } },
       _count: { select: { images: true } },
     },
   });
 
   if (!l || l.status !== "active") {
     return apiError("İlan bulunamadı.", 404);
+  }
+
+  const viewer = await getMobileUser(request);
+
+  // Opsiyonlu ilan yalnızca opsiyonlayan alıcı, satıcı ve admin tarafından
+  // görülebilir (web ilan detayı ile aynı kural).
+  if (l.optionStatus === "opsiyonlandi") {
+    const canSee =
+      viewer?.id === l.optionHolderId || viewer?.id === l.userId || viewer?.role === "admin";
+    if (!canSee) {
+      return apiError("İlan bulunamadı.", 404);
+    }
   }
 
   // Görüntülenme sayacını artır (web ilan detayı ile aynı davranış) - hata
@@ -35,9 +52,9 @@ export async function GET(
   const analysis = analyzeListing({ ...l, photoCount: l._count.images }, ctx);
   const ekspertiz = parseAiAnalysis(l.aiAnalysis)?.ekspertiz_raporu ?? null;
 
-  const user = await getMobileUser(request);
-  const isFavorited = user ? (await getFavoritedIds(user.id, [l.id])).has(l.id) : false;
-  const isOwner = user?.id === l.user.id;
+  const isFavorited = viewer ? (await getFavoritedIds(viewer.id, [l.id])).has(l.id) : false;
+  const isOwner = viewer?.id === l.user.id;
+  const optionSettings = await getOptionSettings();
 
   const listing = {
     id: l.id,
@@ -85,6 +102,12 @@ export async function GET(
     ekspertiz,
     isFavorited,
     isOwner,
+    // Opsiyonlama (rezervasyon) durumu — web OptionPanel ile aynı veriler.
+    optionStatus: l.optionStatus,
+    optionHolderId: l.optionHolderId,
+    optionHolderName: l.optionHolder?.name ?? null,
+    optionEndAt: l.optionEndAt ? l.optionEndAt.toISOString() : null,
+    optionDurations: optionSettings.durationsHours,
   };
 
   return apiJson({ listing });
