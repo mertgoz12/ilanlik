@@ -356,6 +356,7 @@ export default async function HomePage({
                       currentUserId={session?.id ?? null}
                       favoritedIds={favoritedIds}
                       compact
+                      highlightAll
                     />
                   </section>
                 )}

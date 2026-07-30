@@ -14,6 +14,9 @@ type ListingListViewProps = {
   // compact: dar sütunlarda (ör. ana sayfa) tablo yerine yığılmış satır. Tablo
   // sütunları (fiyat/tarih/il-ilçe) gizlenir; her şey görselin yanında dikey.
   compact?: boolean;
+  // highlightAll: tüm satırları vitrin gibi göster (turuncu vurgu + Vitrin
+  // rozeti), ilan öne çıkarılmış olmasa bile. Ana sayfa "Vitrin İlanları" için.
+  highlightAll?: boolean;
 };
 
 // Sahibinden tarzı satır görünümü. Geniş alanlarda sütunlu tablo; compact modda
@@ -24,6 +27,7 @@ export function ListingListView({
   currentUserId = null,
   favoritedIds,
   compact = false,
+  highlightAll = false,
 }: ListingListViewProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-soft">
@@ -43,6 +47,7 @@ export function ListingListView({
           const isVehicle = listing.brand !== null;
           const { icon: CategoryIcon, theme } = getCategoryVisual(listing.category.slug);
           const categoryTheme = CATEGORY_THEME_CLASSES[theme];
+          const isVitrin = highlightAll || listing.isFeatured;
 
           return (
             <Link
@@ -53,13 +58,13 @@ export function ListingListView({
                   ? "flex items-center gap-3"
                   : "flex flex-col gap-2 md:grid md:grid-cols-[minmax(0,1fr)_140px_120px_140px] md:items-center md:gap-3"
               } ${
-                listing.isFeatured
-                  ? "bg-gradient-to-r from-accent-light/60 to-transparent hover:from-accent-light"
+                isVitrin
+                  ? "bg-gradient-to-r from-accent-light/70 to-accent-light/10 hover:from-accent-light"
                   : "hover:bg-slate-50"
               }`}
             >
-              {/* Öne çıkan ilanlarda sol altın vurgu şeridi */}
-              {listing.isFeatured && (
+              {/* Vitrin ilanlarında sol altın vurgu şeridi */}
+              {isVitrin && (
                 <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent to-accent-dark" />
               )}
 
@@ -93,9 +98,9 @@ export function ListingListView({
                 <div className="min-w-0 flex-1">
                   {/* Rozet satırı: öne çıkan + kategori */}
                   <div className="mb-0.5 flex flex-wrap items-center gap-1.5">
-                    {listing.isFeatured && (
-                      <span className="inline-flex items-center gap-0.5 rounded-md bg-gradient-to-r from-accent to-accent-dark px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-sm">
-                        <Crown className="h-2.5 w-2.5" />
+                    {isVitrin && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-brand shadow-sm ring-1 ring-accent-dark/20">
+                        <Crown className="h-3 w-3" />
                         Vitrin
                       </span>
                     )}
