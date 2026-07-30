@@ -295,8 +295,20 @@ export default async function HomePage({
     buttonText: "Ücretsiz İlan Ver",
     buttonLink: "/ilan-ver",
     variant: "promo",
+    promoKind: "vitrin",
   };
-  const heroSlideViews: HeroSlideView[] = [...heroSlides, promoSlide];
+  // iPhone 17 Pro Max çekilişi promo slaydı - ilan veren kullanıcı çekilişe katılır.
+  const iphoneSlide: HeroSlideView = {
+    id: "promo-iphone",
+    imageUrl: "",
+    title: "iPhone 17 Pro Max Çekilişi",
+    subtitle: "İlan ver, çekilişe otomatik katıl!",
+    buttonText: "Hemen İlan Ver",
+    buttonLink: "/ilan-ver",
+    variant: "promo",
+    promoKind: "iphone",
+  };
+  const heroSlideViews: HeroSlideView[] = [...heroSlides, promoSlide, iphoneSlide];
 
   return (
     <div>

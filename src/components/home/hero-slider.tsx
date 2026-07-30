@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Crown, Sparkles, ArrowRight } from "lucide-react";
+import { Crown, Sparkles, ArrowRight, Gift, Smartphone } from "lucide-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import { isHeroGif, isHeroVideo } from "@/lib/hero-media";
 
@@ -14,9 +14,10 @@ export type HeroSlideView = {
   subtitle: string | null;
   buttonText: string | null;
   buttonLink: string | null;
-  // "promo" ise görsel/video yerine kod tabanlı degrade tasarımlı öne çıkarma
-  // slaydı gösterilir (bkz. page.tsx - vitrin slider'ına eklenen promo slayt).
+  // "promo" ise görsel/video yerine kod tabanlı degrade tasarımlı slayt gösterilir.
   variant?: "media" | "promo";
+  // Promo türü: "vitrin" (ücretsiz öne çıkarma) veya "iphone" (çekiliş).
+  promoKind?: "vitrin" | "iphone";
 };
 
 const AUTOPLAY_MS = 5000;
@@ -123,6 +124,49 @@ function PromoSlideContent({ slide, active }: { slide: HeroSlideView; active: bo
   );
 }
 
+// iPhone 17 Pro Max çekilişi promo slaydı: ilan ver, çekilişe katıl.
+function IphonePromoSlideContent({ slide, active }: { slide: HeroSlideView; active: boolean }) {
+  const link = slide.buttonLink || "/ilan-ver";
+  const buttonText = slide.buttonText || "Hemen İlan Ver";
+  return (
+    <>
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-brand-900 to-slate-950" />
+      {/* Sağdan mor/mavi ışıma */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_84%_50%,rgba(129,140,248,0.34),transparent_55%)]" />
+      {/* Dekoratif dev telefon filigranı */}
+      <Smartphone className="pointer-events-none absolute right-4 top-1/2 h-24 w-24 -translate-y-1/2 rotate-6 text-white/10 sm:right-9 sm:h-32 sm:w-32 md:right-14 md:h-40 md:w-40" />
+      {/* Hediye + ışıltılar */}
+      <Gift className="pointer-events-none absolute bottom-4 right-24 hidden h-9 w-9 text-accent/80 sm:block" />
+      <Sparkles className="pointer-events-none absolute right-20 top-5 h-4 w-4 text-white/60 sm:right-28" />
+      <Sparkles className="pointer-events-none absolute bottom-9 right-40 hidden h-3 w-3 text-accent/60 sm:block" />
+
+      <div
+        key={`iphone-${active}`}
+        className={`absolute inset-0 flex flex-col justify-center gap-1 px-5 sm:px-8 md:px-10 ${
+          active ? "animate-hero-in" : ""
+        }`}
+      >
+        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand-900 shadow-soft sm:text-[10px]">
+          <Gift className="h-3 w-3" />
+          Ücretsiz Çekiliş
+        </span>
+        <h2 className="max-w-md text-[15px] font-extrabold leading-tight tracking-tight text-white drop-shadow-sm sm:text-lg md:text-2xl">
+          <span className="bg-gradient-to-r from-accent to-amber-300 bg-clip-text text-transparent">
+            iPhone 17 Pro Max
+          </span>{" "}
+          Çekilişi!
+        </h2>
+        <p className="hidden max-w-xs text-xs text-slate-300 md:block">
+          İlan ver, çekilişe otomatik katıl. Her ilan bir şans!
+        </p>
+        <div className="mt-1.5">
+          <SlideButton text={buttonText} link={link} icon />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -175,7 +219,11 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
           const active = i === index;
           return slide.variant === "promo" ? (
             <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
-              <PromoSlideContent slide={slide} active={active} />
+              {slide.promoKind === "iphone" ? (
+                <IphonePromoSlideContent slide={slide} active={active} />
+              ) : (
+                <PromoSlideContent slide={slide} active={active} />
+              )}
             </div>
           ) : (
             <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
