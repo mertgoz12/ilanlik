@@ -17,7 +17,7 @@ import { SignupPromoCard } from "@/components/home/signup-promo-card";
 // artınca tek satır ile (import + JSX) geri eklenebilir.
 // import { StatsCard } from "@/components/home/stats-card";
 import { BrandGrid } from "@/components/brand-grid";
-import { ListingCard } from "@/components/listing-card";
+import { ListingListView } from "@/components/listing-list-view";
 import { ListingPlaceholderCard, PLACEHOLDER_CATEGORY_SLUGS } from "@/components/listing-placeholder-card";
 import { ResultsToolbar } from "@/components/results-toolbar";
 import { FilterPanel } from "@/components/filter-panel";
@@ -367,13 +367,11 @@ export default async function HomePage({
                 <TrustBanner />
 
                 {featuredListings.length > 0 && (
-                  <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
+                  <section className="mt-5">
+                    <div className="mb-2.5 flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2">
                         <Crown className="h-4 w-4 shrink-0 text-accent" />
-                        <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
-                          Vitrin İlanları
-                        </h2>
+                        <h2 className="text-lg font-bold tracking-tight text-foreground">Vitrin İlanları</h2>
                         <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold text-accent-dark">
                           Premium
                         </span>
@@ -385,18 +383,11 @@ export default async function HomePage({
                         Tüm vitrin ilanlarını gör ›
                       </Link>
                     </div>
-                    <div className="grid gap-2.5 p-4 sm:p-5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
-                      {featuredListings.map((listing) => (
-                        <ListingCard
-                          key={listing.id}
-                          listing={listing}
-                          ruleAnalysis={ruleAnalysisFor(listing)}
-                          currentUserId={session?.id ?? null}
-                          isFavorited={favoritedIds.has(listing.id)}
-                          showFeaturedBadge
-                        />
-                      ))}
-                    </div>
+                    <ListingListView
+                      listings={featuredListings}
+                      currentUserId={session?.id ?? null}
+                      favoritedIds={favoritedIds}
+                    />
                   </section>
                 )}
 
@@ -417,25 +408,12 @@ export default async function HomePage({
                         Tümünü Gör ›
                       </Link>
                     </div>
-                    <div className="mt-2.5 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
-                      {recentListings.map((listing) => (
-                        <ListingCard
-                          key={listing.id}
-                          listing={listing}
-                          ruleAnalysis={ruleAnalysisFor(listing)}
-                          currentUserId={session?.id ?? null}
-                          isFavorited={favoritedIds.has(listing.id)}
-                        />
-                      ))}
-                      {/* Gerçek ilanların ardına, ızgarayı doldurmak için çeşitli
-                          kategori temalarında "İlan Bekleniyor" kartları (sahte
-                          ürün/fiyat yok, bkz. listing-placeholder-card.tsx). */}
-                      {Array.from({ length: HOME_PLACEHOLDER_COUNT }).map((_, i) => (
-                        <ListingPlaceholderCard
-                          key={`home-placeholder-${i}`}
-                          categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
-                        />
-                      ))}
+                    <div className="mt-2.5">
+                      <ListingListView
+                        listings={recentListings}
+                        currentUserId={session?.id ?? null}
+                        favoritedIds={favoritedIds}
+                      />
                     </div>
                   </section>
                 )}
@@ -491,19 +469,12 @@ export default async function HomePage({
                     </Link>
                   </div>
                 ) : (
-                  <div className="mt-3 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
-                    {listings.map((listing) => (
-                      <ListingCard
-                        key={listing.id}
-                        listing={listing}
-                        ruleAnalysis={ruleAnalysisFor(listing)}
-                        currentUserId={session?.id ?? null}
-                        isFavorited={favoritedIds.has(listing.id)}
-                      />
-                    ))}
-                    {Array.from({ length: placeholderCount }).map((_, i) => (
-                      <ListingPlaceholderCard key={`placeholder-${i}`} categorySlug={sp.kategori!} />
-                    ))}
+                  <div className="mt-3">
+                    <ListingListView
+                      listings={listings}
+                      currentUserId={session?.id ?? null}
+                      favoritedIds={favoritedIds}
+                    />
                   </div>
                 )}
 
