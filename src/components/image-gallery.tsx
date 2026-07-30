@@ -209,15 +209,20 @@ export function ImageGallery({
 
   return (
     <div>
-      {/* Ana görsel - hover'da büyümez, fotoğrafa tıklamak büyütmez. Tam ekran
-          yalnızca sağ üstteki "büyüt" butonuyla açılır. Mobilde dokunma yalnız
-          fotoğraf değiştirmek için (swipe) kullanılır. */}
+      {/* Ana görsel - görsele tıklamak bir sonraki fotoğrafa geçer (birden fazla
+          fotoğraf varsa). Tam ekran yalnızca sağ üstteki "büyüt" butonuyla
+          açılır. Mobilde dokunma swipe ile fotoğraf değiştirir; swipe sonrası
+          oluşan sentetik click bastırılır ki çift ilerleme olmasın. */}
       <div className="group relative aspect-[16/10] w-full touch-pan-y overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-soft">
         <div
           onTouchStart={mainSwipe.onTouchStart}
           onTouchMove={mainSwipe.onTouchMove}
           onTouchEnd={mainSwipe.onTouchEnd}
-          className="absolute inset-0 h-full w-full"
+          onClick={() => {
+            if (mainSwipe.consumeWasSwipe()) return;
+            if (count > 1) goTo(active + 1);
+          }}
+          className={`absolute inset-0 h-full w-full ${count > 1 ? "cursor-pointer" : ""}`}
         >
           <Image
             key={images[active].url}
