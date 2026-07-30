@@ -17,6 +17,7 @@ import { SignupPromoCard } from "@/components/home/signup-promo-card";
 // artınca tek satır ile (import + JSX) geri eklenebilir.
 // import { StatsCard } from "@/components/home/stats-card";
 import { BrandGrid } from "@/components/brand-grid";
+import { ListingCard } from "@/components/listing-card";
 import { ListingListView } from "@/components/listing-list-view";
 import { ResultsToolbar } from "@/components/results-toolbar";
 import { FilterPanel } from "@/components/filter-panel";
@@ -310,11 +311,7 @@ export default async function HomePage({
           </div>
         )}
 
-        <div
-          className={`grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)] ${
-            showVitrin ? "xl:grid-cols-[224px_minmax(0,1fr)_256px]" : ""
-          }`}
-        >
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)]">
           <SidebarShell>
             <CategorySidebar activeSlug={sp.kategori} />
             {!showVitrin && !categoryComingSoon && (
@@ -351,13 +348,17 @@ export default async function HomePage({
                         Tümünü Gör ›
                       </Link>
                     </div>
-                    <ListingListView
-                      listings={vitrinListings}
-                      currentUserId={session?.id ?? null}
-                      favoritedIds={favoritedIds}
-                      compact
-                      highlightAll
-                    />
+                    <div className="grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(160px,1fr))]">
+                      {vitrinListings.map((listing) => (
+                        <ListingCard
+                          key={listing.id}
+                          listing={listing}
+                          currentUserId={session?.id ?? null}
+                          isFavorited={favoritedIds.has(listing.id)}
+                          vitrin
+                        />
+                      ))}
+                    </div>
                   </section>
                 )}
 
@@ -429,7 +430,7 @@ export default async function HomePage({
           </div>
 
           {showVitrin && (
-            <aside className="grid grid-cols-1 content-start gap-4 self-start sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 xl:col-span-1 xl:grid-cols-1">
+            <aside className="mt-4 grid grid-cols-1 content-start gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-3">
               <QuickPostCard />
               <SafetyTipsCard />
               <BlogTipsCard />

@@ -22,9 +22,11 @@ type ListingCardProps = {
   currentUserId?: string | null;
   isFavorited?: boolean;
   showFeaturedBadge?: boolean;
+  // vitrin: turuncu çerçeve + "Vitrin" rozeti (ana sayfa vitrini için).
+  vitrin?: boolean;
 };
 
-export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFavorited = false, showFeaturedBadge = false }: ListingCardProps) {
+export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFavorited = false, showFeaturedBadge = false, vitrin = false }: ListingCardProps) {
   const image = listing.images[0];
   const isVehicle = listing.brand !== null && listing.damageStatus !== null;
   const trustScore =
@@ -41,7 +43,9 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
   return (
     <Link
       href={`/ilan/${listing.listingNo}`}
-      className="group flex flex-col overflow-hidden rounded-lg bg-white shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-lg"
+      className={`group flex flex-col overflow-hidden rounded-lg bg-white shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-lg ${
+        vitrin ? "ring-1 ring-accent/60" : ""
+      }`}
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
         {image ? (
@@ -95,10 +99,10 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
           <Sparkles className="h-2 w-2 shrink-0 text-accent-dark" />
           YZ Onaylı
         </span>
-        {showFeaturedBadge && (
-          <span className="absolute bottom-1 right-1 inline-flex items-center gap-0.5 rounded-md border border-accent/40 bg-accent-light/90 px-1 py-0.5 text-[8px] font-bold text-accent-dark backdrop-blur-sm">
-            <Crown className="h-2 w-2 shrink-0" />
-            Öne Çıkan
+        {(vitrin || showFeaturedBadge) && (
+          <span className="absolute bottom-1 right-1 inline-flex items-center gap-1 rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-bold text-brand shadow-sm">
+            <Crown className="h-2.5 w-2.5 shrink-0" />
+            Vitrin
           </span>
         )}
       </div>
