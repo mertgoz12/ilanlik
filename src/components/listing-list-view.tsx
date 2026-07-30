@@ -11,21 +11,31 @@ type ListingListViewProps = {
   listings: ListingWithImages[];
   currentUserId?: string | null;
   favoritedIds?: Set<string>;
+  // compact: dar sütunlarda (ör. ana sayfa) tablo yerine yığılmış satır. Tablo
+  // sütunları (fiyat/tarih/il-ilçe) gizlenir; her şey görselin yanında dikey.
+  compact?: boolean;
 };
 
-// Sahibinden tarzı satır (tablo) görünümü - kategori/arama sonuçlarında ızgaraya
-// alternatif. Masaüstünde sütunlu tablo, mobilde yığılmış satırlar (tek markup,
-// responsive grid). Öne çıkan ilanlar altın vurgu şeridi + rozetle öne çıkar.
-export function ListingListView({ listings, currentUserId = null, favoritedIds }: ListingListViewProps) {
+// Sahibinden tarzı satır görünümü. Geniş alanlarda sütunlu tablo; compact modda
+// (dar alan) yığılmış satır. Öne çıkan ilanlar altın vurgu şeridi + rozetle
+// öne çıkar.
+export function ListingListView({
+  listings,
+  currentUserId = null,
+  favoritedIds,
+  compact = false,
+}: ListingListViewProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-soft">
-      {/* Masaüstü sütun başlıkları */}
-      <div className="hidden grid-cols-[minmax(0,1fr)_140px_120px_140px] gap-3 border-b border-slate-200/80 bg-slate-50/80 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 md:grid">
-        <span>İlan Başlığı</span>
-        <span>Fiyat</span>
-        <span>İlan Tarihi</span>
-        <span>İl / İlçe</span>
-      </div>
+      {/* Masaüstü sütun başlıkları (compact'te gizli) */}
+      {!compact && (
+        <div className="hidden grid-cols-[minmax(0,1fr)_140px_120px_140px] gap-3 border-b border-slate-200/80 bg-slate-50/80 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 md:grid">
+          <span>İlan Başlığı</span>
+          <span>Fiyat</span>
+          <span>İlan Tarihi</span>
+          <span>İl / İlçe</span>
+        </div>
+      )}
 
       <div className="divide-y divide-slate-100">
         {listings.map((listing) => {
@@ -38,7 +48,11 @@ export function ListingListView({ listings, currentUserId = null, favoritedIds }
             <Link
               key={listing.id}
               href={`/ilan/${listing.listingNo}`}
-              className={`group relative flex flex-col gap-2 py-3 pl-4 pr-4 transition-colors md:grid md:grid-cols-[minmax(0,1fr)_140px_120px_140px] md:items-center md:gap-3 ${
+              className={`group relative py-3 pl-4 pr-4 transition-colors ${
+                compact
+                  ? "flex items-center gap-3"
+                  : "flex flex-col gap-2 md:grid md:grid-cols-[minmax(0,1fr)_140px_120px_140px] md:items-center md:gap-3"
+              } ${
                 listing.isFeatured
                   ? "bg-gradient-to-r from-accent-light/60 to-transparent hover:from-accent-light"
                   : "hover:bg-slate-50"
@@ -98,8 +112,12 @@ export function ListingListView({ listings, currentUserId = null, favoritedIds }
                       {listing.fuelType ? ` · ${listing.fuelType}` : ""}
                     </p>
                   )}
-                  {/* Mobilde fiyat + konum + tarih satır içinde gösterilir */}
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 md:hidden">
+                  {/* Mobilde / compact modda fiyat + konum + tarih satır içinde */}
+                  <div
+                    className={`mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 ${
+                      compact ? "" : "md:hidden"
+                    }`}
+                  >
                     <span className="text-sm font-extrabold text-brand">{formatPrice(listing.price)}</span>
                     <span className="flex items-center gap-0.5">
                       <LocationIcon className="h-3 w-3" />
@@ -110,20 +128,24 @@ export function ListingListView({ listings, currentUserId = null, favoritedIds }
                 </div>
               </div>
 
-              {/* Fiyat (masaüstü) */}
-              <div className="hidden md:block">
+              {/* Fiyat (masaüstü tablo) */}
+              <div className={compact ? "hidden" : "hidden md:block"}>
                 <span className="text-[16px] font-extrabold tracking-tight text-brand">
                   {formatPrice(listing.price)}
                 </span>
               </div>
 
-              {/* İlan tarihi (masaüstü) */}
-              <div className="hidden text-[13px] text-slate-500 md:block">
+              {/* İlan tarihi (masaüstü tablo) */}
+              <div className={compact ? "hidden" : "hidden text-[13px] text-slate-500 md:block"}>
                 {formatDate(listing.createdAt)}
               </div>
 
-              {/* İl / İlçe (masaüstü) */}
-              <div className="hidden md:flex md:items-center md:gap-1.5 md:text-[13px] md:text-slate-600">
+              {/* İl / İlçe (masaüstü tablo) */}
+              <div
+                className={
+                  compact ? "hidden" : "hidden md:flex md:items-center md:gap-1.5 md:text-[13px] md:text-slate-600"
+                }
+              >
                 <LocationIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                 <span className="min-w-0">
                   <span className="block font-medium leading-tight">{listing.il}</span>

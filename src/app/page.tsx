@@ -18,7 +18,6 @@ import { SignupPromoCard } from "@/components/home/signup-promo-card";
 // import { StatsCard } from "@/components/home/stats-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingListView } from "@/components/listing-list-view";
-import { ListingPlaceholderCard, PLACEHOLDER_CATEGORY_SLUGS } from "@/components/listing-placeholder-card";
 import { ResultsToolbar } from "@/components/results-toolbar";
 import { FilterPanel } from "@/components/filter-panel";
 import { Pagination } from "@/components/pagination";
@@ -56,10 +55,6 @@ const RECENT_COUNT = 12;
 // (gerçek ilan doldukça) placeholder gösterilmez (bkz. listing-placeholder-card.tsx).
 const CATEGORY_PLACEHOLDER_TARGET = 12;
 // Ana sayfa vitrininde "Yeni Eklenen İlanlar" ızgarasını dolu göstermek için
-// gerçek ilanların ardına eklenen "İlan Bekleniyor" placeholder sayısı. Görsel
-// çeşitlilik için aşağıdaki kategori temaları (ikon/renk) sırayla döndürülür;
-// her kart o kategoride ilan vermeye yönlendirir.
-const HOME_PLACEHOLDER_COUNT = 54;
 // "Öne Çıkan İlanlar" başlığı ayrı bir bölüm olarak ancak bu kadar (veya
 // daha fazla) öne çıkarılmış ilan varsa gösterilir; aksi halde sayfa az
 // ilanla yarım/boş durmasın diye tüm ilanlar tek "Yeni Eklenen İlanlar"
@@ -333,37 +328,6 @@ export default async function HomePage({
                     Çıkan İlanlar" vitrini. Gerçek öne çıkan ilan yeterli değilken
                     (bkz. showSeparateFeatured) prestijli "İlan Bekleniyor"
                     kartlarıyla dolar - burada SAHTE ilan yok, sadece placeholder. */}
-                {!showSeparateFeatured && (
-                  <section className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <Crown className="h-4 w-4 shrink-0 text-accent" />
-                        <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
-                          Vitrin İlanları
-                        </h2>
-                        <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold text-accent-dark">
-                          Premium
-                        </span>
-                      </div>
-                      <Link
-                        href="/one-cikan-ilanlar"
-                        className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
-                      >
-                        Tüm vitrin ilanlarını gör ›
-                      </Link>
-                    </div>
-                    <div className="grid gap-2.5 p-4 sm:p-5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <ListingPlaceholderCard
-                          key={`featured-ph-${i}`}
-                          categorySlug={PLACEHOLDER_CATEGORY_SLUGS[i % PLACEHOLDER_CATEGORY_SLUGS.length]}
-                          premium
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
                 <TrustBanner />
 
                 {featuredListings.length > 0 && (
@@ -387,6 +351,7 @@ export default async function HomePage({
                       listings={featuredListings}
                       currentUserId={session?.id ?? null}
                       favoritedIds={favoritedIds}
+                      compact
                     />
                   </section>
                 )}
@@ -395,7 +360,7 @@ export default async function HomePage({
 
                 {vasitaEmlakActive && <BrandGrid />}
 
-                {(recentListings.length > 0 || HOME_PLACEHOLDER_COUNT > 0) && (
+                {recentListings.length > 0 && (
                   <section className="mt-5">
                     <div className="flex items-end justify-between gap-3">
                       <h2 className="text-lg font-bold tracking-tight text-foreground">
@@ -413,6 +378,7 @@ export default async function HomePage({
                         listings={recentListings}
                         currentUserId={session?.id ?? null}
                         favoritedIds={favoritedIds}
+                        compact
                       />
                     </div>
                   </section>
