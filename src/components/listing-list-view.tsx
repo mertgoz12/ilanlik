@@ -96,7 +96,7 @@ export function ListingListView({
                     {listing.isFeatured && (
                       <span className="inline-flex items-center gap-0.5 rounded-md bg-gradient-to-r from-accent to-accent-dark px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-sm">
                         <Crown className="h-2.5 w-2.5" />
-                        Öne Çıkan
+                        Vitrin
                       </span>
                     )}
                     <span className="truncate rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">

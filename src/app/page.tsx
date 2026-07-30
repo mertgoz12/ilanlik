@@ -207,6 +207,9 @@ export default async function HomePage({
   const recentListings = showSeparateFeatured
     ? listingPool.filter((l) => !l.isFeatured).slice(0, RECENT_COUNT)
     : listingPool.slice(0, RECENT_COUNT);
+  // Ana sayfada tek bir "Vitrin İlanları" bölümü: öne çıkanlar önce, ardından
+  // diğerleri. (Ayrı "Öne Çıkan / Yeni Eklenen" bölümleri kaldırıldı.)
+  const vitrinListings = [...featuredListings, ...recentListings];
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -330,42 +333,17 @@ export default async function HomePage({
                     kartlarıyla dolar - burada SAHTE ilan yok, sadece placeholder. */}
                 <TrustBanner />
 
-                {featuredListings.length > 0 && (
+                <FeaturedCategories />
+
+                {vasitaEmlakActive && <BrandGrid />}
+
+                {vitrinListings.length > 0 && (
                   <section className="mt-5">
                     <div className="mb-2.5 flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2">
                         <Crown className="h-4 w-4 shrink-0 text-accent" />
                         <h2 className="text-lg font-bold tracking-tight text-foreground">Vitrin İlanları</h2>
-                        <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold text-accent-dark">
-                          Premium
-                        </span>
                       </div>
-                      <Link
-                        href="/one-cikan-ilanlar"
-                        className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
-                      >
-                        Tüm vitrin ilanlarını gör ›
-                      </Link>
-                    </div>
-                    <ListingListView
-                      listings={featuredListings}
-                      currentUserId={session?.id ?? null}
-                      favoritedIds={favoritedIds}
-                      compact
-                    />
-                  </section>
-                )}
-
-                <FeaturedCategories />
-
-                {vasitaEmlakActive && <BrandGrid />}
-
-                {recentListings.length > 0 && (
-                  <section className="mt-5">
-                    <div className="flex items-end justify-between gap-3">
-                      <h2 className="text-lg font-bold tracking-tight text-foreground">
-                        Yeni Eklenen İlanlar
-                      </h2>
                       <Link
                         href="/?tum=1"
                         className="shrink-0 text-xs font-semibold text-brand hover:text-accent-dark sm:text-sm"
@@ -373,14 +351,12 @@ export default async function HomePage({
                         Tümünü Gör ›
                       </Link>
                     </div>
-                    <div className="mt-2.5">
-                      <ListingListView
-                        listings={recentListings}
-                        currentUserId={session?.id ?? null}
-                        favoritedIds={favoritedIds}
-                        compact
-                      />
-                    </div>
+                    <ListingListView
+                      listings={vitrinListings}
+                      currentUserId={session?.id ?? null}
+                      favoritedIds={favoritedIds}
+                      compact
+                    />
                   </section>
                 )}
 
