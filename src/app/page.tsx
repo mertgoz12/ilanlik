@@ -19,7 +19,6 @@ import { SignupPromoCard } from "@/components/home/signup-promo-card";
 import { BrandGrid } from "@/components/brand-grid";
 import { ListingCard } from "@/components/listing-card";
 import { ListingPlaceholderCard, PLACEHOLDER_CATEGORY_SLUGS } from "@/components/listing-placeholder-card";
-import { ListingListView } from "@/components/listing-list-view";
 import { ResultsToolbar } from "@/components/results-toolbar";
 import { FilterPanel } from "@/components/filter-panel";
 import { Pagination } from "@/components/pagination";
@@ -76,10 +75,6 @@ export default async function HomePage({
 }) {
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
-  // Kategori/arama sonuç sayfasında ızgara (kart) veya liste görünümü -
-  // VARSAYILAN IZGARA. (Ana sayfa vitrini de ızgaradır.) Liste isteyen
-  // ?gorunum=liste ile seçebilir.
-  const view = sp.gorunum === "liste" ? "liste" : "izgara";
   const currentSort = sp.sort ?? "newest";
   const saveSearchQuery = new URLSearchParams(
     Object.entries(sp).filter(
@@ -477,7 +472,6 @@ export default async function HomePage({
 
                 <ResultsToolbar
                   total={total}
-                  view={view}
                   sort={currentSort}
                   saveQuery={saveSearchQuery}
                   isLoggedIn={!!session}
@@ -495,14 +489,6 @@ export default async function HomePage({
                     >
                       Filtreleri temizle
                     </Link>
-                  </div>
-                ) : view === "liste" && listings.length > 0 ? (
-                  <div className="mt-3">
-                    <ListingListView
-                      listings={listings}
-                      currentUserId={session?.id ?? null}
-                      favoritedIds={favoritedIds}
-                    />
                   </div>
                 ) : (
                   <div className="mt-3 grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
