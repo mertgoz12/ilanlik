@@ -43,8 +43,8 @@ export function ListingCard({ listing, ruleAnalysis, currentUserId = null, isFav
   return (
     <Link
       href={`/ilan/${listing.listingNo}`}
-      className={`group flex flex-col overflow-hidden rounded-lg bg-white shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-lg ${
-        vitrin ? "ring-1 ring-accent/60" : ""
+      className={`group flex flex-col overflow-hidden rounded-lg shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-lg ${
+        vitrin ? "bg-accent-light ring-1 ring-accent/60" : "bg-white"
       }`}
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
