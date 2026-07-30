@@ -61,7 +61,7 @@ function SlideMedia({ slide, priority }: { slide: HeroSlideView; priority: boole
         playsInline
         preload="metadata"
         aria-label={slide.title || "Banner"}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover animate-kenburns"
       />
     );
   }
@@ -73,7 +73,7 @@ function SlideMedia({ slide, priority }: { slide: HeroSlideView; priority: boole
       priority={priority}
       unoptimized={isHeroGif(slide.imageUrl)}
       sizes="(max-width: 1024px) 100vw, 900px"
-      className="object-cover"
+      className="object-cover animate-kenburns"
     />
   );
 }
@@ -81,7 +81,7 @@ function SlideMedia({ slide, priority }: { slide: HeroSlideView; priority: boole
 // Kod tabanlı "öne çıkarma" promo slaydı - görsel yerine degrade + altın
 // parıltı, dekoratif taç filigranı, ışıltılar ve altın vurgulu başlık ile
 // çekiliş banner'ıyla aynı zenginlikte durur (bkz. page.tsx promoSlide).
-function PromoSlideContent({ slide }: { slide: HeroSlideView }) {
+function PromoSlideContent({ slide, active }: { slide: HeroSlideView; active: boolean }) {
   const link = slide.buttonLink || "/ilan-ver";
   const buttonText = slide.buttonText || "Ücretsiz İlan Ver";
   return (
@@ -96,7 +96,12 @@ function PromoSlideContent({ slide }: { slide: HeroSlideView }) {
       <Sparkles className="pointer-events-none absolute bottom-6 right-16 h-3 w-3 text-accent/50 sm:right-24" />
       <Sparkles className="pointer-events-none absolute bottom-10 right-40 hidden h-3.5 w-3.5 text-white/40 sm:block" />
 
-      <div className="absolute inset-0 flex flex-col justify-center gap-1 px-5 sm:px-8 md:px-10">
+      <div
+        key={`promo-${active}`}
+        className={`absolute inset-0 flex flex-col justify-center gap-1 px-5 sm:px-8 md:px-10 ${
+          active ? "animate-hero-in" : ""
+        }`}
+      >
         <span className="inline-flex w-fit items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand-900 shadow-soft sm:text-[10px]">
           <Crown className="h-3 w-3" />
           Ücretsiz Vitrin Fırsatı
@@ -166,10 +171,11 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
         className="flex h-32 transition-transform duration-500 ease-out sm:h-36 md:h-40"
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
-        {slides.map((slide) =>
-          slide.variant === "promo" ? (
+        {slides.map((slide, i) => {
+          const active = i === index;
+          return slide.variant === "promo" ? (
             <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
-              <PromoSlideContent slide={slide} />
+              <PromoSlideContent slide={slide} active={active} />
             </div>
           ) : (
             <div key={slide.id} className="relative h-full w-full shrink-0" aria-roledescription="slide">
@@ -181,7 +187,12 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
                   {/* Marka lacivertinden soldan sağa açılan yumuşak degrade -
                       metin okunaklı kalsın, görünüm sakin/zarif olsun. */}
                   <div className="absolute inset-0 bg-gradient-to-r from-brand/90 via-brand/55 to-brand/10" />
-                  <div className="absolute inset-0 flex flex-col justify-center gap-1.5 px-5 sm:px-8 md:px-10">
+                  <div
+                    key={`media-${active}`}
+                    className={`absolute inset-0 flex flex-col justify-center gap-1.5 px-5 sm:px-8 md:px-10 ${
+                      active ? "animate-hero-in" : ""
+                    }`}
+                  >
                     {slide.title && (
                       <h2 className="max-w-md text-base font-bold leading-snug tracking-tight text-white drop-shadow-sm sm:text-lg md:text-2xl">
                         {slide.title}
@@ -201,8 +212,8 @@ export function HeroSlider({ slides }: { slides: HeroSlideView[] }) {
                 </>
               )}
             </div>
-          ),
-        )}
+          );
+        })}
       </div>
 
       {/* İleri/geri okları - birden çok slayt varsa */}
