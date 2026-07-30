@@ -313,12 +313,12 @@ export default async function HomePage({
           }`}
         >
           <SidebarShell>
+            <CategorySidebar activeSlug={sp.kategori} />
             {!showVitrin && !categoryComingSoon && (
-              <div className="mb-2 border-b border-slate-100 pb-2">
+              <div className="mt-3 border-t border-slate-100 pt-3">
                 <FilterPanel searchParams={sp} />
               </div>
             )}
-            <CategorySidebar activeSlug={sp.kategori} />
           </SidebarShell>
 
           <div className="min-w-0">
