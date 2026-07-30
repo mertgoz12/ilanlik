@@ -12,10 +12,13 @@ export function LoginModalButton({
   className = "",
   children,
   onOpen,
+  callbackUrl,
 }: {
   className?: string;
   children: ReactNode;
   onOpen?: () => void;
+  // Giriş sonrası yönlendirilecek adres (verilmezse bulunulan sayfa).
+  callbackUrl?: string;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -67,7 +70,7 @@ export function LoginModalButton({
               <p className="text-sm text-slate-500">Hesabına giriş yap</p>
             </div>
 
-            <LoginForm callbackUrl={pathname} />
+            <LoginForm callbackUrl={callbackUrl ?? pathname} />
           </div>
         </div>
       )}

@@ -76,9 +76,10 @@ export default async function HomePage({
 }) {
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
-  // Kategori/arama sonuç sayfasında liste (sahibinden tarzı satır) veya ızgara
-  // görünümü - varsayılan liste. (Ana sayfa vitrini bundan bağımsız ızgaradır.)
-  const view = sp.gorunum === "izgara" ? "izgara" : "liste";
+  // Kategori/arama sonuç sayfasında ızgara (kart) veya liste görünümü -
+  // VARSAYILAN IZGARA. (Ana sayfa vitrini de ızgaradır.) Liste isteyen
+  // ?gorunum=liste ile seçebilir.
+  const view = sp.gorunum === "liste" ? "liste" : "izgara";
   const currentSort = sp.sort ?? "newest";
   const saveSearchQuery = new URLSearchParams(
     Object.entries(sp).filter(

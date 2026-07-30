@@ -70,13 +70,25 @@ export async function Navbar() {
             </div>
           )}
 
-          <Link
-            href="/ilan-ver"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-brand shadow-sm transition-colors hover:bg-accent-dark"
-          >
-            <Plus className="h-4 w-4" />
-            Ücretsiz İlan Ver
-          </Link>
+          {session ? (
+            <Link
+              href="/ilan-ver"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-brand shadow-sm transition-colors hover:bg-accent-dark"
+            >
+              <Plus className="h-4 w-4" />
+              Ücretsiz İlan Ver
+            </Link>
+          ) : (
+            // Giriş yoksa: aynı giriş modalını aç (bulanık arka plan + daktilo),
+            // giriş sonrası ilan-ver sayfasına yönlendir.
+            <LoginModalButton
+              callbackUrl="/ilan-ver"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-brand shadow-sm transition-colors hover:bg-accent-dark"
+            >
+              <Plus className="h-4 w-4" />
+              Ücretsiz İlan Ver
+            </LoginModalButton>
+          )}
         </div>
 
         <div className="ml-auto flex items-center gap-2 md:hidden">
